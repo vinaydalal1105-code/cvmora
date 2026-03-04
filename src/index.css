@@ -1,0 +1,278 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Base44-like theme — soft gradient, orange accent, light green CTA
+   ========================================================================== */
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  /* Base44 palette */
+  --color-primary: #f97316;
+  --color-primary-hover: #ea580c;
+  --color-cta: #BFED8D;
+  --color-cta-hover: #b0e87d;
+  --color-primary-light: #fff7ed;
+  --color-cvmora-deep: #1c1917;
+  --color-cvmora-deep-hover: #000;
+  --color-cvmora-mid: #f97316;
+  --color-cvmora-mid-soft: #ffedd5;
+  --color-cvmora-accent: #f97316;
+  --color-cvmora-accent-bright: #fb923c;
+  --color-cvmora-cream: #fafafa;
+  --color-cvmora-cream-warm: #f5f5f4;
+  --color-cvmora-ink: #1c1917;
+  --color-cvmora-ink-soft: #44403c;
+  --color-cvmora-muted: #78716c;
+  --color-cvmora-muted-soft: #a8a29e;
+  --color-cvmora-footer: #1c1917;
+  --color-cvmora-footer-border: rgba(0, 0, 0, 0.08);
+  --gradient-hero: linear-gradient(180deg, #e0f2fe 0%, #fef3e8 50%, #ffedd5 100%);
+  /* Base44 reference: strong orange-red at top → pale peach → off-white (smooth, no banding) */
+  --gradient-hero-base44: linear-gradient(
+    180deg,
+    #ea5c2a 0%,
+    #ed6b38 5%,
+    #f07a45 12%,
+    #f38d55 20%,
+    #f59e66 28%,
+    #f7ae78 36%,
+    #f9bd8a 44%,
+    #fbc99a 52%,
+    #fcd4a8 60%,
+    #fddfb8 68%,
+    #fde8c8 76%,
+    #fef0d8 84%,
+    #fef5e8 90%,
+    #fef9f2 95%,
+    #fafafa 100%
+  );
+  /* Base44-style: smooth band (many stops to avoid visible banding) */
+  --gradient-base44-band: linear-gradient(
+    180deg,
+    #e0f2fe 0%,
+    #dceff8 4%,
+    #d4ebf7 10%,
+    #e2f2fa 18%,
+    #e8f4fa 25%,
+    #f0f7fc 32%,
+    #f5f9fc 40%,
+    #fcfaf8 48%,
+    #fef9f5 55%,
+    #fef5ee 62%,
+    #fef3e8 70%,
+    #ffefe0 76%,
+    #ffedd5 82%,
+    #ffe8ce 86%,
+    #ffdfc4 90%,
+    #ffd9bc 93%,
+    #fef3e8 96%,
+    #fafafa 100%
+  );
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-hero: 0 24px 48px rgba(0, 0, 0, 0.06);
+  --shadow-button: 0 2px 4px rgba(34, 197, 94, 0.2);
+  --shadow-button-hover: 0 4px 12px rgba(34, 197, 94, 0.25);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 22px;
+  --radius-button: 9999px;
+  --radius-pill: 9999px;
+
+  --ease-out-expo: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+}
+
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --color-primary: #f97316;
+  --color-primary-hover: #ea580c;
+  --color-cta: #BFED8D;
+  --color-cta-hover: #b0e87d;
+  --color-primary-light: #fff7ed;
+  --color-cvmora-deep: #1c1917;
+  --color-cvmora-mid: #f97316;
+  --color-cvmora-mid-soft: #ffedd5;
+  --color-cvmora-accent: #f97316;
+  --color-cvmora-accent-bright: #fb923c;
+  --color-cvmora-cream: #fafafa;
+  --color-cvmora-cream-warm: #f5f5f4;
+  --color-cvmora-ink: #1c1917;
+  --color-cvmora-ink-soft: #44403c;
+  --color-cvmora-muted: #78716c;
+  --color-cvmora-muted-soft: #a8a29e;
+  --color-cvmora-footer: #1c1917;
+  --color-cvmora-footer-border: rgba(0, 0, 0, 0.08);
+  --gradient-hero: linear-gradient(180deg, #e0f2fe 0%, #fef3e8 50%, #ffedd5 100%);
+  --gradient-hero-base44: linear-gradient(
+    180deg,
+    #ea5c2a 0%,
+    #ed6b38 5%,
+    #f07a45 12%,
+    #f38d55 20%,
+    #f59e66 28%,
+    #f7ae78 36%,
+    #f9bd8a 44%,
+    #fbc99a 52%,
+    #fcd4a8 60%,
+    #fddfb8 68%,
+    #fde8c8 76%,
+    #fef0d8 84%,
+    #fef5e8 90%,
+    #fef9f2 95%,
+    #fafafa 100%
+  );
+  --gradient-base44-band: linear-gradient(
+    180deg,
+    #e0f2fe 0%,
+    #dceff8 4%,
+    #d4ebf7 10%,
+    #e2f2fa 18%,
+    #e8f4fa 25%,
+    #f0f7fc 32%,
+    #f5f9fc 40%,
+    #fcfaf8 48%,
+    #fef9f5 55%,
+    #fef5ee 62%,
+    #fef3e8 70%,
+    #ffefe0 76%,
+    #ffedd5 82%,
+    #ffe8ce 86%,
+    #ffdfc4 90%,
+    #ffd9bc 93%,
+    #fef3e8 96%,
+    #fafafa 100%
+  );
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-hero: 0 24px 48px rgba(0, 0, 0, 0.06);
+  --shadow-button: 0 2px 4px rgba(34, 197, 94, 0.2);
+  --shadow-button-hover: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+
+/* ==========================================================================
+   Base — Base44-like
+   ========================================================================== */
+
+html {
+  background: #fff;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #fff;
+  color: #1c1917;
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings — Apple-style tight tracking */
+h1, h2, h3, .text-display {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+/* Focus — accessible */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--color-cvmora-ink);
+}
+
+/* Input — Base44-style rounded */
+.input-premium {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #e7e5e4;
+  background: #fff;
+  padding: 0.75rem 1rem;
+  font-size: 16px;
+  font-family: var(--font-sans);
+  color: var(--color-cvmora-ink);
+  transition: border-color var(--duration-fast) var(--ease-out-expo),
+              box-shadow var(--duration-fast) var(--ease-out-expo);
+}
+
+.input-premium::placeholder {
+  color: var(--color-cvmora-muted-soft);
+}
+
+.input-premium:hover {
+  border-color: #d6d3d1;
+}
+
+.input-premium:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+  outline: none;
+}
+
+/* Button primary — Base44 green CTA */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 12px 24px;
+  border-radius: 9999px;
+  font-weight: 500;
+  font-size: 16px;
+  font-family: var(--font-sans);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--duration-fast), transform var(--duration-fast);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.surface-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e7e5e4;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration-normal), border-color var(--duration-fast);
+}
+
+.surface-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: #d6d3d1;
+}
+
+.btn-pill {
+  border-radius: 9999px;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 12px 24px;
+  transition: background-color 200ms, transform 200ms;
+}
+
