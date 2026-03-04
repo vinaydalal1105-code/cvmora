@@ -4,3 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# SPA: serve index.html for all routes so React Router can handle /builder, etc.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
