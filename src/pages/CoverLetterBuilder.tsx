@@ -43,7 +43,7 @@ export function CoverLetterBuilder() {
     }
     api<CoverLetterData & { template_id: string }>(`/cover-letters/${id}`)
       .then((res) => {
-        const r = res as Record<string, unknown>
+        const r = res as unknown as Record<string, unknown>
         setData({
           ...defaultData,
           title: (r.title as string) ?? defaultData.title,

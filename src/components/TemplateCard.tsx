@@ -396,7 +396,7 @@ function PreviewPrimeAts() {
 }
 
 /* Professional: name, accent bar, job-winning layout */
-function PreviewProfessional() {
+function _PreviewProfessional() {
   return (
     <div className={`${previewDocClass} max-w-[280px]`}>
       <div className="px-3 pt-2.5 pb-2 border-b border-[#e5e7eb]">
@@ -475,7 +475,7 @@ function PreviewProfessionalGreen() {
 }
 
 /* Clear: light green banner + two column */
-function PreviewClear() {
+function _PreviewClear() {
   return (
     <div className={`${previewDocClass} max-w-[280px]`}>
       <div className="h-10 bg-[#a8d5b8] flex items-center px-2 gap-2">
@@ -533,7 +533,7 @@ function PreviewBalanced() {
 }
 
 /* Essential: light gray sidebar + skill bars */
-function PreviewEssential() {
+function _PreviewEssential() {
   return (
     <div className={`${previewDocClass} max-w-[280px] flex flex-row`}>
       <div className="flex-1 px-2 pt-2.5 pb-3 min-w-0">
@@ -623,7 +623,7 @@ function PreviewVivid() {
 }
 
 /* Clean: two-column, left INFO/Skills with bars */
-function PreviewClean() {
+function _PreviewClean() {
   return (
     <div className={`${previewDocClass} max-w-[280px] flex flex-row`}>
       <div className="w-1/3 border-r border-[#e5e7eb] px-1.5 pt-2 pb-2 shrink-0">
@@ -650,7 +650,7 @@ function PreviewClean() {
 }
 
 /* Corporate: two-column with photo on top */
-function PreviewCorporate() {
+function _PreviewCorporate() {
   return (
     <div className={`${previewDocClass} max-w-[280px]`}>
       <div className="px-3 pt-2.5 pb-2 border-b border-[#e5e7eb] text-center">

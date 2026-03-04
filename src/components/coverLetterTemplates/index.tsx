@@ -22,7 +22,6 @@ function Body({ body }: { body: string }) {
 
 /** Professional: centered header, horizontal rule, classic formal look. Structure always visible. */
 export function CoverLetterProfessional({ data }: { data: CoverLetterData }) {
-  const hasContact = data.full_name || data.job_title || data.address || data.phone || data.email
   return (
     <div className="bg-white text-[#1c1c1c] p-10 min-h-[842px] w-full font-sans text-sm flex flex-col border border-[#f5f5f4]">
       <div className="text-center mb-4 min-h-[4rem] flex flex-col justify-center">
@@ -47,7 +46,6 @@ export function CoverLetterProfessional({ data }: { data: CoverLetterData }) {
 
 /** Modern: left-aligned, accent bar, clean sans. Structure always visible. */
 export function CoverLetterModern({ data }: { data: CoverLetterData }) {
-  const hasContact = data.full_name || data.job_title || data.address || data.phone || data.email
   return (
     <div className="bg-white text-[#1c1c1c] min-h-[842px] w-full font-sans text-sm flex border border-[#f5f5f4]">
       <div className="w-2 shrink-0 bg-[#f97316]" aria-hidden />
@@ -74,7 +72,6 @@ export function CoverLetterModern({ data }: { data: CoverLetterData }) {
 
 /** Minimal: lots of whitespace, subtle typography. Structure always visible. */
 export function CoverLetterMinimal({ data }: { data: CoverLetterData }) {
-  const hasContact = data.full_name || data.job_title || data.address || data.phone || data.email
   return (
     <div className="bg-white text-[#1c1c1c] p-12 min-h-[842px] w-full font-sans text-sm flex flex-col max-w-[600px] mx-auto border border-[#f5f5f4]">
       <div className="text-left mb-8 min-h-[4rem]">

@@ -125,7 +125,7 @@ export async function createResumeDocx(data: ResumeData): Promise<Blob> {
       }
     }
   } else {
-    mainParagraphs.push(new Paragraph({ text: 'Add your work history and achievements.', spacing: { after: 200 }, italics: true }))
+    mainParagraphs.push(new Paragraph({ children: [new TextRun({ text: 'Add your work history and achievements.', italics: true })], spacing: { after: 200 } }))
   }
 
   mainParagraphs.push(
@@ -155,7 +155,7 @@ export async function createResumeDocx(data: ResumeData): Promise<Blob> {
       }
     }
   } else {
-    mainParagraphs.push(new Paragraph({ text: 'Add degrees and certifications.', spacing: { after: 200 }, italics: true }))
+    mainParagraphs.push(new Paragraph({ children: [new TextRun({ text: 'Add degrees and certifications.', italics: true })], spacing: { after: 200 } }))
   }
 
   mainParagraphs.push(
@@ -175,7 +175,7 @@ export async function createResumeDocx(data: ResumeData): Promise<Blob> {
       )
     }
   } else {
-    mainParagraphs.push(new Paragraph({ text: 'References available upon request.', spacing: { after: 100 }, italics: true }))
+    mainParagraphs.push(new Paragraph({ children: [new TextRun({ text: 'References available upon request.', italics: true })], spacing: { after: 100 } }))
   }
 
   const table = new Table({

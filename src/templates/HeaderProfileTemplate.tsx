@@ -23,8 +23,6 @@ export function HeaderProfileTemplate({ data, accentColor }: { data: ResumeData;
   const { jobTarget, contact, summary, experience, education, skills, references } = data
   const line = (s: string) => s.split('\n').filter(Boolean)
   const name = displayName(contact)
-  const showExp = experience.some(hasContent)
-  const showEdu = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
   const barColor = accentColor ?? '#1e3a5f'
   const light = isLightBg(barColor)

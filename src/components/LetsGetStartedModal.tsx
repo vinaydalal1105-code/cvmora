@@ -78,7 +78,7 @@ function buildBuilderPath(templateId: string | null | undefined, accentColor: st
   return `/builder${base}${accent}`
 }
 
-export function LetsGetStartedModal({ open, onClose, templateId, accentColor, builderQuery, pendingRef }: LetsGetStartedModalProps) {
+export function LetsGetStartedModal({ open, onClose, templateId, accentColor, builderQuery: _builderQuery, pendingRef }: LetsGetStartedModalProps) {
   const navigate = useNavigate()
 
   const pending = pendingRef?.current

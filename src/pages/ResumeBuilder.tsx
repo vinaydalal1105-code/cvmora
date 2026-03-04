@@ -16,7 +16,7 @@ import type { ResumeData } from '../types/resume'
 import { defaultResume } from '../data/defaultResume'
 import { filledExamples } from '../data/filledExamples'
 
-type TemplateId = 'professional' | 'modern' | 'minimal' | 'classic' | 'traditional' | 'corporate' | 'clean' | 'balanced' | 'header-ats' | 'vivid' | 'sidebar-right' | 'centered-clean' | 'accent-bar' | 'vertical-line' | 'initials-header' | 'divided' | 'story' | 'deco' | 'proficiency' | 'header-profile' | 'elegant' | 'pillar' | 'spotlight' | 'card' | 'serif' | 'bold-block' | 'timeline' | 'luxe'
+import type { TemplateId } from '../types/resume'
 
 const TEMPLATE_MAP: Record<string, TemplateId> = {
   classic: 'classic',

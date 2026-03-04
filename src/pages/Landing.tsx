@@ -538,7 +538,7 @@ function CardTemplatePicker() {
 }
 
 /* Back card: dark Kanban-style (peeks behind section 1) */
-function CardKanbanPeek() {
+function _CardKanbanPeek() {
   const cols = [
     { label: 'Experience', color: 'bg-amber-400' },
     { label: 'Education', color: 'bg-orange-400' },
@@ -570,7 +570,7 @@ function CardKanbanPeek() {
 }
 
 /* Back card: gradient strip only (peeks behind) */
-function CardGradientPeek() {
+function _CardGradientPeek() {
   return (
     <div className="w-full max-w-[340px] rounded-2xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] border border-white/30">
       <div className="h-24 bg-gradient-to-br from-rose-200 via-amber-100 to-violet-200" />
