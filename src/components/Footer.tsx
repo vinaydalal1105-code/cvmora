@@ -95,9 +95,14 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-10 sm:mt-12 pt-6 sm:pt-8 border-t border-[#e7e5e4]">
-          <p className="text-xs sm:text-sm text-[#78716c]">
-            © {new Date().getFullYear()} Cvmora. Build resumes that get you hired.
-          </p>
+          <div className="rounded-xl bg-[#fafaf9] border border-[#e7e5e4] px-4 py-3 sm:px-5 sm:py-3.5 text-center">
+            <p className="text-[15px] sm:text-base font-semibold text-[#1c1917] tracking-tight">
+              cvmora.com
+            </p>
+            <p className="text-xs sm:text-sm text-[#78716c] mt-0.5 sm:mt-1">
+              © {new Date().getFullYear()} Cvmora · Build resumes that get you hired.
+            </p>
+          </div>
         </div>
       </div>
     </footer>
