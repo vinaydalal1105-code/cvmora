@@ -509,16 +509,16 @@ export function BuilderStepFooter({
   const handleMainAction = isLast && onFinish ? onFinish : onNext
 
   return (
-    <footer className="flex-none flex items-center justify-between gap-4 px-4 py-3 border-t border-cvmora-ink/8 bg-white">
-      <div className="flex items-center gap-3 min-w-0">
+    <footer className="flex-none flex flex-wrap items-center justify-between gap-3 px-3 sm:px-4 py-3 border-t border-cvmora-ink/8 bg-white">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <p className="text-[0.6875rem] text-cvmora-ink/50 shrink-0">
-          <a href="/privacy" className="text-[var(--color-primary)] hover:underline">Terms</a> & <a href="/privacy" className="text-[var(--color-primary)] hover:underline">Privacy</a>
+          <a href="/privacy" className="text-[var(--color-primary)] hover:underline py-2">Terms</a> & <a href="/privacy" className="text-[var(--color-primary)] hover:underline py-2">Privacy</a>
         </p>
         {stepIndex > 0 && (
           <button
             type="button"
             onClick={onBack}
-            className="shrink-0 px-4 py-2 rounded-[980px] border border-cvmora-ink/15 text-[17px] font-normal text-cvmora-ink/80 hover:bg-cvmora-ink/5 transition-colors"
+            className="shrink-0 min-h-[44px] px-4 py-2 rounded-[980px] border border-cvmora-ink/15 text-[15px] sm:text-[17px] font-normal text-cvmora-ink/80 hover:bg-cvmora-ink/5 active:bg-cvmora-ink/10 transition-colors flex items-center"
           >
             Back
           </button>
@@ -531,7 +531,7 @@ export function BuilderStepFooter({
             type="button"
             onClick={() => onStepClick?.(i)}
             aria-label={`Step ${i + 1}`}
-            className={`w-2.5 h-2.5 rounded-full transition-colors ${
+            className={`w-3 h-3 sm:w-2.5 sm:h-2.5 rounded-full transition-colors p-0.5 ${
               i === stepIndex ? 'bg-[#f97316]' : 'bg-black/15 hover:bg-black/25'
             } ${onStepClick ? 'cursor-pointer' : 'cursor-default'}`}
           />
@@ -544,7 +544,7 @@ export function BuilderStepFooter({
           onClick={handleMainAction}
           disabled={!canProceed}
           title={!canProceed && stepIndex === 0 ? 'Please enter your email to continue' : undefined}
-          className="px-4 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#BFED8D]"
+          className="min-h-[44px] px-4 py-2.5 rounded-full bg-[#BFED8D] text-[#1c1917] text-[15px] sm:text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#BFED8D] flex items-center"
         >
           {isLast ? 'Finish' : `Next: ${step.nextLabel}`}
         </button>

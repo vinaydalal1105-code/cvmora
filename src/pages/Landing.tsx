@@ -635,41 +635,41 @@ export function Landing() {
     <div className="overflow-hidden">
       {/* Hero — smooth transition: warm orange/beige at top → light blue at bottom */}
       <section
-        className="relative pt-16 sm:pt-20 pb-24 sm:pb-32 px-4 sm:px-6 min-h-[85vh] flex items-center"
+        className="relative pt-12 sm:pt-20 pb-20 sm:pb-32 px-4 sm:px-6 min-h-[85vh] min-h-[85dvh] flex items-center"
         style={{
           background: 'linear-gradient(180deg, #fef7f0 0%, #ffedd5 12%, #ffe4c4 25%, #f5e6dc 40%, #e8f0f4 55%, #dceef5 70%, #d4ebf7 85%, #e0f2fe 100%)',
         }}
       >
         <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-          <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0">
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] tracking-tight mb-6 text-[#1c1917]">
+          <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0 w-full">
+            <h1 className="text-3xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.15] tracking-tight mb-4 sm:mb-6 text-[#1c1917]">
               This resume builder gets you{' '}
               <span className="text-[#f97316]">hired faster</span>
             </h1>
-            <p className="text-xl sm:text-2xl text-[#78716c] leading-relaxed mb-10 max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.6 }}>
+            <p className="text-lg sm:text-2xl text-[#78716c] leading-relaxed mb-8 sm:mb-10 max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.6 }}>
               Only 2% of resumes win. Yours will be one of them.
             </p>
-            <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-10">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3 mb-8 sm:mb-10">
               <Link
                 to="/signup"
-                className="btn-primary px-8 py-4 rounded-full bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors font-medium"
+                className="btn-primary w-full sm:w-auto justify-center px-8 py-4 rounded-full bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors font-medium"
               >
                 Create my resume
               </Link>
               <Link
                 to="/builder"
-                className="btn-primary px-8 py-4 rounded-full border border-[#e7e5e4] text-[#1c1917] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors font-medium"
+                className="btn-primary w-full sm:w-auto justify-center px-8 py-4 rounded-full border border-[#e7e5e4] text-[#1c1917] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors font-medium"
               >
                 Upload my resume
               </Link>
             </div>
-            <p className="text-sm uppercase tracking-wider text-[#78716c] font-semibold mb-4">Or try one of these:</p>
+            <p className="text-xs sm:text-sm uppercase tracking-wider text-[#78716c] font-semibold mb-3 sm:mb-4">Or try one of these:</p>
             <div className="flex flex-wrap justify-center lg:justify-start gap-2">
               {suggestionChips.map((chip) => (
                 <Link
                   key={chip.label}
                   to={chip.to}
-                  className="px-4 py-2.5 rounded-full border border-[#e7e5e4] bg-white text-[#44403c] text-base font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors"
+                  className="min-h-[44px] flex items-center px-4 py-2.5 rounded-full border border-[#e7e5e4] bg-white text-[#44403c] text-sm sm:text-base font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] active:bg-[#f5f5f4] transition-colors"
                 >
                   {chip.label}
                 </Link>

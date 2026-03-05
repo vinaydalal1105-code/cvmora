@@ -390,9 +390,9 @@ export function Layout() {
         background: 'linear-gradient(to bottom, #fef7f0 0%, #ffedd5 12%, #ffe4c4 25%, #f5e6dc 40%, #e8f0f4 55%, #dceef5 70%, #d4ebf7 85%, #e0f2fe 100%)',
       }}
     >
-      {/* Fixed header strip: no own background; bar floats over page gradient, hides on scroll down, shows on scroll up */}
+      {/* Fixed header strip: safe-area for notched devices, hides on scroll down */}
       <div
-        className="fixed top-0 left-0 right-0 z-50 pt-4 pb-2.5 px-4 sm:px-5"
+        className="fixed top-0 left-0 right-0 z-50 pt-[max(1rem,env(safe-area-inset-top))] pb-2.5 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]"
         style={{
           transform: navVisible ? 'translateY(0)' : 'translateY(-100%)',
           transition: 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)',
@@ -400,7 +400,7 @@ export function Layout() {
         onMouseLeave={() => setOpenDropdown(null)}
       >
         <header className="w-full max-w-[1400px] mx-auto rounded-full bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-[#e5e7eb]/80">
-          <div className="flex items-center justify-between gap-3 sm:gap-4 px-4 sm:px-8 py-2 sm:py-2.5">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-8 py-2 sm:py-2.5 min-h-[44px] sm:min-h-0">
             <Logo />
 
             {/* Desktop nav: hidden on small screens */}
@@ -419,11 +419,11 @@ export function Layout() {
               ))}
             </nav>
 
-            {/* Mobile menu button */}
+            {/* Mobile menu button — 44px touch target */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen((o) => !o)}
-              className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full text-[#1c1917] hover:bg-[#f5f5f4]"
+              className="lg:hidden flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full text-[#1c1917] hover:bg-[#f5f5f4] active:bg-[#e7e5e4]"
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {mobileMenuOpen ? (
@@ -433,17 +433,17 @@ export function Layout() {
               )}
             </button>
 
-            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
               {isAuthenticated ? (
                 <>
-                  <Link to="/dashboard" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors">Dashboard</Link>
+                  <Link to="/dashboard" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center lg:min-h-0">Dashboard</Link>
                   <span className="text-xs text-[#78716c] hidden lg:inline max-w-[120px] truncate" title={user?.email ?? ''}>{user?.email}</span>
-                  <button type="button" onClick={handleLogout} className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors">Sign out</button>
+                  <button type="button" onClick={handleLogout} className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center lg:min-h-0">Sign out</button>
                 </>
               ) : (
                 <>
-                  <Link to="/login" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors">Sign in</Link>
-                  <Link to="/builder" className="px-4 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[15px] font-medium border border-[#a8e070] shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors">Start building</Link>
+                  <Link to="/login" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center rounded-full lg:min-h-0">Sign in</Link>
+                  <Link to="/builder" className="px-4 py-2.5 min-h-[44px] flex items-center rounded-full bg-[#BFED8D] text-[#1c1917] text-[15px] font-medium border border-[#a8e070] shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors">Start building</Link>
                 </>
               )}
             </div>
@@ -458,7 +458,7 @@ export function Layout() {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="lg:hidden absolute left-0 right-0 top-full z-40 mt-1 mx-4 rounded-2xl bg-white shadow-lg border border-[#e5e7eb] overflow-hidden max-h-[85vh] overflow-y-auto"
+              className="lg:hidden absolute left-0 right-0 top-full z-40 mt-1 mx-2 sm:mx-4 rounded-2xl bg-white shadow-lg border border-[#e5e7eb] overflow-hidden max-h-[80vh] sm:max-h-[85vh] overflow-y-auto pb-[env(safe-area-inset-bottom)]"
             >
               <nav className="py-2">
                 {mainNav.map((item) => (
@@ -556,7 +556,7 @@ export function Layout() {
         </AnimatePresence>
       </div>
       {/* Spacer so main content starts below the fixed header */}
-      <div className="shrink-0 h-[72px] sm:h-[76px]" aria-hidden />
+      <div className="shrink-0 h-[76px] sm:h-[80px]" aria-hidden />
       <main className="flex-1 flex flex-col">
         <Outlet />
       </main>

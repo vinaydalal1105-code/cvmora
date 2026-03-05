@@ -135,14 +135,14 @@ export const ResumePreview = forwardRef<ResumePreviewHandle, { showDownloadButto
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex-none flex items-center justify-between gap-3 px-4 py-2 border-b border-cvmora-ink/8 bg-white/98">
+      <div className="flex-none flex flex-wrap items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2 border-b border-cvmora-ink/8 bg-white/98">
         <span className="text-[0.8125rem] font-medium text-cvmora-ink/70">Preview</span>
         {showDownloadButtons && (
-          <div className="flex items-center gap-1.5">
-            <button type="button" onClick={handlePrint} className="px-4 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d]">
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={handlePrint} className="min-h-[44px] px-4 py-2.5 rounded-full bg-[#BFED8D] text-[#1c1917] text-[15px] sm:text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] active:bg-[#b0e87d] flex items-center">
               PDF
             </button>
-            <button type="button" onClick={handleDownloadWord} disabled={downloadingDocx} className="px-4 py-2 rounded-full border border-[#e7e5e4] text-[#f97316] text-[16px] font-medium hover:bg-[#fff7ed] disabled:opacity-50">
+            <button type="button" onClick={handleDownloadWord} disabled={downloadingDocx} className="min-h-[44px] px-4 py-2.5 rounded-full border border-[#e7e5e4] text-[#f97316] text-[15px] sm:text-[16px] font-medium hover:bg-[#fff7ed] active:bg-[#fff7ed] disabled:opacity-50 flex items-center">
               {downloadingDocx ? '…' : 'Word'}
             </button>
           </div>

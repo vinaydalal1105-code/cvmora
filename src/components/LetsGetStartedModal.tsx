@@ -133,13 +133,13 @@ export function LetsGetStartedModal({ open, onClose, templateId, accentColor, bu
         onClick={onClose}
       />
       <div
-        className="fixed left-1/2 top-1/2 z-[201] w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-[var(--shadow-card-hover)] border border-cvmora-ink/10 overflow-hidden"
+        className="fixed left-1/2 top-1/2 z-[201] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-[var(--shadow-card-hover)] border border-cvmora-ink/10 overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
         aria-describedby="modal-desc"
       >
-        <div className="p-6 sm:p-8">
+        <div className="p-5 sm:p-8">
           <div className="flex items-start justify-between gap-4 mb-2">
             <div>
               <h2 id="modal-title" className="text-xl font-bold text-cvmora-ink tracking-tight">
@@ -152,7 +152,7 @@ export function LetsGetStartedModal({ open, onClose, templateId, accentColor, bu
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-lg text-cvmora-muted hover:bg-cvmora-ink/5 hover:text-cvmora-ink transition-colors"
+              className="min-w-[44px] min-h-[44px] p-2 rounded-lg text-cvmora-muted hover:bg-cvmora-ink/5 hover:text-cvmora-ink active:bg-cvmora-ink/10 transition-colors flex items-center justify-center"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +167,7 @@ export function LetsGetStartedModal({ open, onClose, templateId, accentColor, bu
                 <button
                   type="button"
                   onClick={() => handleSelect(opt.action)}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl text-left hover:bg-cvmora-ink/5 active:bg-cvmora-ink/10 transition-colors group"
+                  className="w-full flex items-center gap-4 p-4 min-h-[60px] sm:min-h-0 rounded-xl text-left hover:bg-cvmora-ink/5 active:bg-cvmora-ink/10 transition-colors group"
                 >
                   <span className="w-10 h-10 rounded-xl bg-cvmora-ink/5 flex items-center justify-center shrink-0 group-hover:bg-[var(--color-primary)]/10 transition-colors">
                     {opt.icon}

@@ -168,11 +168,13 @@
 
 html {
   background: #fff;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   background: #fff;
   color: #1c1917;
   font-family: var(--font-sans);
@@ -181,6 +183,13 @@ body {
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 16px;
+  }
 }
 
 /* Headings — Apple-style tight tracking */
@@ -201,18 +210,28 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
+/* Reduce tap delay on touch devices for buttons/links */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
 ::selection {
   background: rgba(249, 115, 22, 0.15);
   color: var(--color-cvmora-ink);
 }
 
-/* Input — Base44-style rounded */
+/* Input — Base44-style rounded, 44px min touch target on mobile */
 .input-premium {
   width: 100%;
   border-radius: 12px;
   border: 1px solid #e7e5e4;
   background: #fff;
   padding: 0.75rem 1rem;
+  min-height: 44px;
   font-size: 16px;
   font-family: var(--font-sans);
   color: var(--color-cvmora-ink);
@@ -234,13 +253,14 @@ select:focus-visible {
   outline: none;
 }
 
-/* Button primary — Base44 green CTA */
+/* Button primary — Base44 green CTA, 44px min touch target */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 12px 24px;
+  min-height: 44px;
   border-radius: 9999px;
   font-weight: 500;
   font-size: 16px;

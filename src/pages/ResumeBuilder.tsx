@@ -180,45 +180,45 @@ function ResumeBuilderInner() {
   return (
     <div className="h-full flex flex-col min-h-0">
       {/* Single minimal bar: logo, template, Edit|Customize, score, actions */}
-      <header className="flex-none flex items-center justify-between gap-4 px-4 py-2.5 border-b border-cvmora-ink/8 bg-white shrink-0">
-        <div className="flex items-center gap-4 min-w-0">
-          <a href="/" className="flex items-center gap-2 shrink-0 text-cvmora-ink no-underline">
+      <header className="flex-none flex flex-wrap items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-2.5 border-b border-cvmora-ink/8 bg-white shrink-0 min-h-[52px]">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+          <a href="/" className="flex items-center gap-2 shrink-0 text-cvmora-ink no-underline min-h-[44px] items-center">
             <span className="w-8 h-8 rounded-xl bg-[#f97316] flex items-center justify-center text-white font-semibold text-sm">C</span>
             <span className="text-base font-semibold tracking-tight hidden sm:inline">Cvmora</span>
           </a>
-          <div className="hidden sm:flex items-center gap-0.5 border-l border-cvmora-ink/10 pl-4">
+          <div className="flex items-center gap-0.5 border-l border-cvmora-ink/10 pl-2 sm:pl-4">
             <button
               type="button"
               onClick={() => setActiveTab('edit')}
-              className={`px-3 py-1.5 rounded-md text-[0.8125rem] font-medium transition-colors ${activeTab === 'edit' ? 'bg-cvmora-ink/10 text-cvmora-ink' : 'text-cvmora-ink/60 hover:bg-cvmora-ink/5'}`}
+              className={`min-h-[40px] px-3 py-2 rounded-md text-[0.8125rem] font-medium transition-colors ${activeTab === 'edit' ? 'bg-cvmora-ink/10 text-cvmora-ink' : 'text-cvmora-ink/60 hover:bg-cvmora-ink/5'}`}
             >
               Edit
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('customize')}
-              className={`px-3 py-1.5 rounded-md text-[0.8125rem] font-medium transition-colors ${activeTab === 'customize' ? 'bg-cvmora-ink/10 text-cvmora-ink' : 'text-cvmora-ink/60 hover:bg-cvmora-ink/5'}`}
+              className={`min-h-[40px] px-3 py-2 rounded-md text-[0.8125rem] font-medium transition-colors ${activeTab === 'customize' ? 'bg-cvmora-ink/10 text-cvmora-ink' : 'text-cvmora-ink/60 hover:bg-cvmora-ink/5'}`}
             >
               Customize
             </button>
           </div>
-          <div className="flex items-center gap-2 text-[0.75rem]">
+          <div className="hidden sm:flex items-center gap-2 text-[0.75rem] shrink-0">
             <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 font-medium">{scoreInfo.score}%</span>
-            <span className="text-green-700 font-medium truncate max-w-[140px]">{scoreInfo.suggestion}</span>
+            <span className="text-green-700 font-medium truncate max-w-[100px] sm:max-w-[140px]">{scoreInfo.suggestion}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <label className="cursor-pointer">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <label className="cursor-pointer flex items-center min-h-[44px]">
             <input ref={uploadInputRef} type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
-            <span className="text-[16px] font-medium text-[#f97316] hover:opacity-80 px-2.5 py-1.5 rounded-md hover:bg-black/5">{uploading ? '…' : 'Upload PDF'}</span>
+            <span className="text-[14px] sm:text-[16px] font-medium text-[#f97316] hover:opacity-80 px-2.5 py-2 rounded-md hover:bg-black/5 active:bg-black/10">{uploading ? '…' : 'Upload PDF'}</span>
           </label>
           {uploadError && <span className="text-[0.6875rem] text-red-600" title={uploadError}>Failed</span>}
           {isAuthenticated ? (
-            <button type="button" onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] disabled:opacity-50">
+            <button type="button" onClick={handleSave} disabled={saving} className="min-h-[44px] px-4 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[14px] sm:text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] disabled:opacity-50 flex items-center">
               {saving ? '…' : 'Save'}
             </button>
           ) : (
-            <a href="/signup" className="px-4 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] inline-block">Sign up to save</a>
+            <a href="/signup" className="min-h-[44px] px-4 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[14px] sm:text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] inline-flex items-center">Sign up to save</a>
           )}
         </div>
       </header>
@@ -255,21 +255,22 @@ function ResumeBuilderInner() {
             </div>
           </div>
         )}
-        <div className="flex-1 flex min-h-0 min-w-0">
+        {/* On mobile: stack editor above preview. On md+: side by side */}
+        <div className="flex-1 flex flex-col md:flex-row min-h-0 min-w-0 overflow-hidden">
           {activeTab === 'edit' ? (
             <>
-              <aside className="w-full max-w-[420px] flex-none border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0">
-                <div className="flex-1 overflow-y-auto min-h-0">
+              <aside className="w-full md:max-w-[420px] flex-none md:border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0 overflow-y-auto md:overflow-y-auto">
+                <div className="flex-1 min-h-0">
                   <BuilderStepContent stepIndex={builderStep} />
                 </div>
               </aside>
-              <section className="flex-1 min-w-0 flex flex-col min-h-0 bg-[#f5f5f7]">
+              <section className="flex-1 min-w-0 flex flex-col min-h-[50vh] md:min-h-0 bg-[#f5f5f7] border-t md:border-t-0 border-cvmora-ink/8">
                 <ResumePreview ref={previewRef} showDownloadButtons={false} />
               </section>
             </>
           ) : (
             <>
-              <aside className="w-full max-w-[360px] flex-none border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0">
+              <aside className="w-full md:max-w-[360px] flex-none md:border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0 overflow-y-auto">
                 <div className="flex-none px-4 py-3 border-b border-cvmora-ink/6">
                   <h2 className="text-[0.8125rem] font-semibold text-cvmora-ink">Customize</h2>
                 </div>
@@ -277,7 +278,7 @@ function ResumeBuilderInner() {
                   <TemplatePicker />
                 </div>
               </aside>
-              <section className="flex-1 min-w-0 flex flex-col min-h-0 bg-[#f5f5f7]">
+              <section className="flex-1 min-w-0 flex flex-col min-h-[50vh] md:min-h-0 bg-[#f5f5f7] border-t md:border-t-0 border-cvmora-ink/8">
                 <ResumePreview ref={previewRef} showDownloadButtons={false} />
               </section>
             </>

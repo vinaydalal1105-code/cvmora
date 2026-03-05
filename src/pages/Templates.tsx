@@ -53,43 +53,43 @@ export function Templates() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-4 py-6 sm:py-10">
-        {/* Hero: Base44-style */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        {/* Hero */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl md:text-[2.75rem] font-bold text-[#1c1917] tracking-tight mb-4">
+          <h1 className="text-2xl sm:text-4xl md:text-[2.75rem] font-bold text-[#1c1917] tracking-tight mb-3 sm:mb-4">
             Resume templates
           </h1>
-          <p className="text-lg text-[#78716c] max-w-2xl mx-auto mb-8 leading-relaxed" style={{ lineHeight: 1.6 }}>
+          <p className="text-base sm:text-lg text-[#78716c] max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-0" style={{ lineHeight: 1.6 }}>
             Each resume template is designed to follow the exact rules you need to get hired faster. Use our resume templates and get free access to career tools!
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
             <Link
               to="/builder"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-[#BFED8D] text-[#1c1917] text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shadow-sm"
+              className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 rounded-full bg-[#BFED8D] text-[#1c1917] text-[15px] sm:text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shadow-sm"
             >
               Create my resume
             </Link>
             <Link
               to="/builder"
               state={{ showUpload: true }}
-              className="inline-flex items-center justify-center px-6 py-3 rounded-full border-2 border-[#e7e5e4] text-[#1c1917] text-[16px] font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors"
+              className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 rounded-full border-2 border-[#e7e5e4] text-[#1c1917] text-[15px] sm:text-[16px] font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors"
             >
               Upload my resume
             </Link>
           </div>
         </div>
 
-        {/* Filter pills - resume.io style: light blue when active */}
+        {/* Filter pills */}
         <div className="flex flex-wrap gap-2 mb-4">
           {categories.map((cat) => (
             <button
               key={cat}
               type="button"
               onClick={() => setFilter(cat)}
-              className={`px-4 py-2.5 rounded-full text-base font-medium transition-all ${
+              className={`min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm sm:text-base font-medium transition-all ${
                 filter === cat
                   ? 'bg-[#fff7ed] text-[#f97316] border border-[#f97316]/30'
-                  : 'bg-white text-[#1c1917] border border-[#e7e5e4] hover:border-[#d6d3d1] hover:bg-[#fafafa]'
+                  : 'bg-white text-[#1c1917] border border-[#e7e5e4] hover:border-[#d6d3d1] hover:bg-[#fafafa] active:bg-[#f5f5f4]'
               }`}
             >
               {cat === 'all' ? 'All templates' : CATEGORY_LABELS[cat]}

@@ -25,8 +25,8 @@ export function Login() {
   }
 
   return (
-    <div className="max-w-[420px] mx-auto px-4 py-14 sm:py-20">
-      <div className="surface-card p-7 sm:p-9 rounded-2xl">
+    <div className="max-w-[420px] mx-auto px-4 sm:px-6 py-10 sm:py-20 min-h-[50vh]">
+      <div className="surface-card p-5 sm:p-9 rounded-2xl">
         <h1 className="text-2xl font-bold text-cvmora-ink mb-2 tracking-tight">
           Sign in
         </h1>
