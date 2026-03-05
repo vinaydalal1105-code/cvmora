@@ -640,16 +640,17 @@ export function Landing() {
           background: 'linear-gradient(180deg, #fef7f0 0%, #ffedd5 12%, #ffe4c4 25%, #f5e6dc 40%, #e8f0f4 55%, #dceef5 70%, #d4ebf7 85%, #e0f2fe 100%)',
         }}
       >
-        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-          <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0 w-full">
-            <h1 className="text-3xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.15] tracking-tight mb-4 sm:mb-6 text-[#1c1917]">
+        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-6 lg:gap-12">
+          {/* On mobile: preview (carousel) first via order-2; on desktop text stays left */}
+          <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0 w-full order-2 lg:order-1">
+            <h1 className="text-2xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.15] tracking-tight mb-3 sm:mb-6 text-[#1c1917]">
               This resume builder gets you{' '}
               <span className="text-[#f97316]">hired faster</span>
             </h1>
-            <p className="text-lg sm:text-2xl text-[#78716c] leading-relaxed mb-8 sm:mb-10 max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.6 }}>
+            <p className="text-sm sm:text-2xl text-[#78716c] leading-relaxed mb-6 sm:mb-10 max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.55 }}>
               Only 2% of resumes win. Yours will be one of them.
             </p>
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3 mb-8 sm:mb-10">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3 mb-6 sm:mb-10">
               <Link
                 to="/signup"
                 className="btn-primary w-full sm:w-auto justify-center px-8 py-4 rounded-full bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors font-medium"
@@ -663,30 +664,30 @@ export function Landing() {
                 Upload my resume
               </Link>
             </div>
-            <p className="text-xs sm:text-sm uppercase tracking-wider text-[#78716c] font-semibold mb-3 sm:mb-4">Or try one of these:</p>
+            <p className="text-[11px] sm:text-sm uppercase tracking-wider text-[#78716c] font-semibold mb-2 sm:mb-4">Or try one of these:</p>
             <div className="flex flex-wrap justify-center lg:justify-start gap-2">
               {suggestionChips.map((chip) => (
                 <Link
                   key={chip.label}
                   to={chip.to}
-                  className="min-h-[44px] flex items-center px-4 py-2.5 rounded-full border border-[#e7e5e4] bg-white text-[#44403c] text-sm sm:text-base font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] active:bg-[#f5f5f4] transition-colors"
+                  className="min-h-[44px] flex items-center px-3.5 py-2 rounded-full border border-[#e7e5e4] bg-white text-[#44403c] text-xs sm:text-base font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] active:bg-[#f5f5f4] transition-colors"
                 >
                   {chip.label}
                 </Link>
               ))}
             </div>
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-10 sm:gap-12 mt-10">
-              <span className="flex items-center gap-3 text-base text-[#44403c] font-medium">
-                <span className="w-6 h-6 rounded-full bg-[#a7f3d0] flex items-center justify-center shrink-0" aria-hidden>
-                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none" className="text-[#059669]">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 sm:gap-12 mt-6 sm:mt-10">
+              <span className="flex items-center gap-2 text-xs sm:text-base text-[#44403c] font-medium">
+                <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#a7f3d0] flex items-center justify-center shrink-0" aria-hidden>
+                  <svg width="10" height="8" viewBox="0 0 12 10" fill="none" className="text-[#059669] sm:w-3 sm:h-3">
                     <path d="M1 5l3.5 3.5L11 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
                 <span><strong className="text-[#1c1917] font-semibold">75%</strong> more likely to land the job</span>
               </span>
-              <span className="flex items-center gap-3 text-base text-[#44403c] font-medium">
-                <span className="w-6 h-6 flex items-center justify-center shrink-0 text-[#f59e0b]" aria-hidden>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <span className="flex items-center gap-2 text-xs sm:text-base text-[#44403c] font-medium">
+                <span className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shrink-0 text-[#f59e0b]" aria-hidden>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="sm:w-3.5 sm:h-3.5">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
                 </span>
@@ -694,7 +695,7 @@ export function Landing() {
               </span>
             </div>
           </div>
-          <div className="flex-1 flex justify-center lg:justify-end w-full max-w-[420px] sm:max-w-[480px]">
+          <div className="flex-1 flex justify-center lg:justify-end w-full max-w-[420px] sm:max-w-[480px] order-1 lg:order-2">
             <HeroResumeCarousel />
           </div>
         </div>
