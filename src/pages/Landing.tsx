@@ -348,26 +348,26 @@ function FeatureSection({
   return (
     <section
       ref={ref}
-      className={`min-h-[70vh] sm:min-h-[75vh] flex items-center py-12 sm:py-16 px-4 sm:px-6 transition-all duration-700 ease-out ${
+      className={`min-h-[60vh] sm:min-h-[75vh] flex items-center py-8 sm:py-16 px-4 sm:px-6 transition-all duration-700 ease-out ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}
     >
       <div className="max-w-[1400px] mx-auto w-full">
-        <div className="max-w-[1100px] mx-auto rounded-[1.25rem] lg:rounded-[1.5rem] bg-white/95 shadow-[0_8px_40px_rgba(0,0,0,0.08),0_2px_12px_rgba(0,0,0,0.04)] border border-[#e5e7eb]/80 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-center p-5 sm:p-6 lg:p-8">
+        <div className="max-w-[22rem] sm:max-w-[36rem] lg:max-w-[1100px] mx-auto rounded-xl sm:rounded-[1.25rem] lg:rounded-[1.5rem] bg-white/95 shadow-[0_8px_40px_rgba(0,0,0,0.08),0_2px_12px_rgba(0,0,0,0.04)] border border-[#e5e7eb]/80 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6 items-center p-4 sm:p-6 lg:p-8">
             <div className="lg:col-span-5 flex flex-col justify-center min-w-0">
-              <p className="text-[#78716c] text-sm sm:text-base font-medium mb-2">
+              <p className="text-[#78716c] text-xs sm:text-base font-medium mb-1.5 sm:mb-2">
                 {step} <span className="text-[#1c1917]/50">/</span> {total}
               </p>
-              <h2 className="text-2xl sm:text-3xl lg:text-[2rem] font-bold text-[#1c1917] tracking-tight leading-tight mb-4">
+              <h2 className="text-lg sm:text-3xl lg:text-[2rem] font-bold text-[#1c1917] tracking-tight leading-tight mb-3 sm:mb-4">
                 {title}
               </h2>
-              <p className="text-lg sm:text-[1.125rem] text-[#44403c] leading-relaxed mb-6" style={{ lineHeight: 1.6 }}>
+              <p className="text-sm sm:text-[1.125rem] text-[#44403c] leading-relaxed mb-4 sm:mb-6" style={{ lineHeight: 1.6 }}>
                 {desc}
               </p>
               <Link
                 to={to}
-                className="inline-flex items-center justify-center px-6 py-3.5 rounded-full bg-[#1c1917] text-white text-base font-medium hover:bg-[#44403c] transition-colors w-fit shadow-sm"
+                className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 sm:py-3.5 rounded-full bg-[#1c1917] text-white text-sm sm:text-base font-medium hover:bg-[#44403c] transition-colors w-fit shadow-sm"
               >
                 {cta}
               </Link>
@@ -386,7 +386,7 @@ function FeatureSection({
 function StackedCards({ children }: { children: React.ReactNode }) {
   const cards = Array.isArray(children) ? children : [children]
   return (
-    <div className="relative w-full max-w-[420px] min-h-[260px] sm:min-h-[280px] mx-auto lg:mx-0">
+    <div className="relative w-full max-w-[280px] sm:max-w-[360px] lg:max-w-[420px] min-h-[200px] sm:min-h-[280px] mx-auto lg:mx-0">
       {/* Soft gradient behind stack (Base44-style) */}
       <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-100/40 via-rose-50/30 to-amber-100/40 -z-10" aria-hidden />
       {cards.map((child, i) => (
@@ -410,28 +410,28 @@ function StackedCards({ children }: { children: React.ReactNode }) {
 /* Card 1: Resume preview — shows output quality and why it matters */
 function CardResumePreview() {
   return (
-    <div className="w-full max-w-[400px] rounded-2xl overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
+    <div className="w-full max-w-[260px] sm:max-w-[340px] lg:max-w-[400px] rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.1)] sm:shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
       <div
-        className="h-2 w-full"
+        className="h-1.5 sm:h-2 w-full"
         style={{
           background: 'linear-gradient(90deg, #fbbf24 0%, #fbb52c 18%, #f59e0b 35%, #f97316 50%, #f87171 70%, #fb7185 85%, #f43f5e 100%)',
         }}
       />
-      <div className="bg-white p-5 sm:p-6">
-        <p className="text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-3">Recruiter-ready output</p>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#fff7ed] to-[#ffedd5] flex items-center justify-center text-[#ea580c] font-bold text-lg border border-orange-200/50">A</div>
-          <div>
-            <p className="font-semibold text-[#1c1917] text-base">Alice Hart</p>
-            <p className="text-sm text-[#78716c]">Math Teacher</p>
+      <div className="bg-white p-3.5 sm:p-6">
+        <p className="text-[10px] sm:text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-2 sm:mb-3">Recruiter-ready output</p>
+        <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+          <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#fff7ed] to-[#ffedd5] flex items-center justify-center text-[#ea580c] font-bold text-sm sm:text-lg border border-orange-200/50 shrink-0">A</div>
+          <div className="min-w-0">
+            <p className="font-semibold text-[#1c1917] text-sm sm:text-base truncate">Alice Hart</p>
+            <p className="text-xs sm:text-sm text-[#78716c]">Math Teacher</p>
           </div>
         </div>
-        <p className="text-sm text-[#44403c] leading-relaxed mb-4" style={{ lineHeight: 1.55 }}>
+        <p className="text-xs sm:text-sm text-[#44403c] leading-relaxed mb-3 sm:mb-4" style={{ lineHeight: 1.55 }}>
           Summary, experience, and skills in the right order—no reformatting or missing sections.
         </p>
-        <div className="flex flex-wrap gap-2">
-          <span className="px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200/60">ATS Ready</span>
-          <span className="px-2.5 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200/60">Professional</span>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <span className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] sm:text-xs font-medium border border-emerald-200/60">ATS Ready</span>
+          <span className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-blue-50 text-blue-700 text-[10px] sm:text-xs font-medium border border-blue-200/60">Professional</span>
         </div>
       </div>
     </div>
@@ -448,26 +448,26 @@ function CardBuilderOutput() {
     'Formatted for ATS',
   ]
   return (
-    <div className="w-full max-w-[400px] rounded-2xl overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
+    <div className="w-full max-w-[260px] sm:max-w-[340px] lg:max-w-[400px] rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.1)] sm:shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
       <div
-        className="h-3 w-full"
+        className="h-2 sm:h-3 w-full"
         style={{
           background: 'linear-gradient(90deg, #fcd34d 0%, #fbbf24 20%, #f59e0b 40%, #f97316 60%, #fb923c 75%, #fb7185 90%, #f43f5e 100%)',
         }}
       />
-      <div className="bg-gradient-to-b from-white to-rose-50/30 p-5 sm:p-6 border-t border-orange-100/50">
-        <p className="text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-2">Built in seconds, not hours</p>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="w-8 h-8 rounded-lg bg-[#f97316] flex items-center justify-center text-white text-sm font-bold shadow-sm">C</span>
-          <span className="font-semibold text-[#1c1917] text-base">Cvmora</span>
+      <div className="bg-gradient-to-b from-white to-rose-50/30 p-3.5 sm:p-6 border-t border-orange-100/50">
+        <p className="text-[10px] sm:text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-1.5 sm:mb-2">Built in seconds, not hours</p>
+        <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+          <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[#f97316] flex items-center justify-center text-white text-xs sm:text-sm font-bold shadow-sm shrink-0">C</span>
+          <span className="font-semibold text-[#1c1917] text-sm sm:text-base">Cvmora</span>
         </div>
-        <p className="text-sm text-[#44403c] mt-2 mb-4" style={{ lineHeight: 1.55 }}>
+        <p className="text-xs sm:text-sm text-[#44403c] mt-1 sm:mt-2 mb-3 sm:mb-4" style={{ lineHeight: 1.55 }}>
           One goal → full structure. No clicking through 20 screens.
         </p>
-        <div className="space-y-2">
+        <div className="space-y-1.5 sm:space-y-2">
           {items.map((label, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm text-[#1c1917]">
-              <span className="w-5 h-5 rounded flex items-center justify-center bg-amber-100 text-amber-700 text-[10px] font-bold">✓</span>
+            <div key={i} className="flex items-center gap-2 text-xs sm:text-sm text-[#1c1917]">
+              <span className="w-4 h-4 sm:w-5 sm:h-5 rounded flex items-center justify-center bg-amber-100 text-amber-700 text-[9px] sm:text-[10px] font-bold shrink-0">✓</span>
               <span>{label}</span>
             </div>
           ))}
@@ -480,27 +480,27 @@ function CardBuilderOutput() {
 /* Card 3: Export — no paywall, no watermarks */
 function CardExportOptions() {
   return (
-    <div className="w-full max-w-[360px] rounded-2xl overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
+    <div className="w-full max-w-[260px] sm:max-w-[320px] lg:max-w-[360px] rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.1)] sm:shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
       <div
         className="h-2 w-full"
         style={{
           background: 'linear-gradient(90deg, #c4b5fd 0%, #a78bfa 25%, #d946ef 50%, #ec4899 75%, #f472b6 100%)',
         }}
       />
-      <div className="bg-white p-5 sm:p-6">
-        <p className="text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-2">No paywall · No watermarks</p>
-        <p className="font-semibold text-[#1c1917] text-base mb-4">Download your resume</p>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200/80">
-            <span className="text-base font-medium text-[#1c1917]">PDF</span>
-            <span className="text-sm text-[#78716c]">Print-ready</span>
+      <div className="bg-white p-3.5 sm:p-6">
+        <p className="text-[10px] sm:text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-1.5 sm:mb-2">No paywall · No watermarks</p>
+        <p className="font-semibold text-[#1c1917] text-sm sm:text-base mb-3 sm:mb-4">Download your resume</p>
+        <div className="space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200/80">
+            <span className="text-sm sm:text-base font-medium text-[#1c1917]">PDF</span>
+            <span className="text-xs sm:text-sm text-[#78716c]">Print-ready</span>
           </div>
-          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-gradient-to-r from-slate-50 to-indigo-50/50 border border-slate-200/80">
-            <span className="text-base font-medium text-[#1c1917]">Word (.docx)</span>
-            <span className="text-sm text-[#78716c]">Editable</span>
+          <div className="flex items-center justify-between py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-slate-50 to-indigo-50/50 border border-slate-200/80">
+            <span className="text-sm sm:text-base font-medium text-[#1c1917]">Word (.docx)</span>
+            <span className="text-xs sm:text-sm text-[#78716c]">Editable</span>
           </div>
         </div>
-        <p className="text-sm font-medium text-emerald-700 mt-4">One click. No watermarks. No paywall.</p>
+        <p className="text-xs sm:text-sm font-medium text-emerald-700 mt-3 sm:mt-4">One click. No watermarks. No paywall.</p>
       </div>
     </div>
   )
@@ -510,25 +510,25 @@ function CardExportOptions() {
 function CardTemplatePicker() {
   const options = ['Professional', 'Modern', 'Minimal']
   return (
-    <div className="w-full max-w-[360px] rounded-2xl overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
+    <div className="w-full max-w-[260px] sm:max-w-[320px] lg:max-w-[360px] rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.1)] sm:shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
       <div
         className="h-2 w-full"
         style={{
           background: 'linear-gradient(90deg, #a5b4fc 0%, #818cf8 30%, #c084fc 50%, #f97316 70%, #fbbf24 100%)',
         }}
       />
-      <div className="bg-white p-5 sm:p-6">
-        <p className="text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-2">Every layout ATS- & recruiter-tested</p>
-        <p className="font-semibold text-[#1c1917] text-base mb-4">Choose a template</p>
+      <div className="bg-white p-3.5 sm:p-6">
+        <p className="text-[10px] sm:text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-1.5 sm:mb-2">Every layout ATS- & recruiter-tested</p>
+        <p className="font-semibold text-[#1c1917] text-sm sm:text-base mb-3 sm:mb-4">Choose a template</p>
         <div className="space-y-0 divide-y divide-[#e7e5e4]">
           {options.map((name, i) => (
-            <div key={name} className="flex items-center justify-between py-4 first:pt-0">
-              <div className="flex items-center gap-3">
-                {i === 0 && <span className="w-5 h-5 rounded-full bg-[#f97316] flex items-center justify-center text-white text-[10px] font-bold">✓</span>}
-                {i !== 0 && <span className="w-5 h-5 rounded-full border-2 border-[#e7e5e4]" />}
-                <span className="text-base font-medium text-[#1c1917]">{name}</span>
+            <div key={name} className="flex items-center justify-between py-2.5 sm:py-4 first:pt-0">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                {i === 0 && <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#f97316] flex items-center justify-center text-white text-[9px] sm:text-[10px] font-bold shrink-0">✓</span>}
+                {i !== 0 && <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-[#e7e5e4] shrink-0" />}
+                <span className="text-sm sm:text-base font-medium text-[#1c1917] truncate">{name}</span>
               </div>
-              <span className="text-sm text-emerald-600 font-medium">ATS-friendly</span>
+              <span className="text-xs sm:text-sm text-emerald-600 font-medium shrink-0">ATS-friendly</span>
             </div>
           ))}
         </div>

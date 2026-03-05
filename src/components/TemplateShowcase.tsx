@@ -25,7 +25,7 @@ export default function TemplateShowcase() {
 
   return (
     <section
-      className="w-full py-16 sm:py-20 px-4 sm:px-6"
+      className="w-full pt-[max(5rem,calc(4rem+env(safe-area-inset-top)))] pb-16 sm:py-20 px-4 sm:px-6"
       style={{
         background:
           "linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 40%, #fef3e8 100%)",
@@ -80,7 +80,7 @@ export default function TemplateShowcase() {
                   </div>
                   <Link
                     to={`/builder?template=${encodeURIComponent(current.id)}`}
-                    className="mt-6 sm:mt-8 w-full max-w-[320px] py-3 rounded-lg bg-[#BFED8D] text-[#1c1917] text-center text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
+                    className="mt-6 sm:mt-8 w-full max-w-[320px] py-3 min-h-[44px] flex items-center justify-center rounded-lg bg-[#BFED8D] text-[#1c1917] text-center text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] active:bg-[#b0e87d] transition-colors [-webkit-tap-highlight-color:transparent]"
                   >
                     Use this template
                   </Link>
@@ -145,7 +145,7 @@ export default function TemplateShowcase() {
         <div className="text-center mt-10">
           <Link
             to="/templates"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#BFED8D] text-[#1c1917] text-sm font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 min-h-[44px] rounded-full bg-[#BFED8D] text-[#1c1917] text-sm font-semibold border border-[#a8e070] hover:bg-[#b0e87d] active:bg-[#b0e87d] transition-colors [-webkit-tap-highlight-color:transparent]"
           >
             View all templates
             <svg

@@ -178,7 +178,7 @@ function ResumeBuilderInner() {
   }
 
   return (
-    <div className="h-full flex flex-col min-h-0">
+    <div className="h-full flex flex-col min-h-0 pt-[env(safe-area-inset-top)]">
       {/* Single minimal bar: logo, template, Edit|Customize, score, actions */}
       <header className="flex-none flex flex-wrap items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-2.5 border-b border-cvmora-ink/8 bg-white shrink-0 min-h-[52px]">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
@@ -260,7 +260,7 @@ function ResumeBuilderInner() {
           {activeTab === 'edit' ? (
             <>
               <aside className="w-full md:max-w-[420px] flex-none md:border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0 overflow-y-auto md:overflow-y-auto">
-                <div className="flex-1 min-h-0">
+                <div className="flex-1 min-h-0 pb-28">
                   <BuilderStepContent stepIndex={builderStep} />
                 </div>
               </aside>
