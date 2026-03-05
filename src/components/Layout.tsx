@@ -59,6 +59,7 @@ function NavLink({
   hasDropdown,
   isDropdownOpen,
   onMouseEnter,
+  onDropdownClick,
 }: {
   to: string
   label: string
@@ -66,7 +67,15 @@ function NavLink({
   hasDropdown: boolean
   isDropdownOpen: boolean
   onMouseEnter: () => void
+  onDropdownClick?: (e: React.MouseEvent) => void
 }) {
+  const handleClick = hasDropdown && onDropdownClick
+    ? (e: React.MouseEvent) => {
+        e.preventDefault()
+        onDropdownClick(e)
+      }
+    : undefined
+
   return (
     <div
       className="relative"
@@ -74,6 +83,7 @@ function NavLink({
     >
       <Link
         to={to}
+        onClick={handleClick}
         className={`relative flex items-center gap-0.5 text-base font-normal px-2.5 py-2 transition-colors duration-150 outline-none focus:outline-none ${
           isActive || isDropdownOpen ? 'text-[#f97316]' : 'text-[#1c1917] hover:text-[#f97316]'
         }`}
@@ -309,6 +319,7 @@ export function Layout() {
   const location = useLocation()
   const [openDropdown, setOpenDropdown] = useState<DropdownId | null>(null)
   const [navVisible, setNavVisible] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const lastScrollYRef = useRef(0)
   const isBuilder = location.pathname.startsWith('/builder')
   const isCoverLetterBuilder =
@@ -318,6 +329,11 @@ export function Layout() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
+  }, [location.pathname])
+
+  useEffect(() => {
+    setMobileMenuOpen(false)
+    setOpenDropdown(null)
   }, [location.pathname])
 
   useEffect(() => {
@@ -384,10 +400,11 @@ export function Layout() {
         onMouseLeave={() => setOpenDropdown(null)}
       >
         <header className="w-full max-w-[1400px] mx-auto rounded-full bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-[#e5e7eb]/80">
-          <div className="flex items-center justify-between gap-3 sm:gap-4 px-5 sm:px-8 py-2 sm:py-2.5">
+          <div className="flex items-center justify-between gap-3 sm:gap-4 px-4 sm:px-8 py-2 sm:py-2.5">
             <Logo />
 
-            <nav className="flex items-center gap-0 flex-1 justify-center max-w-2xl mx-3">
+            {/* Desktop nav: hidden on small screens */}
+            <nav className="hidden lg:flex items-center gap-0 flex-1 justify-center max-w-2xl mx-3">
               {mainNav.map((item) => (
                 <NavLink
                   key={item.to}
@@ -397,11 +414,26 @@ export function Layout() {
                   hasDropdown={!!item.dropdown}
                   isDropdownOpen={openDropdown === item.dropdown}
                   onMouseEnter={() => setOpenDropdown(item.dropdown ?? null)}
+                  onDropdownClick={() => setOpenDropdown((prev) => (prev === item.dropdown ? null : (item.dropdown ?? null)))}
                 />
               ))}
             </nav>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            {/* Mobile menu button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((o) => !o)}
+              className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full text-[#1c1917] hover:bg-[#f5f5f4]"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileMenuOpen ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+              )}
+            </button>
+
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
               {isAuthenticated ? (
                 <>
                   <Link to="/dashboard" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors">Dashboard</Link>
@@ -417,7 +449,61 @@ export function Layout() {
             </div>
           </div>
         </header>
+
+        {/* Mobile menu overlay: nav links + expandable dropdowns */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="lg:hidden absolute left-0 right-0 top-full z-40 mt-1 mx-4 rounded-2xl bg-white shadow-lg border border-[#e5e7eb] overflow-hidden max-h-[85vh] overflow-y-auto"
+            >
+              <nav className="py-2">
+                {mainNav.map((item) => (
+                  <div key={item.to}>
+                    {item.dropdown ? (
+                      <button
+                        type="button"
+                        onClick={() => setOpenDropdown((prev) => (prev === item.dropdown ? null : item.dropdown ?? null))}
+                        className={`w-full flex items-center justify-between gap-2 px-5 py-3.5 text-left text-[15px] font-normal transition-colors ${
+                          openDropdown === item.dropdown ? 'text-[#f97316] bg-[#fff7ed]/50' : 'text-[#1c1917]'
+                        }`}
+                      >
+                        {item.label}
+                        <span className={`shrink-0 transition-transform ${openDropdown === item.dropdown ? 'rotate-180' : ''}`}>
+                          <svg className="w-4 h-4 opacity-60" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M2.5 4.5 L6 8 L9.5 4.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                      </button>
+                    ) : (
+                      <Link
+                        to={item.to}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-5 py-3.5 text-[15px] font-normal text-[#1c1917] hover:bg-[#f5f5f4]"
+                      >
+                        {item.label}
+                      </Link>
+                    )}
+                    {item.dropdown && openDropdown === item.dropdown && (
+                      <div className="border-t border-[#e5e7eb] bg-[#fafafa]">
+                        {openDropdown === 'templates' && <TemplatesDropdown />}
+                        {openDropdown === 'examples' && <ExamplesDropdown />}
+                        {openDropdown === 'cover-letter' && <CoverLetterDropdown />}
+                        {openDropdown === 'resources' && <ResourcesDropdown />}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <AnimatePresence mode="wait">
+          <div className="hidden lg:block">
           {openDropdown === 'templates' && (
             <motion.div
               key="templates"
@@ -466,10 +552,11 @@ export function Layout() {
               <ResourcesDropdown />
             </motion.div>
           )}
+          </div>
         </AnimatePresence>
       </div>
       {/* Spacer so main content starts below the fixed header */}
-      <div className="shrink-0 h-[68px] sm:h-[72px]" aria-hidden />
+      <div className="shrink-0 h-[72px] sm:h-[76px]" aria-hidden />
       <main className="flex-1 flex flex-col">
         <Outlet />
       </main>

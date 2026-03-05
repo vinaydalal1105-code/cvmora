@@ -17,6 +17,8 @@ export function DividedTemplate({ data, accentColor }: { data: ResumeData; accen
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
+  const hasSummary = !!(summary?.trim())
+  const hasSkills = skills.filter(Boolean).length > 0
   const accent = accentColor ?? '#374151'
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
@@ -38,32 +40,36 @@ export function DividedTemplate({ data, accentColor }: { data: ResumeData; accen
         <div className="mt-4 border-t-2 border-[#e5e7eb]" style={{ borderTopColor: accent }} />
       </header>
 
-      <section className={resumeSpacing.section}>
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b border-[#e5e7eb]">
-          Professional Summary
-        </h2>
-        <p className={resumeSpacing.summary}>{summary || ph('Add a short summary.')}</p>
-      </section>
+      {hasSummary && (
+        <section className={resumeSpacing.section}>
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b border-[#e5e7eb]">
+            Professional Summary
+          </h2>
+          <p className={resumeSpacing.summary}>{summary}</p>
+        </section>
+      )}
 
-      <section className={resumeSpacing.section}>
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b border-[#e5e7eb]">
-          Skills
-        </h2>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-1 text-[13px] text-[#333]">
-          {skills.filter(Boolean).length > 0 ? skills.filter(Boolean).map((s, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <span className="w-1 h-1 rounded-full bg-[#374151] shrink-0" aria-hidden />
-              {s}
-            </div>
-          )) : <p className="text-[13px] text-[#9ca3af] italic">Add your skills</p>}
-        </div>
-      </section>
+      {hasSkills && (
+        <section className={resumeSpacing.section}>
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b border-[#e5e7eb]">
+            Skills
+          </h2>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-1 text-[13px] text-[#333]">
+            {skills.filter(Boolean).map((s, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-[#374151] shrink-0" aria-hidden />
+                {s}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <section className={resumeSpacing.section}>
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b border-[#e5e7eb]">
-          Work History
-        </h2>
-        {showExperience ? (
+      {showExperience && (
+        <section className={resumeSpacing.section}>
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b border-[#e5e7eb]">
+            Work History
+          </h2>
           <div className={resumeSpacing.expWrapper}>
             {experience.filter(hasContent).map((exp) => (
               <div key={exp.id}>
@@ -87,17 +93,15 @@ export function DividedTemplate({ data, accentColor }: { data: ResumeData; accen
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] italic">Add your work history.</p>
-        )}
-      </section>
+        </section>
+      )}
 
-      <section className={resumeSpacing.section}>
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b border-[#e5e7eb]">
-          Education
-        </h2>
-        {showEducation ? (
-          education.filter(hasEduContent).map((edu) => (
+      {showEducation && (
+        <section className={resumeSpacing.section}>
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b border-[#e5e7eb]">
+            Education
+          </h2>
+          {education.filter(hasEduContent).map((edu) => (
             <div key={edu.id} className={resumeSpacing.eduEntry}>
               <div className="font-semibold text-[#1c1c1c]">{edu.degree}</div>
               <div className="text-[12px] text-[#4b5563] mt-0.5">
@@ -107,27 +111,25 @@ export function DividedTemplate({ data, accentColor }: { data: ResumeData; accen
               </div>
               {edu.description && <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>}
             </div>
-          ))
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] italic">Add your education.</p>
-        )}
-      </section>
+          ))}
+        </section>
+      )}
 
-      <section>
-        <h2 className={resumeSpacing.sectionHeading}>References</h2>
-        <div className={resumeSpacing.refBlock}>
-          {hasRefs ? references!.map((ref, i) => (
-            <div key={i}>
-              <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
-              {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
-              {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
-              {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
-            </div>
-          )) : (
-            <p className="text-[13px] text-[#9ca3af] italic">Add references if needed.</p>
-          )}
-        </div>
-      </section>
+      {hasRefs && (
+        <section>
+          <h2 className={resumeSpacing.sectionHeading}>References</h2>
+          <div className={resumeSpacing.refBlock}>
+            {references!.map((ref, i) => (
+              <div key={i}>
+                <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
+                {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
+                {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
+                {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

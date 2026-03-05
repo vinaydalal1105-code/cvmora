@@ -45,6 +45,7 @@ export async function createResumeDocx(data: ResumeData): Promise<Blob> {
   const showExperience = data.experience.some(hasContent)
   const showEducation = data.education.some(hasEduContent)
   const hasRefs = data.references && data.references.length > 0
+  const hasSummary = !!(data.summary?.trim())
 
   const whiteRun = (text: string, opts?: { bold?: boolean; size?: number }) =>
     new TextRun({ text, color: 'FFFFFF', bold: opts?.bold, size: opts?.size ?? 24 })
@@ -63,44 +64,50 @@ export async function createResumeDocx(data: ResumeData): Promise<Blob> {
           }),
         ]
       : [new Paragraph({ children: [whiteSmall('Job title')], spacing: { after: 200 } })]),
-    new Paragraph({
-      children: [whiteRun('DETAILS', { bold: true })],
-      spacing: { before: 100, after: 80 },
-    }),
     ...(contactItems.length > 0
-      ? contactItems.map((t) => new Paragraph({ children: [whiteSmall(t)], spacing: { after: 60 } }))
-      : [new Paragraph({ children: [whiteSmall('Email · Phone · Address')], spacing: { after: 100 } })]),
-    new Paragraph({
-      children: [whiteRun('SKILLS', { bold: true })],
-      spacing: { before: 200, after: 80 },
-    }),
+      ? [
+          new Paragraph({
+            children: [whiteRun('DETAILS', { bold: true })],
+            spacing: { before: 100, after: 80 },
+          }),
+          ...contactItems.map((t) => new Paragraph({ children: [whiteSmall(t)], spacing: { after: 60 } })),
+        ]
+      : []),
     ...(skillsList.length > 0
-      ? [new Paragraph({ children: [whiteSmall(skillsList.join(' · '))], spacing: { after: 100 } })]
-      : [new Paragraph({ children: [whiteSmall('Add skills')], spacing: { after: 100 } })]),
+      ? [
+          new Paragraph({
+            children: [whiteRun('SKILLS', { bold: true })],
+            spacing: { before: contactItems.length > 0 ? 200 : 100, after: 80 },
+          }),
+          new Paragraph({ children: [whiteSmall(skillsList.join(' · '))], spacing: { after: 100 } }),
+        ]
+      : []),
   ]
 
   const mainParagraphs: Paragraph[] = []
 
-  mainParagraphs.push(
-    new Paragraph({
-      text: 'Profile',
-      heading: HeadingLevel.HEADING_1,
-      spacing: { before: 0, after: 100 },
-    }),
-    new Paragraph({
-      text: data.summary || 'Add a short summary of your experience and goals.',
-      spacing: { after: 280 },
-    })
-  )
+  if (hasSummary) {
+    mainParagraphs.push(
+      new Paragraph({
+        text: 'Profile',
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: 0, after: 100 },
+      }),
+      new Paragraph({
+        text: data.summary!.trim(),
+        spacing: { after: 280 },
+      })
+    )
+  }
 
-  mainParagraphs.push(
-    new Paragraph({
-      text: 'Employment History',
-      heading: HeadingLevel.HEADING_1,
-      spacing: { before: 200, after: 100 },
-    })
-  )
   if (showExperience) {
+    mainParagraphs.push(
+      new Paragraph({
+        text: 'Employment History',
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: mainParagraphs.length > 0 ? 200 : 0, after: 100 },
+      })
+    )
     for (const exp of data.experience.filter(hasContent)) {
       const dateRange = `${exp.startDate} – ${exp.current ? 'Present' : exp.endDate}`
       mainParagraphs.push(
@@ -124,18 +131,16 @@ export async function createResumeDocx(data: ResumeData): Promise<Blob> {
         mainParagraphs.push(new Paragraph({ text: '', spacing: { after: 80 } }))
       }
     }
-  } else {
-    mainParagraphs.push(new Paragraph({ children: [new TextRun({ text: 'Add your work history and achievements.', italics: true })], spacing: { after: 200 } }))
   }
 
-  mainParagraphs.push(
-    new Paragraph({
-      text: 'Education',
-      heading: HeadingLevel.HEADING_1,
-      spacing: { before: 200, after: 100 },
-    })
-  )
   if (showEducation) {
+    mainParagraphs.push(
+      new Paragraph({
+        text: 'Education',
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: mainParagraphs.length > 0 ? 200 : 0, after: 100 },
+      })
+    )
     for (const edu of data.education.filter(hasEduContent)) {
       mainParagraphs.push(
         new Paragraph({
@@ -154,18 +159,16 @@ export async function createResumeDocx(data: ResumeData): Promise<Blob> {
         mainParagraphs.push(new Paragraph({ text: edu.description, spacing: { after: 80 } }))
       }
     }
-  } else {
-    mainParagraphs.push(new Paragraph({ children: [new TextRun({ text: 'Add degrees and certifications.', italics: true })], spacing: { after: 200 } }))
   }
 
-  mainParagraphs.push(
-    new Paragraph({
-      text: 'References',
-      heading: HeadingLevel.HEADING_1,
-      spacing: { before: 200, after: 100 },
-    })
-  )
   if (hasRefs && data.references) {
+    mainParagraphs.push(
+      new Paragraph({
+        text: 'References',
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: mainParagraphs.length > 0 ? 200 : 0, after: 100 },
+      })
+    )
     for (const ref of data.references) {
       mainParagraphs.push(
         new Paragraph({
@@ -174,8 +177,6 @@ export async function createResumeDocx(data: ResumeData): Promise<Blob> {
         })
       )
     }
-  } else {
-    mainParagraphs.push(new Paragraph({ children: [new TextRun({ text: 'References available upon request.', italics: true })], spacing: { after: 100 } }))
   }
 
   const table = new Table({

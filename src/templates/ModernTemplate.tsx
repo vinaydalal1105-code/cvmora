@@ -20,6 +20,8 @@ export function ModernTemplate({ data, accentColor }: { data: ResumeData; accent
   const showExperience = experience.some(hasExpContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
+  const hasSummary = !!(summary?.trim())
+  const hasSkills = skills.filter(Boolean).length > 0
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
   return (
@@ -49,22 +51,22 @@ export function ModernTemplate({ data, accentColor }: { data: ResumeData; accent
               <div>{ph('Email · Phone · Location')}</div>
             )}
           </div>
-          {contact.photo ? (
+          {contact.photo && (
             <img src={contact.photo} alt="" className="w-14 h-14 rounded-full object-cover border border-[#e5e7eb]" />
-          ) : (
-            <div className="w-14 h-14 rounded-full bg-[#f3f4f6] border border-[#e5e7eb]" />
           )}
         </div>
       </header>
 
-      <section className={`${resumeSpacing.section} pl-4 border-l-2`} style={{ borderLeftColor: accent }}>
-        <h2 className={resumeSpacing.sectionHeading}>Summary</h2>
-        <p className={resumeSpacing.summary}>{summary || ph('Add a short summary of your experience and goals.')}</p>
-      </section>
+      {hasSummary && (
+        <section className={`${resumeSpacing.section} pl-4 border-l-2`} style={{ borderLeftColor: accent }}>
+          <h2 className={resumeSpacing.sectionHeading}>Summary</h2>
+          <p className={resumeSpacing.summary}>{summary}</p>
+        </section>
+      )}
 
-      <section className={resumeSpacing.section}>
-        <h2 className={resumeSpacing.sectionHeading}>Experience</h2>
-        {showExperience ? (
+      {showExperience && (
+        <section className={resumeSpacing.section}>
+          <h2 className={resumeSpacing.sectionHeading}>Experience</h2>
           <div className={resumeSpacing.expWrapper}>
             {experience.filter(hasExpContent).map((exp) => (
               <div key={exp.id}>
@@ -88,15 +90,13 @@ export function ModernTemplate({ data, accentColor }: { data: ResumeData; accent
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] italic">Add your work history.</p>
-        )}
-      </section>
+        </section>
+      )}
 
-      <section className={resumeSpacing.section}>
-        <h2 className={resumeSpacing.sectionHeading}>Education</h2>
-        {showEducation ? (
-          education.filter(hasEduContent).map((edu) => (
+      {showEducation && (
+        <section className={resumeSpacing.section}>
+          <h2 className={resumeSpacing.sectionHeading}>Education</h2>
+          {education.filter(hasEduContent).map((edu) => (
             <div key={edu.id} className={resumeSpacing.eduEntry}>
               <span className="font-semibold text-[#1c1c1c]">{edu.degree}</span>
               <span className="text-[#4b5563]"> — {edu.school}</span>
@@ -110,43 +110,41 @@ export function ModernTemplate({ data, accentColor }: { data: ResumeData; accent
                 <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>
               )}
             </div>
-          ))
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] italic">Add your education.</p>
-        )}
-      </section>
+          ))}
+        </section>
+      )}
 
-      <section className={resumeSpacing.section}>
-        <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
-        <div className="flex flex-wrap gap-2">
-          {skills.filter(Boolean).length > 0 ? skills.filter(Boolean).map((s, i) => (
-            <span
-              key={i}
-              className="px-2.5 py-0.5 rounded-full bg-[#f3f4f6] text-[12px] text-[#374151] border border-[#e5e7eb]"
-            >
-              {s}
-            </span>
-          )) : (
-            <span className="text-[13px] text-[#9ca3af] italic">Add your skills</span>
-          )}
-        </div>
-      </section>
+      {hasSkills && (
+        <section className={resumeSpacing.section}>
+          <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
+          <div className="flex flex-wrap gap-2">
+            {skills.filter(Boolean).map((s, i) => (
+              <span
+                key={i}
+                className="px-2.5 py-0.5 rounded-full bg-[#f3f4f6] text-[12px] text-[#374151] border border-[#e5e7eb]"
+              >
+                {s}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <section>
-        <h2 className={resumeSpacing.sectionHeading}>References</h2>
-        <div className={resumeSpacing.refBlock}>
-          {hasRefs ? references!.map((ref, i) => (
+      {hasRefs && (
+        <section>
+          <h2 className={resumeSpacing.sectionHeading}>References</h2>
+          <div className={resumeSpacing.refBlock}>
+            {references!.map((ref, i) => (
               <div key={i}>
                 <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
                 {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
                 {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
                 {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
               </div>
-            )) : (
-              <p className="text-[13px] text-[#9ca3af] italic">Add references if needed.</p>
-            )}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

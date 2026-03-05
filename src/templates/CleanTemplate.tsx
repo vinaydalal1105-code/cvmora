@@ -17,15 +17,15 @@ export function CleanTemplate({ data }: { data: ResumeData }) {
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
+  const hasSummary = !!(summary?.trim())
+  const hasSkills = skills.filter(Boolean).length > 0
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
   return (
     <div className="clean-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-[13px]">
       <header className="mb-4 pb-3 border-b border-[#e5e7eb] flex gap-5 items-start">
-        {contact.photo ? (
+        {contact.photo && (
           <img src={contact.photo} alt="" className="w-16 h-16 rounded-full object-cover shrink-0 border border-[#e5e7eb]" />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-[#f3f4f6] border border-[#e5e7eb] shrink-0" />
         )}
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold tracking-tight text-[#1c1c1c] mb-1">
@@ -49,14 +49,16 @@ export function CleanTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <section className={resumeSpacing.section}>
-        <h2 className={resumeSpacing.sectionHeading}>Summary</h2>
-        <p className={resumeSpacing.summaryPlain}>{summary || ph('Add a short summary of your experience and goals.')}</p>
-      </section>
+      {hasSummary && (
+        <section className={resumeSpacing.section}>
+          <h2 className={resumeSpacing.sectionHeading}>Summary</h2>
+          <p className={resumeSpacing.summaryPlain}>{summary}</p>
+        </section>
+      )}
 
-      <section className={resumeSpacing.section}>
-        <h2 className={resumeSpacing.sectionHeading}>Experience</h2>
-        {showExperience ? (
+      {showExperience && (
+        <section className={resumeSpacing.section}>
+          <h2 className={resumeSpacing.sectionHeading}>Experience</h2>
           <div className={resumeSpacing.expWrapper}>
             {experience.filter(hasContent).map((exp) => (
               <div key={exp.id}>
@@ -80,15 +82,13 @@ export function CleanTemplate({ data }: { data: ResumeData }) {
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] italic">Add your work history.</p>
-        )}
-      </section>
+        </section>
+      )}
 
-      <section className={resumeSpacing.section}>
-        <h2 className={resumeSpacing.sectionHeading}>Education</h2>
-        {showEducation ? (
-          education.filter(hasEduContent).map((edu) => (
+      {showEducation && (
+        <section className={resumeSpacing.section}>
+          <h2 className={resumeSpacing.sectionHeading}>Education</h2>
+          {education.filter(hasEduContent).map((edu) => (
             <div key={edu.id} className={resumeSpacing.eduEntry}>
               <span className="font-semibold text-[#1c1c1c]">{edu.degree}</span>
               <span className="text-[#4b5563]">, {edu.school}</span>
@@ -102,32 +102,32 @@ export function CleanTemplate({ data }: { data: ResumeData }) {
                 <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>
               )}
             </div>
-          ))
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] italic">Add your education.</p>
-        )}
-      </section>
+          ))}
+        </section>
+      )}
 
-      <section className={resumeSpacing.section}>
-        <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
-        <p className={resumeSpacing.skillsPlain}>{skills.filter(Boolean).length > 0 ? skills.filter(Boolean).join(' · ') : ph('Add your skills')}</p>
-      </section>
+      {hasSkills && (
+        <section className={resumeSpacing.section}>
+          <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
+          <p className={resumeSpacing.skillsPlain}>{skills.filter(Boolean).join(' · ')}</p>
+        </section>
+      )}
 
-      <section>
-        <h2 className={resumeSpacing.sectionHeading}>References</h2>
-        <div className={resumeSpacing.refBlock}>
-          {hasRefs ? references!.map((ref, i) => (
+      {hasRefs && (
+        <section>
+          <h2 className={resumeSpacing.sectionHeading}>References</h2>
+          <div className={resumeSpacing.refBlock}>
+            {references!.map((ref, i) => (
               <div key={i}>
                 <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
                 {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
                 {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
                 {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
               </div>
-            )) : (
-              <p className="text-[13px] text-[#9ca3af] italic">Add references if needed.</p>
-            )}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

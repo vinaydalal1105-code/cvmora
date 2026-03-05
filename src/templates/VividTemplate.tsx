@@ -29,6 +29,8 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
+  const hasSummary = !!(summary?.trim())
+  const hasSkills = skills.filter(Boolean).length > 0
   const barColor = accentColor ?? '#f59e0b'
   const barLight = isLightBg(barColor)
   const rootStyle = {
@@ -50,14 +52,12 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
       {/* Full-height left bar: single block centered in the stripe */}
       <aside className={`w-[26%] max-w-[55mm] bg-transparent p-3 shrink-0 h-full flex items-center justify-center min-h-0 ${barLight ? 'text-[#1c1917]' : 'text-white'}`}>
         <div className="flex flex-col items-center gap-4 w-full text-center">
-          {contact.photo ? (
+          {contact.photo && (
             <img
               src={contact.photo}
               alt=""
               className={`w-20 h-20 rounded-full object-cover border-2 ${asidePhotoBorder}`}
             />
-          ) : (
-            <div className={`w-20 h-20 rounded-full border-2 ${asidePhotoBorder}`} style={{ backgroundColor: barColor }} />
           )}
           <h1 className={`text-xl font-bold tracking-tight uppercase w-full ${asideNameClass}`}>
             {name || ph('Your name')}
@@ -87,14 +87,16 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
       </aside>
 
       <div className="flex-1 px-6 pt-6 pb-6 min-w-0">
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
-          <p className={resumeSpacing.summary}>{summary || ph('Add a short summary.')}</p>
-        </section>
+        {hasSummary && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
+            <p className={resumeSpacing.summary}>{summary}</p>
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Employment History</h2>
-          {showExperience ? (
+        {showExperience && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Employment History</h2>
             <div className={resumeSpacing.expWrapper}>
               {experience.filter(hasContent).map((exp) => (
                 <div key={exp.id}>
@@ -118,15 +120,13 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-[13px] text-[#9ca3af] italic">Add your work history.</p>
-          )}
-        </section>
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Education</h2>
-          {showEducation ? (
-            education.filter(hasEduContent).map((edu) => (
+        {showEducation && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Education</h2>
+            {education.filter(hasEduContent).map((edu) => (
               <div key={edu.id} className={resumeSpacing.eduEntry}>
                 <span className="font-semibold text-[#1c1c1c]">{edu.degree}</span>
                 <span className="text-[#4b5563]"> — {edu.school}</span>
@@ -137,42 +137,40 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
                   </span>
                 )}
               </div>
-            ))
-          ) : (
-            <p className="text-[13px] text-[#9ca3af] italic">Add your education.</p>
-          )}
-        </section>
+            ))}
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
-          <div className="flex flex-wrap gap-1.5">
-            {skills.filter(Boolean).length > 0 ? skills.filter(Boolean).map((s, i) => (
-              <span
-                key={i}
-                className="px-2 py-0.5 rounded bg-amber-50 text-[#92400e] text-[11px] border border-amber-200"
-              >
-                {s}
-              </span>
-            )) : (
-              <span className="text-[13px] text-[#9ca3af] italic">Add your skills</span>
-            )}
-          </div>
-        </section>
+        {hasSkills && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
+            <div className="flex flex-wrap gap-1.5">
+              {skills.filter(Boolean).map((s, i) => (
+                <span
+                  key={i}
+                  className="px-2 py-0.5 rounded bg-amber-50 text-[#92400e] text-[11px] border border-amber-200"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
 
-        <section>
-          <h2 className={resumeSpacing.sectionHeading}>References</h2>
-          <div className={resumeSpacing.refBlock}>
-            {hasRefs ? references!.map((ref, i) => (
-              <div key={i}>
-                {ref.name}
-                {ref.affiliation && `, ${ref.affiliation}`}
-                {ref.email && ` · ${ref.email}`}
-              </div>
-            )) : (
-              <p className="text-[13px] text-[#9ca3af] italic">Add references if needed.</p>
-            )}
-          </div>
-        </section>
+        {hasRefs && (
+          <section>
+            <h2 className={resumeSpacing.sectionHeading}>References</h2>
+            <div className={resumeSpacing.refBlock}>
+              {references!.map((ref, i) => (
+                <div key={i}>
+                  {ref.name}
+                  {ref.affiliation && `, ${ref.affiliation}`}
+                  {ref.email && ` · ${ref.email}`}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   )

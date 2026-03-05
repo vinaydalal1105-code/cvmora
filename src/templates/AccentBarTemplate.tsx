@@ -27,6 +27,8 @@ export function AccentBarTemplate({ data, accentColor }: { data: ResumeData; acc
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
+  const hasSummary = !!(summary?.trim())
+  const hasSkills = skills.filter(Boolean).length > 0
   const barColor = accentColor ?? '#1e3a5f'
   const barLight = isLightBg(barColor)
   const barText = barLight ? 'text-[#1c1917]' : 'text-white'
@@ -45,8 +47,12 @@ export function AccentBarTemplate({ data, accentColor }: { data: ResumeData; acc
             {name ? name.split(/\s+/).map((n) => n[0]).join('').slice(0, 2) : '—'}
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight uppercase truncate">{name || ph('Your name')}</h1>
-            <p className={`text-[11px] ${barMuted}`}>{jobTarget?.trim() || ph('Job title')}</p>
+            <h1 className={`text-xl font-bold tracking-tight uppercase truncate ${barText}`}>
+              {name || <span className={barText}>Your name</span>}
+            </h1>
+            <p className={`text-[11px] ${barMuted}`}>
+              {jobTarget?.trim() || <span className={barMuted}>Job title</span>}
+            </p>
           </div>
         </div>
         <div className={`text-[11px] text-right shrink-0 ${barMuted}`}>
@@ -57,7 +63,7 @@ export function AccentBarTemplate({ data, accentColor }: { data: ResumeData; acc
               {contact.location && <div>{contact.location}</div>}
             </>
           ) : (
-            <div>{ph('Contact')}</div>
+            <div><span className={barMuted}>Contact</span></div>
           )}
         </div>
       </header>
@@ -65,14 +71,16 @@ export function AccentBarTemplate({ data, accentColor }: { data: ResumeData; acc
       {/* Two columns */}
       <div className="flex px-0">
         <div className="w-[58%] min-w-0 pt-6 pl-8 pr-5 pb-6">
-          <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Professional Summary</h2>
-            <p className={resumeSpacing.summary}>{summary || ph('Add a short summary.')}</p>
-          </section>
+          {hasSummary && (
+            <section className={resumeSpacing.section}>
+              <h2 className={resumeSpacing.sectionHeading}>Professional Summary</h2>
+              <p className={resumeSpacing.summary}>{summary}</p>
+            </section>
+          )}
 
-          <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Work History</h2>
-            {showExperience ? (
+          {showExperience && (
+            <section className={resumeSpacing.section}>
+              <h2 className={resumeSpacing.sectionHeading}>Work History</h2>
               <div className={resumeSpacing.expWrapper}>
                 {experience.filter(hasContent).map((exp) => (
                   <div key={exp.id}>
@@ -96,66 +104,62 @@ export function AccentBarTemplate({ data, accentColor }: { data: ResumeData; acc
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-[13px] text-[#9ca3af] italic">Add your work history.</p>
-            )}
-          </section>
+            </section>
+          )}
 
-          <section>
-            <h2 className={resumeSpacing.sectionHeading}>References</h2>
-            <div className={resumeSpacing.refBlock}>
-              {hasRefs ? references!.map((ref, i) => (
-                <div key={i}>
-                  <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
-                  {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
-                  {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
-                  {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
-                </div>
-              )) : (
-                <p className="text-[13px] text-[#9ca3af] italic">Add references if needed.</p>
-              )}
-            </div>
-          </section>
+          {hasRefs && (
+            <section>
+              <h2 className={resumeSpacing.sectionHeading}>References</h2>
+              <div className={resumeSpacing.refBlock}>
+                {references!.map((ref, i) => (
+                  <div key={i}>
+                    <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
+                    {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
+                    {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
+                    {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         <div className="w-[42%] shrink-0 pt-6 pl-5 pr-8 pb-6 border-l border-[#e5e7eb]">
-          <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Contact</h2>
-            <div className="text-[12px] text-[#4b5563] space-y-1 mt-1">
-              {contact.address?.trim() || contact.phone || contact.email || contact.location || contact.website || contact.linkedin ? (
-                <>
-                  {contact.address?.trim() && <div>{contact.address.trim()}</div>}
-                  {contact.phone && <div>{contact.phone}</div>}
-                  {contact.email && <div className="break-all">{contact.email}</div>}
-                  {contact.location && <div>{contact.location}</div>}
-                  {contact.website && (
-                    <a href={contact.website} className="text-[#2563eb] underline block truncate">
-                      {contact.website.replace(/^https?:\/\//, '')}
-                    </a>
-                  )}
-                  {contact.linkedin && (
-                    <a href={contact.linkedin} className="text-[#2563eb] underline block">LinkedIn</a>
-                  )}
-                </>
-              ) : (
-                <p className="text-[13px] text-[#9ca3af] italic">Add contact details</p>
-              )}
-            </div>
-          </section>
+          {(contact.address?.trim() || contact.phone || contact.email || contact.location || contact.website || contact.linkedin) && (
+            <section className={resumeSpacing.section}>
+              <h2 className={resumeSpacing.sectionHeading}>Contact</h2>
+              <div className="text-[12px] text-[#4b5563] space-y-1 mt-1">
+                {contact.address?.trim() && <div>{contact.address.trim()}</div>}
+                {contact.phone && <div>{contact.phone}</div>}
+                {contact.email && <div className="break-all">{contact.email}</div>}
+                {contact.location && <div>{contact.location}</div>}
+                {contact.website && (
+                  <a href={contact.website} className="text-[#2563eb] underline block truncate">
+                    {contact.website.replace(/^https?:\/\//, '')}
+                  </a>
+                )}
+                {contact.linkedin && (
+                  <a href={contact.linkedin} className="text-[#2563eb] underline block">LinkedIn</a>
+                )}
+              </div>
+            </section>
+          )}
 
-          <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
-            <ul className="text-[13px] text-[#333] space-y-1 mt-1 list-disc pl-4">
-              {skills.filter(Boolean).length > 0 ? skills.filter(Boolean).map((s, i) => (
-                <li key={i}>{s}</li>
-              )) : <li className="text-[#9ca3af] italic">Add your skills</li>}
-            </ul>
-          </section>
+          {hasSkills && (
+            <section className={resumeSpacing.section}>
+              <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
+              <ul className="text-[13px] text-[#333] space-y-1 mt-1 list-disc pl-4">
+                {skills.filter(Boolean).map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-          <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Education</h2>
-            {showEducation ? (
-              education.filter(hasEduContent).map((edu) => (
+          {showEducation && (
+            <section className={resumeSpacing.section}>
+              <h2 className={resumeSpacing.sectionHeading}>Education</h2>
+              {education.filter(hasEduContent).map((edu) => (
                 <div key={edu.id} className={resumeSpacing.eduEntry}>
                   <div className="font-semibold text-[#1c1c1c]">{edu.degree}</div>
                   <div className="text-[12px] text-[#4b5563] mt-0.5">
@@ -167,11 +171,9 @@ export function AccentBarTemplate({ data, accentColor }: { data: ResumeData; acc
                     <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>
                   )}
                 </div>
-              ))
-            ) : (
-              <p className="text-[13px] text-[#9ca3af] italic">Add your education.</p>
-            )}
-          </section>
+              ))}
+            </section>
+          )}
         </div>
       </div>
     </div>

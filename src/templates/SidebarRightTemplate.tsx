@@ -27,6 +27,9 @@ export function SidebarRightTemplate({ data, accentColor }: { data: ResumeData; 
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
+  const hasSummary = !!(summary?.trim())
+  const hasSkills = skills.filter(Boolean).length > 0
+  const hasContactDetails = !!(contact.location || contact.phone || contact.email)
   const barColor = accentColor ?? '#1e3a5f'
   const barLight = isLightBg(barColor)
   const sidebarText = barLight ? 'text-[#1c1917]' : 'text-white'
@@ -48,18 +51,20 @@ export function SidebarRightTemplate({ data, accentColor }: { data: ResumeData; 
         <p className="text-[12px] text-[#6b7280] uppercase tracking-wider mb-4">{jobTarget?.trim() || ph('Job title')}</p>
         <div className="border-b border-[#e5e7eb] pb-2 mb-4" />
 
-        <section className={resumeSpacing.section}>
-          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b-2" style={{ borderBottomColor: barColor }}>
-            Professional Summary
-          </h2>
-          <p className={resumeSpacing.summary}>{summary || ph('Add a short summary.')}</p>
-        </section>
+        {hasSummary && (
+          <section className={resumeSpacing.section}>
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b-2" style={{ borderBottomColor: barColor }}>
+              Professional Summary
+            </h2>
+            <p className={resumeSpacing.summary}>{summary}</p>
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b-2" style={{ borderBottomColor: barColor }}>
-            Work History
-          </h2>
-          {showExperience ? (
+        {showExperience && (
+          <section className={resumeSpacing.section}>
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b-2" style={{ borderBottomColor: barColor }}>
+              Work History
+            </h2>
             <div className={resumeSpacing.expWrapper}>
               {experience.filter(hasContent).map((exp) => (
                 <div key={exp.id}>
@@ -83,17 +88,15 @@ export function SidebarRightTemplate({ data, accentColor }: { data: ResumeData; 
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-[13px] text-[#9ca3af] italic">Add your work history.</p>
-          )}
-        </section>
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b-2" style={{ borderBottomColor: barColor }}>
-            Education
-          </h2>
-          {showEducation ? (
-            education.filter(hasEduContent).map((edu) => (
+        {showEducation && (
+          <section className={resumeSpacing.section}>
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b-2" style={{ borderBottomColor: barColor }}>
+              Education
+            </h2>
+            {education.filter(hasEduContent).map((edu) => (
               <div key={edu.id} className={resumeSpacing.eduEntry}>
                 <div className="font-semibold text-[#1c1c1c]">{edu.degree}</div>
                 <div className="text-[12px] text-[#4b5563] mt-0.5">
@@ -105,27 +108,25 @@ export function SidebarRightTemplate({ data, accentColor }: { data: ResumeData; 
                   <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>
                 )}
               </div>
-            ))
-          ) : (
-            <p className="text-[13px] text-[#9ca3af] italic">Add your education.</p>
-          )}
-        </section>
+            ))}
+          </section>
+        )}
 
-        <section>
-          <h2 className={resumeSpacing.sectionHeading}>References</h2>
-          <div className={resumeSpacing.refBlock}>
-            {hasRefs ? references!.map((ref, i) => (
-              <div key={i}>
-                <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
-                {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
-                {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
-                {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
-              </div>
-            )) : (
-              <p className="text-[13px] text-[#9ca3af] italic">Add references if needed.</p>
-            )}
-          </div>
-        </section>
+        {hasRefs && (
+          <section>
+            <h2 className={resumeSpacing.sectionHeading}>References</h2>
+            <div className={resumeSpacing.refBlock}>
+              {references!.map((ref, i) => (
+                <div key={i}>
+                  <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
+                  {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
+                  {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
+                  {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       {/* Right: dark sidebar - contact + skills */}
@@ -133,26 +134,26 @@ export function SidebarRightTemplate({ data, accentColor }: { data: ResumeData; 
         <div className="w-8 h-8 rounded bg-white/20 flex items-center justify-center text-[10px] font-bold mb-4" aria-hidden>
           {name ? name.split(/\s+/).map((n) => n[0]).join('').slice(0, 2) : '—'}
         </div>
-        <div className="text-[11px] space-y-1 mb-6">
-          {contact.location || contact.phone || contact.email ? (
-            <>
-              {contact.location && <div>{contact.location}</div>}
-              {contact.phone && <div>{contact.phone}</div>}
-              {contact.email && <div className="break-all">{contact.email}</div>}
-            </>
-          ) : (
-            <span className="opacity-80">Contact details</span>
-          )}
-        </div>
-        <h2 className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-90">Skills</h2>
-        <ul className={`text-[11px] space-y-1 ${sidebarMuted}`}>
-          {skills.filter(Boolean).length > 0 ? skills.filter(Boolean).map((s, i) => (
-            <li key={i} className="flex items-center gap-1.5">
-              <span className="w-1 h-1 rounded-full bg-current opacity-80" aria-hidden />
-              {s}
-            </li>
-          )) : <li className="opacity-80 italic">Add skills</li>}
-        </ul>
+        {hasContactDetails && (
+          <div className="text-[11px] space-y-1 mb-6">
+            {contact.location && <div>{contact.location}</div>}
+            {contact.phone && <div>{contact.phone}</div>}
+            {contact.email && <div className="break-all">{contact.email}</div>}
+          </div>
+        )}
+        {hasSkills && (
+          <>
+            <h2 className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-90">Skills</h2>
+            <ul className={`text-[11px] space-y-1 ${sidebarMuted}`}>
+              {skills.filter(Boolean).map((s, i) => (
+                <li key={i} className="flex items-center gap-1.5">
+                  <span className="w-1 h-1 rounded-full bg-current opacity-80" aria-hidden />
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </aside>
     </div>
   )

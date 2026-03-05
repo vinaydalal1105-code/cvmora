@@ -38,6 +38,8 @@ export function CorporateTemplate({
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
+  const hasSummary = !!(summary?.trim())
+  const hasSkills = skills.filter(Boolean).length > 0
 
   const contactItems = [
     contact.email,
@@ -80,14 +82,12 @@ export function CorporateTemplate({
     >
       {/* Left sidebar – full height so color bar runs top to bottom */}
       <aside className={`w-[28%] max-w-[60mm] border-r ${asideBorder} p-2.5 pt-6 shrink-0 min-h-full self-stretch ${asideBg}`} style={asideStyle}>
-        {contact.photo ? (
+        {contact.photo && (
           <img
             src={contact.photo}
             alt=""
             className={`w-20 h-20 rounded-full object-cover mx-auto mb-2 border-2 ${sidebarLight ? 'border-[#1c1917]/25' : 'border-white/40'}`}
           />
-        ) : (
-          <div className={`w-20 h-20 rounded-full mx-auto mb-2 border-2 border-dashed flex items-center justify-center text-[10px] ${sidebarLight ? 'border-[#1c1917]/25 text-[#1c1917]/70' : 'border-white/40 text-white/70'}`} aria-hidden>Photo</div>
         )}
         <h1 className={`text-xl font-bold tracking-tight mb-0.5 ${nameClass}`}>
           {name || <span className="opacity-70 font-normal">Your name</span>}
@@ -95,59 +95,53 @@ export function CorporateTemplate({
         <p className={`text-[11px] uppercase tracking-wider mb-2 ${jobClass}`}>
           {jobTarget?.trim() || <span className="normal-case opacity-70">Job title</span>}
         </p>
-        <div className="mb-2">
-          <h2 className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${asideTitle}`}>Details</h2>
-          <div className={`text-[12px] space-y-1 ${asideText}`}>
-            {contactItems.length > 0 ? (
-              <>
-                {contact.email && <div>{contact.email}</div>}
-                {contact.phone && <div>{contact.phone}</div>}
-                {contact.address?.trim() && <div>{contact.address.trim()}</div>}
-                {contact.location && <div>{contact.location}</div>}
-                {contact.website && (
-                  <a href={contact.website} className={`block truncate ${asideLink}`}>
-                    {contact.website.replace(/^https?:\/\//, '')}
-                  </a>
-                )}
-                {contact.linkedin && (
-                  <a href={contact.linkedin} className={asideLink + ' block'}>
-                    LinkedIn
-                  </a>
-                )}
-              </>
-            ) : (
-              <div className="opacity-70">Email · Phone · Address</div>
-            )}
+        {contactItems.length > 0 && (
+          <div className="mb-2">
+            <h2 className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${asideTitle}`}>Details</h2>
+            <div className={`text-[12px] space-y-1 ${asideText}`}>
+              {contact.email && <div>{contact.email}</div>}
+              {contact.phone && <div>{contact.phone}</div>}
+              {contact.address?.trim() && <div>{contact.address.trim()}</div>}
+              {contact.location && <div>{contact.location}</div>}
+              {contact.website && (
+                <a href={contact.website} className={`block truncate ${asideLink}`}>
+                  {contact.website.replace(/^https?:\/\//, '')}
+                </a>
+              )}
+              {contact.linkedin && (
+                <a href={contact.linkedin} className={asideLink + ' block'}>
+                  LinkedIn
+                </a>
+              )}
+            </div>
           </div>
-        </div>
-        <div>
-          <h2 className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${asideTitle}`}>Skills</h2>
-          <div className="flex flex-wrap gap-1.5">
-            {skills.filter(Boolean).length > 0 ? (
-              skills.filter(Boolean).map((s, i) => (
+        )}
+        {hasSkills && (
+          <div>
+            <h2 className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${asideTitle}`}>Skills</h2>
+            <div className="flex flex-wrap gap-1.5">
+              {skills.filter(Boolean).map((s, i) => (
                 <span key={i} className={skillTag}>
                   {s}
                 </span>
-              ))
-            ) : (
-              <span className={`text-[11px] opacity-70 ${asideText}`}>Add skills</span>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </aside>
 
-      {/* Main content – always show section structure */}
+      {/* Main content */}
       <div className="flex-1 px-6 pt-6 pb-6 min-w-0">
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
-          <p className={resumeSpacing.summary}>
-            {summary ? summary : <span className="text-[#9ca3af] italic">Add a short summary of your experience and goals.</span>}
-          </p>
-        </section>
+        {hasSummary && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
+            <p className={resumeSpacing.summary}>{summary}</p>
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Employment History</h2>
-          {showExperience ? (
+        {showExperience && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Employment History</h2>
             <div className={resumeSpacing.expWrapper}>
               {experience.filter(hasContent).map((exp) => (
                 <div key={exp.id}>
@@ -171,15 +165,13 @@ export function CorporateTemplate({
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-[13px] text-[#9ca3af] italic">Add your work history and achievements.</p>
-          )}
-        </section>
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Education</h2>
-          {showEducation ? (
-            education.filter(hasEduContent).map((edu) => (
+        {showEducation && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Education</h2>
+            {education.filter(hasEduContent).map((edu) => (
               <div key={edu.id} className={resumeSpacing.eduEntry}>
                 <span className="font-semibold text-[#1c1c1c]">{edu.degree}</span>
                 <span className="text-[#4b5563]"> — {edu.school}</span>
@@ -193,15 +185,13 @@ export function CorporateTemplate({
                   <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>
                 )}
               </div>
-            ))
-          ) : (
-            <p className="text-[13px] text-[#9ca3af] italic">Add degrees and certifications.</p>
-          )}
-        </section>
+            ))}
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>References</h2>
-          {hasRefs ? (
+        {hasRefs && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>References</h2>
             <div className={resumeSpacing.refBlock}>
               {references!.map((ref, i) => (
                 <div key={i}>
@@ -212,10 +202,8 @@ export function CorporateTemplate({
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-[13px] text-[#9ca3af] italic">References available upon request.</p>
-          )}
-        </section>
+          </section>
+        )}
       </div>
     </div>
   )

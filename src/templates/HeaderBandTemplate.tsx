@@ -34,6 +34,8 @@ export function HeaderBandTemplate({ data, accentColor }: { data: ResumeData; ac
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
+  const hasSummary = !!(summary?.trim())
+  const hasSkills = skills.filter(Boolean).length > 0
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
   return (
@@ -43,9 +45,11 @@ export function HeaderBandTemplate({ data, accentColor }: { data: ResumeData; ac
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-col justify-center">
             <h1 className={`text-2xl font-bold tracking-tight ${headerNameClass}`}>
-              {name || ph('Your name')}
+              {name || <span className={headerNameClass}>Your name</span>}
             </h1>
-            <p className={`text-[12px] uppercase tracking-wider mt-0.5 ${headerSubClass}`}>{jobTarget?.trim() || ph('Job title')}</p>
+            <p className={`text-[12px] uppercase tracking-wider mt-0.5 ${headerSubClass}`}>
+              {jobTarget?.trim() || <span className={headerSubClass}>Job title</span>}
+            </p>
           </div>
           <div className={`text-right text-[12px] space-y-0.5 flex flex-col justify-center ${headerContactClass}`}>
             {contact.email || contact.phone || contact.location ? (
@@ -55,21 +59,23 @@ export function HeaderBandTemplate({ data, accentColor }: { data: ResumeData; ac
                 {contact.location && <div>{contact.location}</div>}
               </>
             ) : (
-              <div>{ph('Contact')}</div>
+              <div><span className={headerContactClass}>Contact</span></div>
             )}
           </div>
         </div>
       </header>
 
       <div className="px-8 pt-8 pb-6">
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
-          <p className={resumeSpacing.summary}>{summary || ph('Add a short summary.')}</p>
-        </section>
+        {hasSummary && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
+            <p className={resumeSpacing.summary}>{summary}</p>
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Career Experience</h2>
-          {showExperience ? (
+        {showExperience && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Career Experience</h2>
             <div className={resumeSpacing.expWrapper}>
               {experience.filter(hasContent).map((exp) => (
                 <div key={exp.id}>
@@ -93,15 +99,13 @@ export function HeaderBandTemplate({ data, accentColor }: { data: ResumeData; ac
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-[13px] text-[#9ca3af] italic">Add your work history.</p>
-          )}
-        </section>
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Education</h2>
-          {showEducation ? (
-            education.filter(hasEduContent).map((edu) => (
+        {showEducation && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Education</h2>
+            {education.filter(hasEduContent).map((edu) => (
               <div key={edu.id} className={resumeSpacing.eduEntry}>
                 <span className="font-semibold text-[#1c1c1c]">{edu.degree}</span>
                 <span className="text-[#4b5563]"> — {edu.school}</span>
@@ -112,33 +116,31 @@ export function HeaderBandTemplate({ data, accentColor }: { data: ResumeData; ac
                   </span>
                 )}
               </div>
-            ))
-          ) : (
-            <p className="text-[13px] text-[#9ca3af] italic">Add your education.</p>
-          )}
-        </section>
+            ))}
+          </section>
+        )}
 
-        <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Technical Proficiencies</h2>
-          <p className={resumeSpacing.skills}>
-            {skills.filter(Boolean).length > 0 ? skills.filter(Boolean).join(' · ') : ph('Add your skills')}
-          </p>
-        </section>
+        {hasSkills && (
+          <section className={resumeSpacing.section}>
+            <h2 className={resumeSpacing.sectionHeading}>Technical Proficiencies</h2>
+            <p className={resumeSpacing.skills}>{skills.filter(Boolean).join(' · ')}</p>
+          </section>
+        )}
 
-        <section>
-          <h2 className={resumeSpacing.sectionHeading}>References</h2>
-          <div className={resumeSpacing.refBlock}>
-            {hasRefs ? references!.map((ref, i) => (
-              <div key={i}>
-                {ref.name}
-                {ref.affiliation && `, ${ref.affiliation}`}
-                {ref.email && ` · ${ref.email}`}
-              </div>
-            )) : (
-              <p className="text-[13px] text-[#9ca3af] italic">Add references if needed.</p>
-            )}
-          </div>
-        </section>
+        {hasRefs && (
+          <section>
+            <h2 className={resumeSpacing.sectionHeading}>References</h2>
+            <div className={resumeSpacing.refBlock}>
+              {references!.map((ref, i) => (
+                <div key={i}>
+                  {ref.name}
+                  {ref.affiliation && `, ${ref.affiliation}`}
+                  {ref.email && ` · ${ref.email}`}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   )

@@ -795,6 +795,12 @@ export function TemplateCard({ template, variant, onSelectTemplate }: TemplateCa
                     lastInteractedColorIndexRef.current = i
                     selectedColorIndexRef.current = i
                     setSelectedColorIndex(i)
+                    const hex = ACCENT_COLORS[i]
+                    if (hex && /^#[0-9A-Fa-f]{6}$/.test(hex)) {
+                      try {
+                        sessionStorage.setItem('cvmora_builder_accent', hex)
+                      } catch (_) {}
+                    }
                   }}
                   className={`w-4 h-4 rounded-full border-2 shrink-0 transition-all ${
                     i === selectedColorIndex ? 'border-[#1d1d1f] ring-2 ring-[#1d1d1f]/25' : 'border-[#e5e7eb]'

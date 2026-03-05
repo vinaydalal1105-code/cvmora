@@ -38,14 +38,14 @@ export function TraditionalTemplate({ data }: { data: ResumeData }) {
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
+  const hasSummary = !!(summary?.trim())
+  const hasSkills = skills.filter(Boolean).length > 0
 
   return (
     <div className="traditional-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-sm min-h-full">
       <header className="text-center border-b border-[#e5e7eb] pb-3 mb-4">
-        {contact.photo ? (
+        {contact.photo && (
           <img src={contact.photo} alt="" className="w-20 h-20 rounded-full object-cover mx-auto mb-1 border border-[#e5e7eb]" />
-        ) : (
-          <div className="w-20 h-20 rounded-full border border-dashed border-[#e5e7eb] bg-[#f9fafb] mx-auto mb-1 flex items-center justify-center text-[10px] text-[#9ca3af]" aria-hidden>Photo</div>
         )}
         <h1 className="text-2xl font-bold text-[#1c1c1c] tracking-tight">
           {name || <span className="text-[#9ca3af] font-normal">Your name</span>}
@@ -64,15 +64,15 @@ export function TraditionalTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <SectionBlock title="Profile">
-        <p className={resumeSpacing.summary}>
-          {summary ? summary : <span className="text-[#9ca3af] italic">Add a short summary of your experience and goals.</span>}
-        </p>
-      </SectionBlock>
+      {hasSummary && (
+        <SectionBlock title="Profile">
+          <p className={resumeSpacing.summary}>{summary}</p>
+        </SectionBlock>
+      )}
 
-      <SectionBlock title="Experience">
-        {showExperience ? (
-          experience.filter(hasContent).map((exp) => (
+      {showExperience && (
+        <SectionBlock title="Experience">
+          {experience.filter(hasContent).map((exp) => (
             <div key={exp.id} className={resumeSpacing.expEntry}>
               <div className="flex justify-between items-baseline gap-2 flex-wrap">
                 <span className="font-semibold text-[#1c1c1c]">{exp.jobTitle}</span>
@@ -92,15 +92,13 @@ export function TraditionalTemplate({ data }: { data: ResumeData }) {
                 </ul>
               )}
             </div>
-          ))
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] italic">Add your work history and achievements.</p>
-        )}
-      </SectionBlock>
+          ))}
+        </SectionBlock>
+      )}
 
-      <SectionBlock title="Education">
-        {showEducation ? (
-          education.filter(hasEduContent).map((edu) => (
+      {showEducation && (
+        <SectionBlock title="Education">
+          {education.filter(hasEduContent).map((edu) => (
             <div key={edu.id} className={resumeSpacing.eduEntry}>
               <div className="font-semibold text-[#1c1c1c]">{edu.degree}</div>
               <div className="text-[13px] text-[#4b5563] mt-0.5">
@@ -112,22 +110,18 @@ export function TraditionalTemplate({ data }: { data: ResumeData }) {
                 <p className={resumeSpacing.eduDescription}>{edu.description}</p>
               )}
             </div>
-          ))
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] italic">Add degrees and certifications.</p>
-        )}
-      </SectionBlock>
+          ))}
+        </SectionBlock>
+      )}
 
-      <SectionBlock title="Skills">
-        <p className={resumeSpacing.skills}>
-          {skills.filter(Boolean).length > 0
-            ? skills.filter(Boolean).join(' · ')
-            : <span className="text-[#9ca3af] italic">Add your key skills.</span>}
-        </p>
-      </SectionBlock>
+      {hasSkills && (
+        <SectionBlock title="Skills">
+          <p className={resumeSpacing.skills}>{skills.filter(Boolean).join(' · ')}</p>
+        </SectionBlock>
+      )}
 
-      <SectionBlock title="References">
-        {hasRefs ? (
+      {hasRefs && (
+        <SectionBlock title="References">
           <div className={resumeSpacing.refBlock}>
             {references!.map((ref, i) => (
               <div key={i}>
@@ -138,10 +132,8 @@ export function TraditionalTemplate({ data }: { data: ResumeData }) {
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] italic">References available upon request.</p>
-        )}
-      </SectionBlock>
+        </SectionBlock>
+      )}
     </div>
   )
 }
