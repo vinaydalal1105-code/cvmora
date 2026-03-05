@@ -80,7 +80,7 @@ export default function TemplateShowcase() {
                   </div>
                   <Link
                     to={`/builder?template=${encodeURIComponent(current.id)}`}
-                    className="mt-3 sm:mt-8 w-full max-w-[320px] py-2.5 sm:py-3 rounded-lg bg-[#BFED8D] text-[#1c1917] text-center text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shrink-0"
+                    className="hidden sm:inline-flex mt-3 sm:mt-8 w-full max-w-[320px] py-2.5 sm:py-3 rounded-lg bg-[#BFED8D] text-[#1c1917] text-center text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shrink-0 justify-center"
                   >
                     Use this template
                   </Link>
@@ -100,8 +100,8 @@ export default function TemplateShowcase() {
             </svg>
           </button>
 
-          {/* Mobile: arrows below card */}
-          <div className="flex sm:hidden items-center justify-center gap-6 w-full pt-2">
+          {/* Mobile: arrows below card — hidden on mobile per request */}
+          <div className="hidden sm:flex items-center justify-center gap-6 w-full pt-2">
             <button
               type="button"
               onClick={goPrev}
@@ -125,8 +125,8 @@ export default function TemplateShowcase() {
           </div>
         </div>
 
-        {/* Pagination dots */}
-        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mt-4 sm:mt-8 max-w-full">
+        {/* Pagination dots — hidden on mobile */}
+        <div className="hidden sm:flex flex-wrap justify-center gap-1.5 sm:gap-2 mt-4 sm:mt-8 max-w-full">
           {allTemplates.map((_, i) => (
             <button
               key={i}
@@ -142,7 +142,7 @@ export default function TemplateShowcase() {
           ))}
         </div>
 
-        <div className="text-center mt-6 sm:mt-10">
+        <div className="hidden sm:block text-center mt-6 sm:mt-10">
           <Link
             to="/templates"
             className="inline-flex items-center gap-2 px-5 py-2.5 sm:py-3 rounded-full bg-[#BFED8D] text-[#1c1917] text-sm font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
