@@ -256,16 +256,16 @@ function ResumeBuilderInner() {
             </div>
           </div>
         )}
-        {/* On mobile: stack editor above preview. On md+: side by side */}
+        {/* On mobile: stack editor above preview; editor scrolls inside. On md+: side by side */}
         <div className="flex-1 flex flex-col md:flex-row min-h-0 min-w-0 overflow-hidden">
           {activeTab === 'edit' ? (
             <>
-              <aside className="w-full md:max-w-[420px] flex-none md:border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0 overflow-y-auto md:overflow-y-auto">
-                <div className="flex-1 min-h-0 pb-24">
+              <aside className="w-full md:max-w-[420px] flex-1 min-h-0 md:flex-none md:border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0 overflow-y-auto md:overflow-y-auto">
+                <div className="pb-28">
                   <BuilderStepContent stepIndex={builderStep} />
                 </div>
               </aside>
-              <section className="flex-1 min-w-0 flex flex-col min-h-[50vh] md:min-h-0 bg-[#f5f5f7] border-t md:border-t-0 border-cvmora-ink/8">
+              <section className="flex-1 min-w-0 min-h-[40vh] md:min-h-0 flex flex-col bg-[#f5f5f7] border-t md:border-t-0 border-cvmora-ink/8">
                 <ResumePreview ref={previewRef} showDownloadButtons={false} />
               </section>
             </>

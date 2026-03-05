@@ -25,22 +25,22 @@ export default function TemplateShowcase() {
 
   return (
     <section
-      className="w-full pt-[max(2rem,calc(1rem+env(safe-area-inset-top)))] pb-12 sm:py-20 px-4 sm:px-6"
+      className="w-full pt-[max(1.5rem,calc(0.75rem+env(safe-area-inset-top)))] pb-8 sm:py-20 px-4 sm:px-6"
       style={{
         background:
           "linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 40%, #fef3e8 100%)",
       }}
     >
       <div className="max-w-[1200px] mx-auto">
-        <h2 className="text-2xl sm:text-3xl font-bold text-[#1c1917] text-center mb-2">
+        <h2 className="text-xl sm:text-3xl font-bold text-[#1c1917] text-center mb-1 sm:mb-2">
           Choose your resume template
         </h2>
-        <p className="text-[#78716c] text-center text-sm sm:text-base mb-10">
+        <p className="text-[#78716c] text-center text-sm sm:text-base mb-4 sm:mb-10">
           Browse one by one. Each template is different — find the one that fits
           you.
         </p>
 
-        <div className="relative flex flex-col sm:flex-row items-center justify-center min-h-[500px] sm:min-h-[580px] gap-4">
+        <div className="relative flex flex-col sm:flex-row items-center justify-center min-h-0 sm:min-h-[580px] gap-3 sm:gap-4">
           {/* Desktop: arrows on sides */}
           <button
             type="button"
@@ -54,13 +54,13 @@ export default function TemplateShowcase() {
           </button>
 
           <div className="flex flex-col items-center px-2 sm:px-4 w-full max-w-[580px] min-w-0 sm:min-w-[400px] flex-shrink-0">
-            <div className="text-[#1c1917] font-bold text-lg sm:text-xl mb-1">
+            <div className="text-[#1c1917] font-bold text-base sm:text-xl mb-0.5 sm:mb-1">
               {current.name}
             </div>
-            <p className="text-[#78716c] text-xs sm:text-sm mb-4 sm:mb-6">
+            <p className="text-[#78716c] text-xs sm:text-sm mb-2 sm:mb-6">
               {current.users ? `${current.users} chose this template` : "500+ users chose this template"}
             </p>
-            <div className="relative w-full flex flex-col items-center justify-start overflow-visible min-h-[420px] sm:min-h-[680px]">
+            <div className="relative w-full flex flex-col items-center justify-start overflow-visible min-h-[260px] sm:min-h-[680px]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={current.id}
@@ -80,7 +80,7 @@ export default function TemplateShowcase() {
                   </div>
                   <Link
                     to={`/builder?template=${encodeURIComponent(current.id)}`}
-                    className="mt-6 sm:mt-8 w-full max-w-[320px] py-3 rounded-lg bg-[#BFED8D] text-[#1c1917] text-center text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shrink-0"
+                    className="mt-3 sm:mt-8 w-full max-w-[320px] py-2.5 sm:py-3 rounded-lg bg-[#BFED8D] text-[#1c1917] text-center text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shrink-0"
                   >
                     Use this template
                   </Link>
@@ -101,7 +101,7 @@ export default function TemplateShowcase() {
           </button>
 
           {/* Mobile: arrows below card */}
-          <div className="flex sm:hidden items-center justify-center gap-6 w-full pt-4">
+          <div className="flex sm:hidden items-center justify-center gap-6 w-full pt-2">
             <button
               type="button"
               onClick={goPrev}
@@ -125,8 +125,8 @@ export default function TemplateShowcase() {
           </div>
         </div>
 
-        {/* Pagination dots — clear gap above so "Use this template" doesn't cover them */}
-        <div className="flex flex-wrap justify-center gap-2 mt-6 sm:mt-8">
+        {/* Pagination dots */}
+        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mt-4 sm:mt-8 max-w-full">
           {allTemplates.map((_, i) => (
             <button
               key={i}
@@ -142,10 +142,10 @@ export default function TemplateShowcase() {
           ))}
         </div>
 
-        <div className="text-center mt-10">
+        <div className="text-center mt-6 sm:mt-10">
           <Link
             to="/templates"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#BFED8D] text-[#1c1917] text-sm font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 sm:py-3 rounded-full bg-[#BFED8D] text-[#1c1917] text-sm font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
           >
             View all templates
             <svg

@@ -399,8 +399,8 @@ export function Layout() {
         }}
         onMouseLeave={() => setOpenDropdown(null)}
       >
-        <header className="w-full max-w-[1400px] mx-auto rounded-full bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-[#e5e7eb]/80">
-          <div className="flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-8 py-2 sm:py-2.5 min-h-[44px] sm:min-h-0">
+        <header className="w-full max-w-[1400px] mx-auto rounded-full bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-[#e5e7eb]/80 overflow-visible">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 pl-3 pr-4 sm:px-8 py-2 sm:py-2.5 min-h-[44px] sm:min-h-0">
             <Logo />
 
             {/* Desktop nav: hidden on small screens */}
@@ -443,7 +443,7 @@ export function Layout() {
               ) : (
                 <>
                   <Link to="/login" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center rounded-full lg:min-h-0">Sign in</Link>
-                  <Link to="/builder" className="px-4 py-2.5 min-h-[44px] flex items-center rounded-full bg-[#BFED8D] text-[#1c1917] text-[15px] font-medium border border-[#a8e070] shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors">Start building</Link>
+                  <Link to="/builder" className="px-3 py-2.5 min-h-[44px] flex items-center rounded-full bg-[#BFED8D] text-[#1c1917] text-[14px] sm:text-[15px] font-medium border border-[#a8e070] shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors whitespace-nowrap shrink-0">Start building</Link>
                 </>
               )}
             </div>
