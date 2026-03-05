@@ -25,7 +25,7 @@ export default function TemplateShowcase() {
 
   return (
     <section
-      className="w-full pt-[max(5rem,calc(4rem+env(safe-area-inset-top)))] pb-16 sm:py-20 px-4 sm:px-6"
+      className="w-full pt-[max(2rem,calc(1rem+env(safe-area-inset-top)))] pb-12 sm:py-20 px-4 sm:px-6"
       style={{
         background:
           "linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 40%, #fef3e8 100%)",
@@ -60,7 +60,7 @@ export default function TemplateShowcase() {
             <p className="text-[#78716c] text-xs sm:text-sm mb-4 sm:mb-6">
               {current.users ? `${current.users} chose this template` : "500+ users chose this template"}
             </p>
-            <div className="relative w-full flex justify-center overflow-visible min-h-[420px] sm:min-h-[680px]">
+            <div className="relative w-full flex flex-col items-center justify-start overflow-visible min-h-[420px] sm:min-h-[680px]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={current.id}
@@ -68,7 +68,7 @@ export default function TemplateShowcase() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.6, ease: [0.33, 0, 0.2, 1] }}
-                  className="absolute inset-0 flex flex-col items-center justify-start w-full overflow-visible"
+                  className="flex flex-col items-center justify-start w-full overflow-visible"
                 >
                   <div
                     className="flex justify-center w-full overflow-visible origin-top scale-75 sm:scale-[1.28]"
@@ -80,7 +80,7 @@ export default function TemplateShowcase() {
                   </div>
                   <Link
                     to={`/builder?template=${encodeURIComponent(current.id)}`}
-                    className="mt-6 sm:mt-8 w-full max-w-[320px] py-3 min-h-[44px] flex items-center justify-center rounded-lg bg-[#BFED8D] text-[#1c1917] text-center text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] active:bg-[#b0e87d] transition-colors [-webkit-tap-highlight-color:transparent]"
+                    className="mt-6 sm:mt-8 w-full max-w-[320px] py-3 rounded-lg bg-[#BFED8D] text-[#1c1917] text-center text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shrink-0"
                   >
                     Use this template
                   </Link>
@@ -101,7 +101,7 @@ export default function TemplateShowcase() {
           </button>
 
           {/* Mobile: arrows below card */}
-          <div className="flex sm:hidden items-center justify-center gap-6 w-full pt-2">
+          <div className="flex sm:hidden items-center justify-center gap-6 w-full pt-4">
             <button
               type="button"
               onClick={goPrev}
@@ -125,8 +125,8 @@ export default function TemplateShowcase() {
           </div>
         </div>
 
-        {/* Pagination dots */}
-        <div className="flex flex-wrap justify-center gap-2 mt-8">
+        {/* Pagination dots — clear gap above so "Use this template" doesn't cover them */}
+        <div className="flex flex-wrap justify-center gap-2 mt-6 sm:mt-8">
           {allTemplates.map((_, i) => (
             <button
               key={i}
@@ -145,7 +145,7 @@ export default function TemplateShowcase() {
         <div className="text-center mt-10">
           <Link
             to="/templates"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 min-h-[44px] rounded-full bg-[#BFED8D] text-[#1c1917] text-sm font-semibold border border-[#a8e070] hover:bg-[#b0e87d] active:bg-[#b0e87d] transition-colors [-webkit-tap-highlight-color:transparent]"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#BFED8D] text-[#1c1917] text-sm font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
           >
             View all templates
             <svg

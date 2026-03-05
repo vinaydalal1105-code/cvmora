@@ -71,7 +71,7 @@ function PersonalDetailsStep() {
   }
 
   return (
-    <div className="px-4 py-4 pb-8">
+    <div className="px-4 py-4">
       <h1 className="text-lg font-bold text-cvmora-ink tracking-tight mb-1">Personal Details</h1>
       <p className="text-[0.8125rem] text-cvmora-muted mb-6">
         Users who added phone number and email received 64% more positive feedback from recruiters.
@@ -129,7 +129,7 @@ function PersonalDetailsStep() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3 mb-3">
         <Input
           label="First Name"
           value={c.firstName ?? ''}
@@ -143,7 +143,7 @@ function PersonalDetailsStep() {
           placeholder="Last name"
         />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3 mb-3">
         <Input
           label="Email*"
           value={c.email}
@@ -164,7 +164,7 @@ function PersonalDetailsStep() {
         onChange={(v) => updateContact({ address: v })}
         placeholder="Street address"
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3 mb-3">
         <Input
           label="City, State"
           value={(c.city ?? '') + (c.state ? ', ' + (c.state ?? '') : '')}
@@ -509,8 +509,9 @@ export function BuilderStepFooter({
   const handleMainAction = isLast && onFinish ? onFinish : onNext
 
   return (
-    <footer className="flex-none flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-between gap-3 px-3 sm:px-4 py-3 border-t border-cvmora-ink/8 bg-white">
-      <div className="flex items-center gap-2 sm:gap-3 min-w-0 w-full sm:w-auto sm:order-1 justify-between">
+    <footer className="flex-none flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 px-3 sm:px-4 py-3 border-t border-cvmora-ink/8 bg-white">
+      {/* Top row on mobile: Terms + Back (left), Next (right). Bottom row: dots */}
+      <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 min-w-0 order-1 sm:order-1">
         <p className="text-[0.6875rem] text-cvmora-ink/50 shrink-0">
           <a href="/privacy" className="text-[var(--color-primary)] hover:underline py-2">Terms</a> & <a href="/privacy" className="text-[var(--color-primary)] hover:underline py-2">Privacy</a>
         </p>
@@ -524,7 +525,7 @@ export function BuilderStepFooter({
           </button>
         )}
       </div>
-      <div className="flex items-center justify-center gap-2 shrink-0 w-full sm:w-auto sm:order-2">
+      <div className="flex items-center justify-center gap-2 shrink-0 order-3 sm:order-2">
         {Array.from({ length: total }, (_, i) => (
           <button
             key={i}
@@ -537,7 +538,7 @@ export function BuilderStepFooter({
           />
         ))}
       </div>
-      <div className="flex items-center justify-end sm:justify-end gap-2 shrink-0 w-full sm:w-auto sm:order-3">
+      <div className="flex items-center justify-end gap-2 shrink-0 order-2 sm:order-3">
         <span className="text-[0.75rem] text-cvmora-ink/60 tabular-nums hidden sm:inline">{stepIndex + 1}/{total}</span>
         <button
           type="button"

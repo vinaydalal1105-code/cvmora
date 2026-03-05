@@ -178,15 +178,15 @@ function ResumeBuilderInner() {
   }
 
   return (
-    <div className="h-full flex flex-col min-h-0 pt-[env(safe-area-inset-top)]">
+    <div className="h-full flex flex-col min-h-0">
       {/* Single minimal bar: logo, template, Edit|Customize, score, actions */}
-      <header className="flex-none flex flex-wrap items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-2.5 border-b border-cvmora-ink/8 bg-white shrink-0 min-h-[52px]">
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+      <header className="flex-none flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-2.5 border-b border-cvmora-ink/8 bg-white shrink-0 min-h-[52px]">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 overflow-hidden">
           <a href="/" className="flex items-center gap-2 shrink-0 text-cvmora-ink no-underline min-h-[44px] items-center">
             <span className="w-8 h-8 rounded-xl bg-[#f97316] flex items-center justify-center text-white font-semibold text-sm">C</span>
             <span className="text-base font-semibold tracking-tight hidden sm:inline">Cvmora</span>
           </a>
-          <div className="flex items-center gap-0.5 border-l border-cvmora-ink/10 pl-2 sm:pl-4">
+          <div className="flex items-center gap-0.5 border-l border-cvmora-ink/10 pl-2 sm:pl-4 shrink-0">
             <button
               type="button"
               onClick={() => setActiveTab('edit')}
@@ -202,9 +202,10 @@ function ResumeBuilderInner() {
               Customize
             </button>
           </div>
-          <div className="hidden sm:flex items-center gap-2 text-[0.75rem] shrink-0">
-            <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 font-medium">{scoreInfo.score}%</span>
-            <span className="text-green-700 font-medium truncate max-w-[100px] sm:max-w-[140px]">{scoreInfo.suggestion}</span>
+          {/* Score/suggestion: only on md+ to avoid cramped overlap on mobile */}
+          <div className="hidden md:flex items-center gap-2 text-[0.75rem] shrink-0 overflow-hidden">
+            <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 font-medium whitespace-nowrap">{scoreInfo.score}%</span>
+            <span className="text-green-700 font-medium truncate max-w-[120px] lg:max-w-[140px]" title={scoreInfo.suggestion}>{scoreInfo.suggestion}</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -260,7 +261,7 @@ function ResumeBuilderInner() {
           {activeTab === 'edit' ? (
             <>
               <aside className="w-full md:max-w-[420px] flex-none md:border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0 overflow-y-auto md:overflow-y-auto">
-                <div className="flex-1 min-h-0 pb-28">
+                <div className="flex-1 min-h-0 pb-24">
                   <BuilderStepContent stepIndex={builderStep} />
                 </div>
               </aside>
