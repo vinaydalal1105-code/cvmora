@@ -32,10 +32,11 @@ export default function TemplateShowcase() {
       }}
     >
       <div className="max-w-[1200px] mx-auto">
-        <h2 className="text-xl sm:text-3xl font-bold text-[#1c1917] text-center mb-1 sm:mb-2">
+        {/* Hidden on mobile: show only template preview on small screens */}
+        <h2 className="hidden sm:block text-xl sm:text-3xl font-bold text-[#1c1917] text-center mb-1 sm:mb-2">
           Choose your resume template
         </h2>
-        <p className="text-[#78716c] text-center text-sm sm:text-base mb-4 sm:mb-10">
+        <p className="hidden sm:block text-[#78716c] text-center text-sm sm:text-base mb-4 sm:mb-10">
           Browse one by one. Each template is different — find the one that fits
           you.
         </p>
@@ -54,10 +55,10 @@ export default function TemplateShowcase() {
           </button>
 
           <div className="flex flex-col items-center px-2 sm:px-4 w-full max-w-[580px] min-w-0 sm:min-w-[400px] flex-shrink-0">
-            <div className="text-[#1c1917] font-bold text-base sm:text-xl mb-0.5 sm:mb-1">
+            <div className="hidden sm:block text-[#1c1917] font-bold text-base sm:text-xl mb-0.5 sm:mb-1">
               {current.name}
             </div>
-            <p className="text-[#78716c] text-xs sm:text-sm mb-2 sm:mb-6">
+            <p className="hidden sm:block text-[#78716c] text-xs sm:text-sm mb-2 sm:mb-6">
               {current.users ? `${current.users} chose this template` : "500+ users chose this template"}
             </p>
             <div className="relative w-full flex flex-col items-center justify-start overflow-visible min-h-[260px] sm:min-h-[680px]">
@@ -70,14 +71,16 @@ export default function TemplateShowcase() {
                   transition={{ duration: 0.6, ease: [0.33, 0, 0.2, 1] }}
                   className="flex flex-col items-center justify-start w-full overflow-visible"
                 >
-                  <div
-                    className="flex justify-center w-full overflow-visible origin-top scale-75 sm:scale-[1.28]"
+                  {/* On mobile: card is tappable to open builder; on desktop card is non-clickable, use button below */}
+                  <Link
+                    to={`/builder?template=${encodeURIComponent(current.id)}`}
+                    className="flex justify-center w-full overflow-visible origin-top scale-75 sm:scale-[1.28] pointer-events-auto sm:pointer-events-none"
                   >
                     <TemplateCard
                       template={current}
                       variant="hero"
                     />
-                  </div>
+                  </Link>
                   <Link
                     to={`/builder?template=${encodeURIComponent(current.id)}`}
                     className="hidden sm:inline-flex mt-3 sm:mt-8 w-full max-w-[320px] py-2.5 sm:py-3 rounded-lg bg-[#BFED8D] text-[#1c1917] text-center text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shrink-0 justify-center"
@@ -100,8 +103,8 @@ export default function TemplateShowcase() {
             </svg>
           </button>
 
-          {/* Mobile: arrows below card — hidden on mobile per request */}
-          <div className="hidden sm:flex items-center justify-center gap-6 w-full pt-2">
+          {/* Mobile arrows removed on mobile; desktop uses side arrows */}
+          <div className="hidden items-center justify-center gap-6 w-full pt-2">
             <button
               type="button"
               onClick={goPrev}
