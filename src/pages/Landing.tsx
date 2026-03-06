@@ -659,6 +659,7 @@ export function Landing() {
               </Link>
               <Link
                 to="/builder"
+                state={{ showUpload: true }}
                 className="btn-primary w-full sm:w-auto justify-center px-8 py-4 rounded-full border border-[#e7e5e4] text-[#1c1917] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors font-medium"
               >
                 Upload my resume

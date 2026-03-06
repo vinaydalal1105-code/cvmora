@@ -26,13 +26,50 @@ export async function api<T>(
   return data as T
 }
 
-export async function apiUploadResume(file: File): Promise<{ text: string; pages?: number }> {
-  const token = getToken()
+/** Parsed resume structure returned by the server when parsing PDF/Word */
+export interface ParsedResumeData {
+  contact?: Partial<{
+    fullName: string
+    email: string
+    phone: string
+    location: string
+    address: string
+    city: string
+    state: string
+    country: string
+    website: string
+    linkedin: string
+  }>
+  summary?: string
+  experience?: Array<{
+    id: string
+    jobTitle: string
+    company: string
+    location: string
+    startDate: string
+    endDate: string
+    current: boolean
+    description: string
+  }>
+  education?: Array<{
+    id: string
+    degree: string
+    school: string
+    location: string
+    startDate: string
+    endDate: string
+    description: string
+  }>
+  skills?: string[]
+}
+
+export async function apiUploadResume(
+  file: File
+): Promise<{ text: string; pages?: number; data?: ParsedResumeData | null }> {
   const form = new FormData()
   form.append('file', file)
   const res = await fetch(API + '/upload/resume', {
     method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: form,
   })
   const data = await res.json()

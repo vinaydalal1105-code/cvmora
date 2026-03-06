@@ -3,6 +3,10 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
+    { "source": "/api/(?<path>.*)", "destination": "/api?path=$path" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  ],
+  "env": {
+    "SQLITE_PATH": "/tmp/cvmora.db"
+  }
 }

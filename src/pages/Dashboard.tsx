@@ -30,15 +30,20 @@ export function Dashboard() {
 
   useEffect(() => {
     if (!isAuthenticated) return
+    setError('')
     Promise.all([
-      api<ResumeMeta[]>('/resumes').catch(() => []),
-      api<CoverLetterMeta[]>('/cover-letters').catch(() => []),
+      api<ResumeMeta[]>('/resumes').catch((err) => {
+        console.error('Failed to load resumes:', err)
+        setError('Couldn’t load your resumes. Try signing in again or refresh the page.')
+        return [] as ResumeMeta[]
+      }),
+      api<CoverLetterMeta[]>('/cover-letters').catch(() => [] as CoverLetterMeta[]),
     ])
       .then(([r, c]) => {
         setResumes(Array.isArray(r) ? r : [])
         setCoverLetters(Array.isArray(c) ? c : [])
       })
-      .catch(() => setError('Failed to load'))
+      .catch(() => setError('Couldn’t load your resumes. Try signing in again or refresh the page.'))
       .finally(() => setLoading(false))
   }, [isAuthenticated])
 

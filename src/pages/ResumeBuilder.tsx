@@ -130,19 +130,23 @@ function ResumeBuilderInner() {
       .finally(() => setLoading(false))
   }, [id, isAuthenticated, loadData, setTemplate, navigate])
 
-  const handleSave = async () => {
-    if (!isAuthenticated) {
-      navigate('/login')
-      return
-    }
+  const dataRef = useRef(data)
+  const templateRef = useRef(template)
+  dataRef.current = data
+  templateRef.current = template
+
+  const saveResume = async () => {
+    if (!isAuthenticated) return
+    const d = dataRef.current
+    const tpl = templateRef.current
     setSaving(true)
     try {
       if (id) {
-        await api(`/resumes/${id}`, { method: 'PUT', body: { data, template_id: template } })
+        await api(`/resumes/${id}`, { method: 'PUT', body: { data: d, template_id: tpl } })
       } else {
         const created = await api<{ id: number }>('/resumes', {
           method: 'POST',
-          body: { title: data.contact.fullName || 'My Resume', data, template_id: template },
+          body: { title: d.contact.fullName || 'My Resume', data: d, template_id: tpl },
         })
         navigate(`/builder/${created.id}`, { replace: true })
       }
@@ -153,14 +157,55 @@ function ResumeBuilderInner() {
     }
   }
 
+  const handleSave = () => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    saveResume()
+  }
+
+  // Auto-save for logged-in users so resumes are stored and show on dashboard
+  const hasContent =
+    (data.contact?.fullName || '').trim() ||
+    (data.contact?.email || '').trim() ||
+    (data.summary || '').trim() ||
+    data.experience?.some((e) => (e.jobTitle || e.company || e.description || '').trim()) ||
+    data.education?.some((e) => (e.degree || e.school || e.description || '').trim()) ||
+    (data.skills?.length ?? 0) > 0
+  useEffect(() => {
+    if (!isAuthenticated || !hasContent || saving) return
+    const t = setTimeout(() => saveResume(), 2500)
+    return () => clearTimeout(t)
+  }, [data, template, isAuthenticated, saving, id])
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setUploadError('')
     setUploading(true)
     try {
-      const { text } = await apiUploadResume(file)
-      if (text) loadData({ ...defaultResume, summary: text.slice(0, 2000) })
+      const { text, data: parsed } = await apiUploadResume(file)
+      if (parsed && (parsed.summary || parsed.contact?.fullName || parsed.experience?.length || parsed.education?.length || parsed.skills?.length)) {
+        const contactOverrides = parsed.contact
+          ? Object.fromEntries(
+              Object.entries(parsed.contact).filter(([, v]) => v != null && v !== '')
+            ) as Partial<ResumeData['contact']>
+          : {}
+        const next: ResumeData = {
+          ...defaultResume,
+          contact: { ...defaultResume.contact, ...contactOverrides },
+          summary: (parsed.summary && parsed.summary.trim()) ? parsed.summary : defaultResume.summary,
+          experience: parsed.experience?.length ? parsed.experience : defaultResume.experience,
+          education: parsed.education?.length ? parsed.education : defaultResume.education,
+          skills: parsed.skills?.length ? parsed.skills : defaultResume.skills,
+        }
+        if (!next.experience.length) next.experience = [...defaultResume.experience]
+        if (!next.education.length) next.education = [...defaultResume.education]
+        loadData(next)
+      } else if (text) {
+        loadData({ ...defaultResume, summary: text.slice(0, 4000) })
+      }
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
@@ -210,8 +255,8 @@ function ResumeBuilderInner() {
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <label className="cursor-pointer flex items-center min-h-[44px]">
-            <input ref={uploadInputRef} type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
-            <span className="text-[14px] sm:text-[16px] font-medium text-[#f97316] hover:opacity-80 px-2.5 py-2 rounded-md hover:bg-black/5 active:bg-black/10">{uploading ? '…' : 'Upload PDF'}</span>
+            <input ref={uploadInputRef} type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={handleUpload} disabled={uploading} />
+            <span className="text-[14px] sm:text-[16px] font-medium text-[#f97316] hover:opacity-80 px-2.5 py-2 rounded-md hover:bg-black/5 active:bg-black/10">{uploading ? '…' : 'Upload PDF or Word'}</span>
           </label>
           {uploadError && <span className="text-[0.6875rem] text-red-600" title={uploadError}>Failed</span>}
           {isAuthenticated ? (

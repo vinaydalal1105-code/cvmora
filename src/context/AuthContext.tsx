@@ -13,7 +13,8 @@ interface AuthContextValue {
   token: string | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, name?: string) => Promise<void>
+  register: (email: string, password: string, name?: string, confirmPassword?: string) => Promise<{ needVerification?: boolean; email?: string } | void>
+  completeOAuthLogin: (token: string) => Promise<void>
   logout: () => void
   isAuthenticated: boolean
 }
@@ -53,12 +54,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [persist])
 
   const register = useCallback(
-    async (email: string, password: string, name?: string) => {
-      const { user: u, token: t } = await api<{ user: User; token: string }>('/auth/register', {
+    async (email: string, password: string, name?: string, confirmPassword?: string) => {
+      const res = await api<{ user?: User; token?: string; needVerification?: boolean; email?: string }>('/auth/register', {
         method: 'POST',
-        body: { email, password, name },
+        body: { email, password, name, confirmPassword },
       })
-      persist(t, u)
+      if (res.needVerification && res.email) {
+        return { needVerification: true, email: res.email }
+      }
+      if (res.user && res.token) {
+        persist(res.token, res.user)
+      }
     },
     [persist]
   )
@@ -66,6 +72,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     persist(null, null)
   }, [persist])
+
+  const completeOAuthLogin = useCallback(
+    async (token: string) => {
+      const API = '/api'
+      const res = await fetch(API + '/auth/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error('Failed to load user')
+      const user = (await res.json()) as User
+      persist(token, user)
+    },
+    [persist]
+  )
 
   useEffect(() => {
     setLoading(false)
@@ -77,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     login,
     register,
+    completeOAuthLogin,
     logout,
     isAuthenticated: !!token && !!user,
   }

@@ -4,6 +4,9 @@ import TemplateShowcase from './components/TemplateShowcase'
 import { Landing } from './pages/Landing'
 import { Login } from './pages/Login'
 import { SignUp } from './pages/SignUp'
+import { ForgotPassword } from './pages/ForgotPassword'
+import { ResetPassword } from './pages/ResetPassword'
+import { AuthCallback } from './pages/AuthCallback'
 import { Dashboard } from './pages/Dashboard'
 import { ResumeBuilder } from './pages/ResumeBuilder'
 import { CoverLetterBuilder } from './pages/CoverLetterBuilder'
@@ -31,6 +34,9 @@ function App() {
           <Route index element={<><Landing /><TemplateShowcase /></>} />
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<SignUp />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="auth/callback" element={<AuthCallback />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="builder" element={<ResumeBuilder />} />
           <Route path="builder/:id" element={<ResumeBuilder />} />

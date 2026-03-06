@@ -437,7 +437,7 @@ export function Layout() {
               {isAuthenticated ? (
                 <>
                   <Link to="/dashboard" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center lg:min-h-0">Dashboard</Link>
-                  <span className="text-xs text-[#78716c] hidden lg:inline max-w-[120px] truncate" title={user?.email ?? ''}>{user?.email}</span>
+                  <span className="text-xs text-[#78716c] hidden lg:inline max-w-[120px] truncate" title={(user?.name || user?.email) ?? ''}>{user?.name || user?.email}</span>
                   <button type="button" onClick={handleLogout} className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center lg:min-h-0">Sign out</button>
                 </>
               ) : (
