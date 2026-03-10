@@ -34,14 +34,14 @@ if (process.env.VERCEL !== '1') {
 
 import express from 'express'
 import cors from 'cors'
-import { register, login, verifyToken, getUserById, verifyEmailToken, setUserVerified, createPasswordResetToken, verifyPasswordResetToken, updatePassword } from './auth.js'
+import { register, login, verifyToken, getUserById, verifyEmailToken, setUserVerified, createPasswordResetToken, verifyPasswordResetToken, updatePassword, updateUserProfile } from './auth.js'
 import { sendVerificationEmail, sendPasswordResetEmail } from './mail.js'
 import { oauthRouter } from './routes/oauth.js'
 import { resumesRouter } from './routes/resumes.js'
 import { coverLettersRouter } from './routes/coverLetters.js'
 import { uploadRouter } from './routes/upload.js'
 import { jobsRouter } from './routes/jobs.js'
-import { db } from './db.js'
+import { getUserIdByEmail } from './db.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -49,12 +49,12 @@ const PORT = process.env.PORT || 3001
 app.use(cors({ origin: true, credentials: true }))
 app.use(express.json({ limit: '5mb' }))
 
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
   const { email, password, name, confirmPassword } = req.body || {}
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' })
   if (password !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match' })
   if (String(password).length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' })
-  const result = register(email, password, name)
+  const result = await register(email, password, name)
   if (result.error) return res.status(400).json({ error: result.error })
   const apiUrl = (process.env.API_URL || `http://localhost:${PORT}`).replace(/\/$/, '')
   const verificationLink = `${apiUrl}/api/auth/verify-email?token=${encodeURIComponent(result.verificationToken)}`
@@ -64,36 +64,36 @@ app.post('/api/auth/register', (req, res) => {
   res.json({ needVerification: true, email: result.email })
 })
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body || {}
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' })
-  const result = login(email, password)
+  const result = await login(email, password)
   if (result.error) return res.status(401).json({ error: result.error })
   res.json(result)
 })
 
-app.get('/api/auth/verify-email', (req, res) => {
+app.get('/api/auth/verify-email', async (req, res) => {
   const token = req.query.token
   const frontend = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '')
   if (!token) return res.redirect(frontend + '/login?error=missing_token')
   const userId = verifyEmailToken(String(token))
   if (!userId) return res.redirect(frontend + '/login?error=invalid_or_expired_link')
-  setUserVerified(userId)
+  await setUserVerified(userId)
   res.redirect(frontend + '/login?verified=1')
 })
 
-app.post('/api/auth/forgot-password', (req, res) => {
+app.post('/api/auth/forgot-password', async (req, res) => {
   const { email } = req.body || {}
   const frontend = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '')
   if (!email || typeof email !== 'string') {
     return res.status(400).json({ error: 'Email is required' })
   }
   try {
-    const user = db.prepare('SELECT id, email FROM users WHERE email = ?').get(email.trim())
-    if (user) {
-      const token = createPasswordResetToken(user.id)
+    const userId = await getUserIdByEmail(email.trim())
+    if (userId) {
+      const token = createPasswordResetToken(userId)
       const resetLink = `${frontend}/reset-password?token=${encodeURIComponent(token)}`
-      sendPasswordResetEmail(user.email, resetLink).catch((err) =>
+      sendPasswordResetEmail(email.trim(), resetLink).catch((err) =>
         console.error('[mail] Password reset email failed:', err)
       )
     }
@@ -104,7 +104,7 @@ app.post('/api/auth/forgot-password', (req, res) => {
   }
 })
 
-app.post('/api/auth/reset-password', (req, res) => {
+app.post('/api/auth/reset-password', async (req, res) => {
   const { token, newPassword, confirmPassword } = req.body || {}
   if (!token) return res.status(400).json({ error: 'Reset token is required' })
   if (!newPassword || newPassword.length < 6) {
@@ -115,17 +115,29 @@ app.post('/api/auth/reset-password', (req, res) => {
   }
   const userId = verifyPasswordResetToken(String(token))
   if (!userId) return res.status(400).json({ error: 'Invalid or expired reset link. Request a new one.' })
-  updatePassword(userId, newPassword)
+  await updatePassword(userId, newPassword)
   res.json({ message: 'Password updated. You can sign in now.' })
 })
 
-app.get('/api/auth/me', (req, res) => {
+app.get('/api/auth/me', async (req, res) => {
   const auth = req.headers.authorization
   const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null
   if (!token) return res.status(401).json({ error: 'Not authenticated' })
   const userId = verifyToken(token)
   if (!userId) return res.status(401).json({ error: 'Invalid or expired token' })
-  const user = getUserById(userId)
+  const user = await getUserById(userId)
+  if (!user) return res.status(401).json({ error: 'User not found' })
+  res.json(user)
+})
+
+app.patch('/api/auth/me', async (req, res) => {
+  const auth = req.headers.authorization
+  const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null
+  if (!token) return res.status(401).json({ error: 'Not authenticated' })
+  const userId = verifyToken(token)
+  if (!userId) return res.status(401).json({ error: 'Invalid or expired token' })
+  await updateUserProfile(userId, req.body || {})
+  const user = await getUserById(userId)
   if (!user) return res.status(401).json({ error: 'User not found' })
   res.json(user)
 })

@@ -3,7 +3,9 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/(?<path>.*)", "destination": "/api?path=$path" },
+    { "source": "/api/auth/google/callback", "destination": "/api/auth/google/callback" },
+    { "source": "/api/auth/linkedin/callback", "destination": "/api/auth/linkedin/callback" },
+    { "source": "/api/(.*)", "destination": "/api?path=$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "env": {

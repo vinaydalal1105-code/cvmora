@@ -21,12 +21,20 @@ In the Vercel project (**Settings → Environment Variables**), set these for **
 | `LINKEDIN_CLIENT_ID` | LinkedIn OAuth app ID (optional) | |
 | `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth secret (optional) | |
 | `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` | For verification & password-reset emails (optional) | e.g. Gmail SMTP |
-| `SQLITE_PATH` | Optional; defaults to `/tmp/cvmora.db` on Vercel | `/tmp/cvmora.db` |
+| `DATABASE_URL` | **Recommended for production.** Neon Postgres connection string (from Vercel Storage → Neon). When set, the app uses Postgres instead of ephemeral SQLite so Google sign-in and user data persist. | (from Neon integration) |
+| `SQLITE_PATH` | Optional when not using Postgres; defaults to `/tmp/cvmora.db` on Vercel | `/tmp/cvmora.db` |
 
 **OAuth redirect URIs** (in Google/LinkedIn consoles):
 
 - Google: `https://cvmora.com/api/auth/google/callback`
 - LinkedIn: `https://cvmora.com/api/auth/linkedin/callback`
+
+**Google sign-in shows “Unauthorized” or fails?**
+
+1. In [Google Cloud Console](https://console.cloud.google.com/) → **APIs & Services** → **Credentials** → open your **OAuth 2.0 Client ID** (Web application).
+2. Under **Authorized redirect URIs**, add exactly: `https://cvmora.com/api/auth/google/callback` (no trailing slash).
+3. In Vercel, set **API_URL** and **FRONTEND_URL** to `https://cvmora.com` for Production.
+4. Redeploy after changing env vars or redirect URIs.
 
 ## Database on Vercel
 

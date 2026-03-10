@@ -1,6 +1,6 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, truncateForPreview } from './resumeSpacing'
 
 function isLightBg(hex: string): boolean {
   const h = String(hex).replace(/^#/, '').trim()
@@ -41,7 +41,7 @@ export function BoldTemplate({ data, accentColor }: { data: ResumeData; accentCo
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
   return (
-    <div className="bold-template bg-white text-[#1a1a1a] min-h-0 max-w-[210mm] mx-auto font-sans text-sm overflow-visible">
+    <div className="bold-template bg-white text-[#1a1a1a] min-h-0 max-w-[210mm] mx-auto font-sans text-sm overflow-visible rounded-t-lg">
       {/* Full-width dark header */}
       <header
         className="relative px-8 py-5 flex items-center justify-between gap-4 rounded-t-lg"
@@ -84,7 +84,7 @@ export function BoldTemplate({ data, accentColor }: { data: ResumeData; accentCo
         {hasSummary && (
           <section className={resumeSpacing.section}>
             <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
-            <p className={resumeSpacing.summary}>{summary}</p>
+            <p className={resumeSpacing.summary}>{truncateForPreview(summary)}</p>
           </section>
         )}
 
@@ -131,6 +131,13 @@ export function BoldTemplate({ data, accentColor }: { data: ResumeData; accentCo
                     {' '}
                     · {[edu.location, `${edu.startDate} – ${edu.endDate}`].filter(Boolean).join(' · ')}
                   </span>
+                )}
+                {edu.description && (
+                  <ul className={resumeSpacing.bulletList}>
+                    {line(edu.description).map((bullet, i) => (
+                      <li key={i}>{bullet.replace(/^[•\-]\s*/, '')}</li>
+                    ))}
+                  </ul>
                 )}
               </div>
             ))}

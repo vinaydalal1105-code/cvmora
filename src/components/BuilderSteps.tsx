@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useResume } from '../context/ResumeContext'
 import { Input, TextArea } from './Editor'
+import { SKILL_SUGGESTIONS } from '../data/skillSuggestions'
 
 /** Template IDs that display a profile photo in their layout – show photo upload only for these */
 const TEMPLATES_WITH_PHOTO: string[] = [
@@ -280,7 +281,7 @@ function ExperienceStepContent() {
             label="Description (bullets on new lines)"
             value={exp.description}
             onChange={(v) => updateExperience(exp.id, { description: v })}
-            rows={4}
+            rows={8}
           />
         </div>
       ))}
@@ -341,7 +342,7 @@ function EducationStepContent() {
             label="Details"
             value={edu.description}
             onChange={(v) => updateEducation(edu.id, { description: v })}
-            rows={2}
+            rows={8}
           />
         </div>
       ))}
@@ -356,9 +357,16 @@ function EducationStepContent() {
   )
 }
 
+function getSkillSuggestions(prefix: string): string[] {
+  const q = prefix.trim().toLowerCase()
+  if (!q) return [...SKILL_SUGGESTIONS]
+  return SKILL_SUGGESTIONS.filter((s) => s.toLowerCase().startsWith(q))
+}
+
 function SkillsStepContent() {
   const { data, setSkills } = useResume()
   const skills = data.skills.length ? data.skills : ['']
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
 
   const updateSkill = (index: number, value: string) => {
     const next = skills.length ? [...skills] : ['']
@@ -386,6 +394,11 @@ function SkillsStepContent() {
     setSkills(next)
   }
 
+  const applySuggestion = (index: number, value: string) => {
+    updateSkill(index, value)
+    setFocusedIndex(null)
+  }
+
   return (
     <div className="px-4 py-4">
       <h1 className="text-lg font-bold text-cvmora-ink tracking-tight mb-1">Skills</h1>
@@ -393,50 +406,79 @@ function SkillsStepContent() {
         Choose important skills that show you fit the position. Match key skills from the job listing when applying online.
       </p>
       <div className="space-y-3 mb-4">
-        {skills.map((skill, index) => (
-          <div
-            key={index}
-            className="flex items-center gap-2 p-3 rounded-lg border border-cvmora-ink/10 bg-white"
-          >
-            <input
-              type="text"
-              value={skill}
-              onChange={(e) => updateSkill(index, e.target.value)}
-              placeholder="e.g. Leadership, Python, Project management"
-              className="input-premium text-[0.9375rem] py-2 flex-1 min-w-0"
-            />
-            <div className="flex items-center gap-0.5 shrink-0">
-              {index > 0 && (
-                <button
-                  type="button"
-                  onClick={() => moveSkill(index, -1)}
-                  className="p-1.5 rounded text-cvmora-ink/50 hover:bg-cvmora-ink/10 hover:text-cvmora-ink"
-                  aria-label="Move up"
+        {skills.map((skill, index) => {
+          const suggestions = getSkillSuggestions(skill)
+          const showList = focusedIndex === index && suggestions.length > 0
+
+          return (
+            <div
+              key={index}
+              className="relative flex flex-col gap-0 p-3 rounded-lg border border-cvmora-ink/10 bg-white"
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={skill}
+                  onChange={(e) => updateSkill(index, e.target.value)}
+                  onFocus={() => setFocusedIndex(index)}
+                  onBlur={() => setTimeout(() => setFocusedIndex(null), 180)}
+                  placeholder="e.g. Leadership, Python, Project management"
+                  className="input-premium text-[0.9375rem] py-2 flex-1 min-w-0"
+                  autoComplete="off"
+                />
+                <div className="flex items-center gap-0.5 shrink-0">
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => moveSkill(index, -1)}
+                      className="p-1.5 rounded text-cvmora-ink/50 hover:bg-cvmora-ink/10 hover:text-cvmora-ink"
+                      aria-label="Move up"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+                    </button>
+                  )}
+                  {index < skills.length - 1 && (
+                    <button
+                      type="button"
+                      onClick={() => moveSkill(index, 1)}
+                      className="p-1.5 rounded text-cvmora-ink/50 hover:bg-cvmora-ink/10 hover:text-cvmora-ink"
+                      aria-label="Move down"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeSkill(index)}
+                    className="p-1.5 rounded text-cvmora-ink/50 hover:bg-red-50 hover:text-red-600"
+                    aria-label="Remove skill"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
+              </div>
+              {showList && (
+                <ul
+                  className="absolute left-3 right-14 top-full z-10 mt-1 max-h-[220px] overflow-y-auto rounded-lg border border-cvmora-ink/15 bg-white py-1 shadow-lg"
+                  onMouseDown={(e) => e.preventDefault()}
+                  role="listbox"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
-                </button>
+                  {suggestions.map((s, i) => (
+                    <li key={i} role="option">
+                      <button
+                        type="button"
+                        className="w-full px-3 py-2 text-left text-[0.9375rem] text-cvmora-ink hover:bg-[var(--color-primary)]/10 focus:bg-[var(--color-primary)]/10 focus:outline-none"
+                        onMouseDown={() => applySuggestion(index, s)}
+                      >
+                        {s}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
-              {index < skills.length - 1 && (
-                <button
-                  type="button"
-                  onClick={() => moveSkill(index, 1)}
-                  className="p-1.5 rounded text-cvmora-ink/50 hover:bg-cvmora-ink/10 hover:text-cvmora-ink"
-                  aria-label="Move down"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => removeSkill(index)}
-                className="p-1.5 rounded text-cvmora-ink/50 hover:bg-red-50 hover:text-red-600"
-                aria-label="Remove skill"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-              </button>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
       <button
         type="button"

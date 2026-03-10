@@ -21,8 +21,10 @@ export function ProficiencyTemplate({ data, accentColor }: { data: ResumeData; a
   const initials = name ? name.split(/\s+/).map((n) => n[0]).join('').slice(0, 2) : '—'
 
   return (
-    <div className="proficiency-template bg-white text-[#1c1c1c] h-full min-h-0 max-w-[210mm] mx-auto font-sans text-sm flex">
-      <aside className="w-[26%] shrink-0 min-h-full pt-10 px-3 pb-6 flex flex-col" style={{ backgroundColor: `${accent}12` }}>
+    <div
+      className="proficiency-template bg-white text-[#1c1c1c] h-[842px] min-h-[842px] max-w-[210mm] mx-auto font-sans text-sm flex"
+    >
+      <aside className="w-[26%] shrink-0 self-stretch min-h-full pt-10 px-3 pb-6 flex flex-col">
         <div
           className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0 mx-auto mb-4"
           style={{ backgroundColor: accent }}

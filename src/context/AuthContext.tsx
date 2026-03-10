@@ -15,6 +15,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, name?: string, confirmPassword?: string) => Promise<{ needVerification?: boolean; email?: string } | void>
   completeOAuthLogin: (token: string) => Promise<void>
+  updateProfile: (updates: { name?: string }) => Promise<void>
   logout: () => void
   isAuthenticated: boolean
 }
@@ -86,6 +87,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persist]
   )
 
+  const updateProfile = useCallback(
+    async (updates: { name?: string }) => {
+      if (!token) return
+      const u = await api<User>('/auth/me', { method: 'PATCH', body: updates })
+      persist(token, u)
+    },
+    [token, persist]
+  )
+
   useEffect(() => {
     setLoading(false)
   }, [])
@@ -97,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     register,
     completeOAuthLogin,
+    updateProfile,
     logout,
     isAuthenticated: !!token && !!user,
   }

@@ -38,13 +38,10 @@ export function SidebarRightTemplate({ data, accentColor }: { data: ResumeData; 
 
   return (
     <div
-      className="sidebar-right-template text-[#1c1c1c] h-full min-h-full max-w-[210mm] mx-auto font-sans text-sm flex"
-      style={{
-        background: `linear-gradient(to right, #ffffff 0%, #ffffff 72%, ${barColor} 72%, ${barColor} 100%)`,
-      }}
+      className="sidebar-right-template relative bg-white text-[#1c1c1c] h-[842px] min-h-[842px] max-w-[210mm] mx-auto font-sans text-sm flex"
     >
       {/* Left: main content */}
-      <div className="w-[72%] min-w-0 pt-10 px-8 pb-6">
+      <div className="w-[72%] min-w-0 pt-10 px-8 pb-6 relative z-10">
         <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight uppercase mb-1">
           {name || ph('Your name')}
         </h1>
@@ -130,7 +127,10 @@ export function SidebarRightTemplate({ data, accentColor }: { data: ResumeData; 
       </div>
 
       {/* Right: dark sidebar - contact + skills */}
-      <aside className={`w-[28%] shrink-0 p-3 pt-10 flex flex-col min-h-full ${sidebarText}`}>
+      <aside
+        className={`w-[28%] shrink-0 p-3 pt-10 flex flex-col h-full min-h-[842px] relative z-10 ${sidebarText}`}
+        style={{ backgroundColor: barColor }}
+      >
         <div className="w-8 h-8 rounded bg-white/20 flex items-center justify-center text-[10px] font-bold mb-4" aria-hidden>
           {name ? name.split(/\s+/).map((n) => n[0]).join('').slice(0, 2) : '—'}
         </div>

@@ -19,7 +19,8 @@ export function Login() {
     const err = searchParams.get('error')
     const verified = searchParams.get('verified')
     if (err) {
-      setError(decodeURIComponent(err.replace(/\+/g, ' ')))
+      const raw = decodeURIComponent(err.replace(/\+/g, ' '))
+      setError(raw)
       setSearchParams({}, { replace: true })
     } else if (verified === '1') {
       setError('')

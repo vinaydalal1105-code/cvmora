@@ -1,6 +1,6 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, truncateForPreview } from './resumeSpacing'
 
 function hasExpContent(exp: { jobTitle?: string; company?: string; description?: string }) {
   return !!(exp.jobTitle?.trim() || exp.company?.trim() || exp.description?.trim())
@@ -25,7 +25,7 @@ export function ModernTemplate({ data, accentColor }: { data: ResumeData; accent
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
   return (
-    <div className="modern-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-sm">
+    <div className="modern-template bg-white text-[#1c1c1c] pt-10 px-8 pb-8 min-h-[842px] max-w-[210mm] mx-auto font-sans text-sm overflow-visible">
       <header className="flex items-start justify-between gap-4 mb-4 pb-3 border-b border-[#e5e7eb]">
         <div className="min-w-0">
           <div className="w-12 h-1 rounded-full mb-2" style={{ backgroundColor: accent }} />
@@ -60,7 +60,7 @@ export function ModernTemplate({ data, accentColor }: { data: ResumeData; accent
       {hasSummary && (
         <section className={`${resumeSpacing.section} pl-4 border-l-2`} style={{ borderLeftColor: accent }}>
           <h2 className={resumeSpacing.sectionHeading}>Summary</h2>
-          <p className={resumeSpacing.summary}>{summary}</p>
+          <p className={resumeSpacing.summary}>{truncateForPreview(summary)}</p>
         </section>
       )}
 

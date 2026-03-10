@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useAuth } from '../context/AuthContext'
 import { TemplateCard } from '../components/TemplateCard'
 import { allTemplates } from '../data/templates'
 
@@ -357,21 +358,21 @@ function FeatureSection({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-center p-5 sm:p-6 lg:p-8">
             <div className="lg:col-span-5 flex flex-col justify-center min-w-0">
               <p className="text-[#78716c] text-sm sm:text-base font-medium mb-2">
-                {step} <span className="text-[#1c1917]/50">/</span> {total}
-              </p>
+            {step} <span className="text-[#1c1917]/50">/</span> {total}
+          </p>
               <h2 className="text-2xl sm:text-3xl lg:text-[2rem] font-bold text-[#1c1917] tracking-tight leading-tight mb-4">
-                {title}
-              </h2>
+            {title}
+          </h2>
               <p className="text-lg sm:text-[1.125rem] text-[#44403c] leading-relaxed mb-6" style={{ lineHeight: 1.6 }}>
-                {desc}
-              </p>
-              <Link
-                to={to}
+            {desc}
+          </p>
+          <Link
+            to={to}
                 className="inline-flex items-center justify-center px-6 py-3.5 rounded-full bg-[#1c1917] text-white text-base font-medium hover:bg-[#44403c] transition-colors w-fit shadow-sm"
-              >
-                {cta}
-              </Link>
-            </div>
+          >
+            {cta}
+          </Link>
+        </div>
             <div className="lg:col-span-7 flex justify-center lg:justify-end items-center">
               {children}
             </div>
@@ -630,6 +631,7 @@ function ToolsSection() {
 }
 
 export function Landing() {
+  const { isAuthenticated } = useAuth()
   const resumeCountDigits = useResumeCountDigits()
   return (
     <div className="overflow-hidden">
@@ -640,9 +642,9 @@ export function Landing() {
           background: 'linear-gradient(180deg, #fef7f0 0%, #ffedd5 12%, #ffe4c4 25%, #f5e6dc 40%, #e8f0f4 55%, #dceef5 70%, #d4ebf7 85%, #e0f2fe 100%)',
         }}
       >
-        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-6 lg:gap-12">
-          {/* On mobile: preview (carousel) first via order-2; on desktop text stays left */}
-          <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0 w-full order-2 lg:order-1">
+        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-6 lg:gap-12">
+          {/* On mobile: text/call-to-action first, centered; carousel below. Desktop: text left, carousel right */}
+          <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0 w-full order-1 lg:order-1">
             <h1 className="text-2xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.15] tracking-tight mb-3 sm:mb-6 text-[#1c1917]">
               This resume builder gets you{' '}
               <span className="text-[#f97316]">hired faster</span>
@@ -652,7 +654,7 @@ export function Landing() {
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3 mb-6 sm:mb-10">
               <Link
-                to="/signup"
+                to={isAuthenticated ? '/builder' : '/signup'}
                 className="btn-primary w-full sm:w-auto justify-center px-8 py-4 rounded-full bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors font-medium"
               >
                 Create my resume
@@ -665,19 +667,8 @@ export function Landing() {
                 Upload my resume
               </Link>
             </div>
-            <p className="text-[11px] sm:text-sm uppercase tracking-wider text-[#78716c] font-semibold mb-2 sm:mb-4">Or try one of these:</p>
-            <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-              {suggestionChips.map((chip) => (
-                <Link
-                  key={chip.label}
-                  to={chip.to}
-                  className="min-h-[44px] flex items-center px-3.5 py-2 rounded-full border border-[#e7e5e4] bg-white text-[#44403c] text-xs sm:text-base font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] active:bg-[#f5f5f4] transition-colors"
-                >
-                  {chip.label}
-                </Link>
-              ))}
-            </div>
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 sm:gap-12 mt-6 sm:mt-10">
+            {/* Social proof before template chips on mobile; centered */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 sm:gap-12 mt-6 sm:mt-10 mb-6 sm:mb-0">
               <span className="flex items-center gap-2 text-xs sm:text-base text-[#44403c] font-medium">
                 <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#a7f3d0] flex items-center justify-center shrink-0" aria-hidden>
                   <svg width="10" height="8" viewBox="0 0 12 10" fill="none" className="text-[#059669] sm:w-3 sm:h-3">
@@ -695,8 +686,20 @@ export function Landing() {
                 <span><strong className="text-[#1c1917] font-semibold">4.8</strong> out of 5 <span className="text-[#78716c]">·</span> <strong className="text-[#1c1917] font-semibold">22,000+</strong> reviews</span>
               </span>
             </div>
+            <p className="text-[11px] sm:text-sm uppercase tracking-wider text-[#78716c] font-semibold mb-2 sm:mb-4">Or try one of these:</p>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-2">
+              {suggestionChips.map((chip) => (
+                <Link
+                  key={chip.label}
+                  to={chip.to}
+                  className="min-h-[44px] flex items-center px-3.5 py-2 rounded-full border border-[#e7e5e4] bg-white text-[#44403c] text-xs sm:text-base font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] active:bg-[#f5f5f4] transition-colors"
+                >
+                  {chip.label}
+                </Link>
+              ))}
+            </div>
           </div>
-          <div className="flex-1 flex justify-center lg:justify-end w-full max-w-[420px] sm:max-w-[480px] order-1 lg:order-2">
+          <div className="flex-1 flex justify-center lg:justify-end w-full max-w-[420px] sm:max-w-[480px] order-2 lg:order-2">
             <HeroResumeCarousel />
           </div>
         </div>
@@ -881,7 +884,7 @@ export function Landing() {
             Join Cvmora and create your resume in minutes. Save multiple versions and download anytime.
           </p>
           <Link
-            to="/signup"
+            to={isAuthenticated ? '/builder' : '/signup'}
             className="btn-primary inline-flex items-center gap-2 px-10 py-4 rounded-full bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shadow-sm font-medium"
           >
             Get started free

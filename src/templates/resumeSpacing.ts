@@ -1,4 +1,13 @@
 /**
+ * Limit text length for preview so accidentally pasted repeated content doesn't flood the page.
+ * Full text is still saved and exported; this only affects on-screen display.
+ */
+export function truncateForPreview(text: string, maxLen = 2500): string {
+  if (!text || text.length <= maxLen) return text
+  return text.slice(0, maxLen).trim() + ' …'
+}
+
+/**
  * Shared spacing and typography for resume templates.
  * Use these constants so line spacing and section spacing are identical across all templates.
  */
@@ -22,8 +31,8 @@ export const resumeSpacing = {
   eduEntry: 'mb-3',
   /** Education description paragraph */
   eduDescription: 'text-[13px] text-[#333] mt-1 leading-relaxed',
-  /** Education description smaller (e.g. in CleanTemplate) */
-  eduDescriptionSm: 'text-[12px] text-[#333] mt-1 leading-relaxed',
+  /** Education description (same size as experience for visibility) */
+  eduDescriptionSm: 'text-[13px] text-[#333] mt-1 leading-relaxed',
   /** Skills paragraph */
   skills: 'text-[13px] text-[#333] leading-relaxed mt-1',
   /** Skills when parent sets text size */

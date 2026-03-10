@@ -60,7 +60,7 @@ export function ForgotPassword() {
         {sent ? (
           <div className="space-y-5">
             <div className="p-4 rounded-xl bg-green-50 text-green-800 text-base font-medium border border-green-200">
-              If an account exists with that email, we’ve sent a password reset link. Check your inbox and spam folder.
+              If an account exists with that email, we’ve sent a password reset link to <strong>{email}</strong>. Check that inbox and your spam folder.
             </div>
             <Link
               to="/login"

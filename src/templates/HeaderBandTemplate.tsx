@@ -39,9 +39,9 @@ export function HeaderBandTemplate({ data, accentColor }: { data: ResumeData; ac
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
   return (
-    <div className="header-band-template bg-white text-[#1a1a1a] min-h-0 max-w-[210mm] mx-auto font-sans text-sm">
+    <div className="header-band-template bg-white text-[#1a1a1a] pt-0 px-0 pb-8 min-h-[842px] max-w-[210mm] mx-auto font-sans text-sm overflow-visible rounded-t-lg">
       {/* Full-width colored header band */}
-      <header className="px-8 py-4" style={{ backgroundColor: headerBg }}>
+      <header className="px-4 py-4 rounded-t-lg" style={{ backgroundColor: headerBg }}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-col justify-center">
             <h1 className={`text-2xl font-bold tracking-tight ${headerNameClass}`}>
@@ -65,7 +65,7 @@ export function HeaderBandTemplate({ data, accentColor }: { data: ResumeData; ac
         </div>
       </header>
 
-      <div className="px-8 pt-8 pb-6">
+      <div className="px-4 pt-6 pb-6">
         {hasSummary && (
           <section className={resumeSpacing.section}>
             <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
@@ -114,6 +114,13 @@ export function HeaderBandTemplate({ data, accentColor }: { data: ResumeData; ac
                     {' '}
                     · {[edu.location, `${edu.startDate} – ${edu.endDate}`].filter(Boolean).join(' · ')}
                   </span>
+                )}
+                {edu.description && (
+                  <ul className={resumeSpacing.bulletList}>
+                    {line(edu.description).map((bullet, i) => (
+                      <li key={i}>{bullet.replace(/^[•\-]\s*/, '')}</li>
+                    ))}
+                  </ul>
                 )}
               </div>
             ))}

@@ -1,7 +1,7 @@
 import type React from 'react'
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, truncateForPreview } from './resumeSpacing'
 
 function hasContent(exp: { jobTitle?: string; company?: string; description?: string }) {
   return !!(exp.jobTitle?.trim() || exp.company?.trim() || exp.description?.trim())
@@ -42,7 +42,7 @@ export function TraditionalTemplate({ data }: { data: ResumeData }) {
   const hasSkills = skills.filter(Boolean).length > 0
 
   return (
-    <div className="traditional-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-sm min-h-full">
+    <div className="traditional-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 max-w-[210mm] mx-auto font-sans text-sm overflow-visible rounded-t-lg">
       <header className="text-center border-b border-[#e5e7eb] pb-3 mb-4">
         {contact.photo && (
           <img src={contact.photo} alt="" className="w-20 h-20 rounded-full object-cover mx-auto mb-1 border border-[#e5e7eb]" />
@@ -53,14 +53,21 @@ export function TraditionalTemplate({ data }: { data: ResumeData }) {
         <p className="text-[12px] text-[#6b7280] uppercase tracking-wider mt-0.5">
           {jobTarget?.trim() || <span className="text-[#9ca3af] normal-case">Job title</span>}
         </p>
-        {contact.address?.trim() ? (
-          <p className="text-[13px] text-[#4b5563] mt-0.5">{contact.address.trim()}</p>
-        ) : (
-          <p className="text-[13px] text-[#9ca3af] mt-0.5">Address</p>
-        )}
-        <div className="flex justify-between items-center mt-1 px-4 text-[12px] text-[#6b7280] border-t border-[#e5e7eb] pt-1.5">
-          <span>{contact.phone || <span className="text-[#9ca3af]">Phone</span>}</span>
-          <span>{contact.email || <span className="text-[#9ca3af]">Email</span>}</span>
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-0 text-[12px] text-[#6b7280] mt-1">
+          {contact.email && <span>{contact.email}</span>}
+          {contact.phone && <span>{contact.phone}</span>}
+          {contact.address?.trim() && <span>{contact.address.trim()}</span>}
+          {contact.location && <span>{contact.location}</span>}
+          {contact.website && (
+            <a href={contact.website} className="text-[#2563eb] underline">
+              {contact.website.replace(/^https?:\/\//, '')}
+            </a>
+          )}
+          {contact.linkedin && (
+            <a href={contact.linkedin} className="text-[#2563eb] underline">
+              LinkedIn
+            </a>
+          )}
         </div>
       </header>
 

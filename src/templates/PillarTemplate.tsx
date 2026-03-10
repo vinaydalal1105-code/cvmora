@@ -20,9 +20,13 @@ export function PillarTemplate({ data, accentColor }: { data: ResumeData; accent
   const accent = accentColor ?? '#0f766e'
 
   return (
-    <div className="pillar-template bg-white text-[#1c1c1c] h-full min-h-0 max-w-[210mm] mx-auto font-sans text-sm flex">
-      <div className="w-[5%] min-w-[12px] shrink-0 self-stretch" style={{ backgroundColor: accent }} aria-hidden />
-      <div className="flex-1 min-w-0 pt-10 px-8 pb-6">
+    <div className="pillar-template relative bg-white text-[#1c1c1c] h-full min-h-[842px] max-w-[210mm] mx-auto font-sans text-sm">
+      <div
+        className="absolute inset-y-0 left-0 w-[5%] min-w-[12px]"
+        style={{ backgroundColor: accent }}
+        aria-hidden
+      />
+      <div className="min-w-0 pt-10 px-8 pb-6" style={{ marginLeft: 'max(5%, 12px)' }}>
         {name && (
           <h1 className="text-[22px] font-bold text-[#0f172a] tracking-tight pl-3" style={{ borderLeft: `4px solid ${accent}` }}>
             {name}

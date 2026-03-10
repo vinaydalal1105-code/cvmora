@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { ResumeProvider, useResume } from '../context/ResumeContext'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../api/client'
@@ -15,6 +15,7 @@ import {
 import type { ResumeData } from '../types/resume'
 import { defaultResume } from '../data/defaultResume'
 import { filledExamples } from '../data/filledExamples'
+import { displayName } from '../utils/resume'
 
 import type { TemplateId } from '../types/resume'
 
@@ -64,8 +65,10 @@ function ResumeBuilderInner() {
   const [builderStep, setBuilderStep] = useState(0)
   const [activeTab, setActiveTab] = useState<'edit' | 'customize'>('edit')
   const [hasFinished, setHasFinished] = useState(false)
+  const [autoDownloadPdf, setAutoDownloadPdf] = useState(false)
   const previewRef = useRef<ResumePreviewHandle>(null)
   const scoreInfo = resumeScore(data)
+  const [searchParams, setSearchParams] = useSearchParams()
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -125,31 +128,53 @@ function ResumeBuilderInner() {
           if (mapped) setTemplate(mapped)
           else setTemplate('professional')
         }
+        if (new URLSearchParams(location.search).get('download') === 'pdf') {
+          setAutoDownloadPdf(true)
+        }
       })
       .catch(() => navigate('/dashboard'))
       .finally(() => setLoading(false))
-  }, [id, isAuthenticated, loadData, setTemplate, navigate])
+  }, [id, isAuthenticated, loadData, setTemplate, navigate, location.search])
+
+  useEffect(() => {
+    if (!autoDownloadPdf || loading) return
+    const t = setTimeout(() => {
+      previewRef.current?.print()
+      setAutoDownloadPdf(false)
+      setSearchParams((prev) => {
+        const p = new URLSearchParams(prev)
+        p.delete('download')
+        return p
+      }, { replace: true })
+    }, 600)
+    return () => clearTimeout(t)
+  }, [autoDownloadPdf, loading, setSearchParams])
 
   const dataRef = useRef(data)
   const templateRef = useRef(template)
   dataRef.current = data
   templateRef.current = template
 
-  const saveResume = async () => {
+  const saveResume = async (navigateAfterSave = false) => {
     if (!isAuthenticated) return
     const d = dataRef.current
     const tpl = templateRef.current
     setSaving(true)
     try {
+      const title = displayName(d.contact) || 'My Resume'
       if (id) {
-        await api(`/resumes/${id}`, { method: 'PUT', body: { data: d, template_id: tpl } })
+        await api(`/resumes/${id}`, { method: 'PUT', body: { title, data: d, template_id: tpl } })
       } else {
         const created = await api<{ id: number }>('/resumes', {
           method: 'POST',
-          body: { title: d.contact.fullName || 'My Resume', data: d, template_id: tpl },
+          body: { title, data: d, template_id: tpl },
         })
-        navigate(`/builder/${created.id}`, { replace: true })
+        // Switch to editing the new resume so future auto-saves update it instead of creating more
+        if (created?.id) {
+          navigate(`/builder/${created.id}`, { replace: true })
+        }
       }
+      if (navigateAfterSave) navigate('/dashboard')
     } catch {
       // show error in UI if needed
     } finally {
@@ -162,7 +187,7 @@ function ResumeBuilderInner() {
       navigate('/login')
       return
     }
-    saveResume()
+    saveResume(true)
   }
 
   // Auto-save for logged-in users so resumes are stored and show on dashboard
@@ -175,7 +200,7 @@ function ResumeBuilderInner() {
     (data.skills?.length ?? 0) > 0
   useEffect(() => {
     if (!isAuthenticated || !hasContent || saving) return
-    const t = setTimeout(() => saveResume(), 2500)
+    const t = setTimeout(() => saveResume(false), 2500)
     return () => clearTimeout(t)
   }, [data, template, isAuthenticated, saving, id])
 

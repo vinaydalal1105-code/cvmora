@@ -21,7 +21,7 @@ export function CardTemplate({ data, accentColor }: { data: ResumeData; accentCo
   const cardStyle = { borderColor: `${accent}30`, backgroundColor: '#fafafa' }
 
   return (
-    <div className="card-template bg-white text-[#1c1c1c] pt-6 px-8 pb-5 min-h-0 max-w-[210mm] mx-auto font-sans text-sm overflow-hidden">
+    <div className="card-template bg-white text-[#1c1c1c] pt-10 px-8 pb-8 min-h-[842px] max-w-[210mm] mx-auto font-sans text-sm overflow-visible">
       <header className="mb-4">
         {name && <h1 className="text-2xl font-bold text-[#0f172a] tracking-tight">{name}</h1>}
         {jobTarget?.trim() && <p className="text-[12px] font-medium text-[#475569] mt-0.5">{jobTarget.trim()}</p>}

@@ -1,6 +1,6 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, truncateForPreview } from './resumeSpacing'
 
 /** True if hex background is light, so we should use dark text for contrast. */
 function isLightBg(hex: string): boolean {
@@ -77,7 +77,7 @@ export function CorporateTemplate({
 
   return (
     <div
-      className="corporate-template text-[#1c1c1c] pt-6 px-0 pb-0 h-full min-h-[297mm] max-w-[210mm] mx-auto font-sans text-sm flex items-stretch"
+      className={`corporate-template text-[#1c1c1c] pt-6 px-0 pb-0 h-full min-h-[297mm] max-w-[210mm] mx-auto font-sans text-sm flex items-stretch overflow-hidden ${useAccentStyles ? 'rounded-t-lg' : ''}`}
       style={rootStyle}
     >
       {/* Left sidebar – full height so color bar runs top to bottom */}
@@ -135,7 +135,7 @@ export function CorporateTemplate({
         {hasSummary && (
           <section className={resumeSpacing.section}>
             <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
-            <p className={resumeSpacing.summary}>{summary}</p>
+            <p className={resumeSpacing.summary}>{truncateForPreview(summary)}</p>
           </section>
         )}
 

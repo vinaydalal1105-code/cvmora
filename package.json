@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:all": "npx --yes concurrently \"npm run server\" \"npm run dev\" --names api,vite",
+    "dev": "npx --yes concurrently \"npm run server\" \"npm run dev:client\" --names api,vite",
+    "dev:client": "vite",
+    "dev:all": "npm run dev",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -13,6 +14,7 @@
     "server:dev": "cd server && node --watch index.js"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^0.10.0",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.6.0",
     "cors": "^2.8.5",

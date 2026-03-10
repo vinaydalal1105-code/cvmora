@@ -1,6 +1,6 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, truncateForPreview } from './resumeSpacing'
 
 function hasContent(exp: { jobTitle?: string; company?: string; description?: string }) {
   return !!(exp.jobTitle?.trim() || exp.company?.trim() || exp.description?.trim())
@@ -22,7 +22,7 @@ export function CleanTemplate({ data }: { data: ResumeData }) {
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
   return (
-    <div className="clean-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-[13px]">
+    <div className="clean-template bg-white text-[#1c1c1c] pt-10 px-8 pb-8 min-h-[842px] max-w-[210mm] mx-auto font-sans text-[13px] overflow-visible">
       <header className="mb-4 pb-3 border-b border-[#e5e7eb] flex gap-5 items-start">
         {contact.photo && (
           <img src={contact.photo} alt="" className="w-16 h-16 rounded-full object-cover shrink-0 border border-[#e5e7eb]" />
@@ -52,7 +52,7 @@ export function CleanTemplate({ data }: { data: ResumeData }) {
       {hasSummary && (
         <section className={resumeSpacing.section}>
           <h2 className={resumeSpacing.sectionHeading}>Summary</h2>
-          <p className={resumeSpacing.summaryPlain}>{summary}</p>
+          <p className={resumeSpacing.summaryPlain}>{truncateForPreview(summary)}</p>
         </section>
       )}
 

@@ -20,7 +20,7 @@ export function LuxeTemplate({ data, accentColor }: { data: ResumeData; accentCo
   const accent = accentColor ?? '#b45309'
 
   return (
-    <div className="luxe-template bg-white text-[#1c1c1c] pt-8 px-10 pb-8 min-h-0 max-w-[210mm] mx-auto text-sm overflow-hidden">
+    <div className="luxe-template bg-white text-[#1c1c1c] pt-10 px-10 pb-8 min-h-[842px] max-w-[210mm] mx-auto text-sm overflow-visible">
       <header className="text-center mb-5">
         <div className="h-px w-16 mx-auto mb-3" style={{ backgroundColor: accent }} aria-hidden />
         {name && <h1 className="text-[28px] font-light text-[#0f172a] tracking-[0.02em]" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>{name}</h1>}

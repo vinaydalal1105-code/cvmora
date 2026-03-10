@@ -22,7 +22,7 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
   return (
-    <div className="minimal-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-[13px]">
+    <div className="minimal-template bg-white text-[#1c1c1c] pt-10 px-8 pb-8 min-h-[842px] max-w-[210mm] mx-auto font-sans text-[13px] overflow-visible">
       <header className="mb-4 pb-3 border-b border-[#e5e7eb] flex gap-4 items-start">
         {contact.photo && (
           <img src={contact.photo} alt="" className="w-14 h-14 rounded-full object-cover shrink-0 border border-[#e5e7eb]" />

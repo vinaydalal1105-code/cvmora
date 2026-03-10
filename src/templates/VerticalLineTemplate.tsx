@@ -23,7 +23,7 @@ export function VerticalLineTemplate({ data, accentColor }: { data: ResumeData; 
   const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
 
   return (
-    <div className="vertical-line-template bg-white text-[#1c1c1c] h-full min-h-0 max-w-[210mm] mx-auto font-sans text-sm flex">
+    <div className="vertical-line-template bg-white text-[#1c1c1c] h-full min-h-[842px] max-w-[210mm] mx-auto font-sans text-sm flex">
       <div className="w-1 shrink-0 self-stretch" style={{ backgroundColor: accent }} aria-hidden />
       <div className="flex-1 min-w-0 pt-10 px-8 pb-6">
         <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight uppercase">{name || ph('Your name')}</h1>

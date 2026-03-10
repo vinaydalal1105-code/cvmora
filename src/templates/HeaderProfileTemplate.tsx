@@ -30,8 +30,8 @@ export function HeaderProfileTemplate({ data, accentColor }: { data: ResumeData;
   const mutedCls = light ? 'text-[#4b5563]' : 'text-white/90'
 
   return (
-    <div className="header-profile-template bg-white text-[#1c1c1c] min-h-0 max-w-[210mm] mx-auto font-sans text-sm">
-      <header className={`px-8 py-5 ${textCls}`} style={{ backgroundColor: barColor }}>
+    <div className="header-profile-template bg-white text-[#1c1c1c] pt-0 px-0 pb-8 min-h-[842px] max-w-[210mm] mx-auto font-sans text-sm overflow-visible rounded-t-lg">
+      <header className={`px-4 py-5 rounded-t-lg ${textCls}`} style={{ backgroundColor: barColor }}>
         {name && <h1 className="text-2xl font-bold tracking-tight uppercase">{name}</h1>}
         {jobTarget?.trim() && <p className={`text-sm ${mutedCls} mt-0.5`}>{jobTarget.trim()}</p>}
         {summary && (
@@ -46,7 +46,7 @@ export function HeaderProfileTemplate({ data, accentColor }: { data: ResumeData;
         </div>
       </header>
       <div className="flex">
-        <div className="w-[60%] min-w-0 pt-6 pl-8 pr-5 pb-6">
+        <div className="w-[60%] min-w-0 pt-6 pl-4 pr-3 pb-6">
           {experience.some(hasContent) && (
             <section className={resumeSpacing.section}>
               <h2 className={resumeSpacing.sectionHeading}>Employment History</h2>
@@ -83,7 +83,7 @@ export function HeaderProfileTemplate({ data, accentColor }: { data: ResumeData;
             </section>
           )}
         </div>
-        <div className="w-[40%] min-w-0 pt-6 pl-5 pr-8 pb-6 border-l border-[#e5e7eb]">
+        <div className="w-[40%] min-w-0 pt-6 pl-3 pr-4 pb-6 border-l border-[#e5e7eb]">
           {skills.filter(Boolean).length > 0 && (
             <section className={resumeSpacing.section}>
               <h2 className={resumeSpacing.sectionHeading}>Skills</h2>

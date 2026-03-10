@@ -296,3 +296,90 @@ select:focus-visible {
   transition: background-color 200ms, transform 200ms;
 }
 
+/* Resume preview: measure container — allow templates to shrink so we get true content height; show page 2 only when first is full */
+.resume-measure [class*="-template"] {
+  min-height: 0 !important;
+}
+.resume-measure aside {
+  min-height: 0 !important;
+}
+
+/* Resume preview: full-height wrapper so template percentage height resolves */
+.resume-print-inner .resume-template-fill {
+  height: 100% !important;
+  min-height: 100% !important;
+  width: 100%;
+}
+
+/* Resume preview: make template roots and sidebars fill height so sidebar/gradient runs top-to-bottom */
+.resume-print-inner .resume-template-fill [class*="-template"] {
+  min-height: 100% !important;
+  height: 100% !important;
+}
+.resume-print-inner .resume-template-fill [class*="-template"] aside,
+.resume-print-inner aside {
+  min-height: 100% !important;
+  align-self: stretch !important;
+  flex-shrink: 0 !important;
+}
+/* Pillar / Vertical Line: first child is the colored bar div (not aside) */
+.resume-print-inner .resume-template-fill .pillar-template > div:first-child,
+.resume-print-inner .resume-template-fill .vertical-line-template > div:first-child {
+  min-height: 100% !important;
+  align-self: stretch !important;
+}
+
+/* Builder preview: force Pillar/Vertical Line bar to run top-to-bottom via absolute positioning */
+.resume-print-root .resume-print-inner .pillar-template,
+.resume-print-root .resume-print-inner .vertical-line-template {
+  position: relative !important;
+}
+.resume-print-root .resume-print-inner .pillar-template > div:first-child,
+.resume-print-root .resume-print-inner .vertical-line-template > div:first-child {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 5% !important;
+  min-width: 12px !important;
+  margin: 0 !important;
+  flex: none !important;
+}
+.resume-print-root .resume-print-inner .vertical-line-template > div:first-child {
+  width: 2% !important;
+  min-width: 8px !important;
+}
+.resume-print-root .resume-print-inner .pillar-template > div:nth-child(2),
+.resume-print-root .resume-print-inner .vertical-line-template > div:nth-child(2) {
+  margin-left: 5% !important;
+  box-sizing: border-box !important;
+}
+.resume-print-root .resume-print-inner .vertical-line-template > div:nth-child(2) {
+  margin-left: 2% !important;
+}
+
+/* Template card preview: make sidebar elements transparent so paper background (full-height bar) shows through */
+.template-card-paper .pillar-template > div:first-child,
+.template-card-paper .vertical-line-template > div:first-child {
+  background: transparent !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  align-self: stretch !important;
+}
+.template-card-paper .sidebar-right-template {
+  background: transparent !important;
+}
+.template-card-paper .sidebar-right-template aside {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  align-self: stretch !important;
+}
+/* Force template root full height in template card so sidebar spans top to bottom */
+.template-card-paper .resume-print-inner [class*="-template"] {
+  height: 100% !important;
+  min-height: 100% !important;
+}

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { db } from './db.js'
+import * as db from './db.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cvmora-dev-secret-change-in-production'
 const SALT_ROUNDS = 10
@@ -26,7 +26,6 @@ export function verifyToken(token) {
   }
 }
 
-/** Create a short-lived JWT for email verification link */
 export function createVerificationToken(userId, email) {
   return jwt.sign(
     { userId, email, purpose: 'verify-email' },
@@ -35,7 +34,6 @@ export function createVerificationToken(userId, email) {
   )
 }
 
-/** Verify the token from email link; returns userId or null */
 export function verifyEmailToken(token) {
   try {
     const payload = jwt.verify(token, JWT_SECRET)
@@ -46,11 +44,10 @@ export function verifyEmailToken(token) {
   }
 }
 
-export function setUserVerified(userId) {
-  db.prepare('UPDATE users SET verified = 1 WHERE id = ?').run(userId)
+export async function setUserVerified(userId) {
+  await db.updateUserVerified(userId)
 }
 
-/** Create JWT for password reset link (1 hour) */
 export function createPasswordResetToken(userId) {
   return jwt.sign(
     { userId, purpose: 'reset-password' },
@@ -59,7 +56,6 @@ export function createPasswordResetToken(userId) {
   )
 }
 
-/** Verify password reset token; returns userId or null */
 export function verifyPasswordResetToken(token) {
   try {
     const payload = jwt.verify(token, JWT_SECRET)
@@ -70,25 +66,23 @@ export function verifyPasswordResetToken(token) {
   }
 }
 
-export function updatePassword(userId, newPassword) {
+export async function updatePassword(userId, newPassword) {
   const hash = hashPassword(newPassword)
-  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, userId)
+  await db.updateUserPassword(userId, hash)
 }
 
-export function register(email, password, name = '') {
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email)
+export async function register(email, password, name = '') {
+  const existing = await db.getUserByEmailForLogin(email)
   if (existing) return { error: 'Email already registered' }
   const hash = hashPassword(password)
-  const result = db.prepare(
-    'INSERT INTO users (email, password_hash, name, verified) VALUES (?, ?, ?, 0)'
-  ).run(email, hash, name || email.split('@')[0])
-  const user = db.prepare('SELECT id, email, name, created_at, verified FROM users WHERE id = ?').get(result.lastInsertRowid)
+  const id = await db.insertUser({ email, password_hash: hash, name, verified: 0 })
+  const user = await db.getUserById(id)
   const verificationToken = createVerificationToken(user.id, user.email)
   return { needVerification: true, email: user.email, verificationToken, name: user.name }
 }
 
-export function login(email, password) {
-  const user = db.prepare('SELECT id, email, name, password_hash, verified FROM users WHERE email = ?').get(email)
+export async function login(email, password) {
+  const user = await db.getUserByEmailForLogin(email)
   if (!user) return { error: 'Invalid email or password' }
   if (!verifyPassword(password, user.password_hash)) return { error: 'Invalid email or password' }
   if (!user.verified) {
@@ -98,33 +92,48 @@ export function login(email, password) {
   return { user: safe, token: createToken(user.id) }
 }
 
-export function getUserById(id) {
-  return db.prepare('SELECT id, email, name, created_at, verified FROM users WHERE id = ?').get(id)
+export async function getUserById(id) {
+  return db.getUserById(id)
+}
+
+export async function updateUserProfile(userId, { name }) {
+  if (name !== undefined) {
+    const trimmed = String(name).trim()
+    if (trimmed) await db.updateUserName(userId, trimmed)
+  }
 }
 
 const OAUTH_PLACEHOLDER = 'oauth-no-password'
 
-/** Find or create user for OAuth (Google/LinkedIn). Returns { user, token } or { error }. */
-export function findOrCreateOAuthUser(provider, providerId, email, name) {
+export async function findOrCreateOAuthUser(provider, providerId, email, name) {
   if (!provider || !providerId || !email) return { error: 'Missing OAuth profile data' }
+  if (!db.hasOAuthColumns()) return { error: 'OAuth not configured' }
   const safeName = (name && name.trim()) ? name.trim() : (email.split('@')[0] || 'User')
-  const hasProviderCol = db.prepare("PRAGMA table_info(users)").all().some((c) => c.name === 'provider')
-  if (!hasProviderCol) return { error: 'OAuth not configured' }
 
-  let user = db.prepare('SELECT id, email, name, created_at FROM users WHERE provider = ? AND provider_id = ?')
-    .get(provider, providerId)
+  let user = await db.getUserByProvider(provider, providerId)
   if (user) {
+    await db.updateUserName(user.id, safeName)
+    user = await db.getUserById(user.id)
     return { user, token: createToken(user.id) }
   }
-  user = db.prepare('SELECT id, email, name, created_at FROM users WHERE email = ?').get(email)
+
+  user = await db.getUserByEmailForLogin(email)
   if (user) {
-    db.prepare('UPDATE users SET provider = ?, provider_id = ?, verified = 1 WHERE id = ?').run(provider, providerId, user.id)
+    await db.updateUserOAuth(user.id, provider, providerId)
+    await db.updateUserName(user.id, safeName)
+    user = await db.getUserById(user.id)
     return { user, token: createToken(user.id) }
   }
+
   const hash = hashPassword(OAUTH_PLACEHOLDER + providerId + (process.env.JWT_SECRET || ''))
-  const result = db.prepare(
-    'INSERT INTO users (email, password_hash, name, provider, provider_id, verified) VALUES (?, ?, ?, ?, ?, 1)'
-  ).run(email, hash, safeName, provider, providerId)
-  user = db.prepare('SELECT id, email, name, created_at FROM users WHERE id = ?').get(result.lastInsertRowid)
+  const id = await db.insertUser({
+    email,
+    password_hash: hash,
+    name: safeName,
+    verified: 1,
+    provider,
+    provider_id: providerId,
+  })
+  user = await db.getUserById(id)
   return { user, token: createToken(user.id), isNewUser: true }
 }

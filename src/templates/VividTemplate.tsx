@@ -46,7 +46,7 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
 
   return (
     <div
-      className="vivid-template text-[#1a1a1a] min-h-full h-full max-w-[210mm] mx-auto font-sans text-sm flex items-stretch"
+      className="vivid-template text-[#1a1a1a] min-h-full h-full max-w-[210mm] mx-auto font-sans text-sm flex items-stretch overflow-hidden rounded-t-lg"
       style={rootStyle}
     >
       {/* Full-height left bar: single block centered in the stripe */}
@@ -135,6 +135,13 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
                     {' '}
                     · {[edu.location, `${edu.startDate} – ${edu.endDate}`].filter(Boolean).join(' · ')}
                   </span>
+                )}
+                {edu.description && (
+                  <ul className={resumeSpacing.bulletList}>
+                    {line(edu.description).map((bullet, i) => (
+                      <li key={i}>{bullet.replace(/^[•\-]\s*/, '')}</li>
+                    ))}
+                  </ul>
                 )}
               </div>
             ))}

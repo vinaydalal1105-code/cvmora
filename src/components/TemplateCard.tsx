@@ -232,7 +232,7 @@ function FilledTemplatePreview({
       <Component data={data} />
     )
 
-  // Paper background: for templates with a vertical color bar, draw gradient on paper so bar extends top to bottom
+  // Paper background: for templates with a vertical color bar, draw bar on paper so it extends full card height (top to bottom)
   const defaultSidebarColor =
     template.id === 'professional'
       ? '#002244'
@@ -240,20 +240,64 @@ function FilledTemplatePreview({
         ? '#f59e0b'
         : template.id === 'sidebar-right'
           ? '#1e3a5f'
-          : null
+          : template.id === 'pillar'
+            ? '#0f766e'
+            : template.id === 'vertical-line'
+              ? '#059669'
+              : template.id === 'proficiency'
+                ? '#1e40af'
+                : null
   const sidebarColor = accentColor ?? defaultSidebarColor
   let paperBg: string | undefined
-  if (template.id === 'sidebar-right') {
-    paperBg = `linear-gradient(to right, #ffffff 0%, #ffffff 72%, ${sidebarColor} 72%, ${sidebarColor} 100%)`
+  if (template.id === 'traditional') {
+    paperBg = '#ffffff' // Explicitly set to white for traditional
+  } else if (template.id === 'sidebar-right') {
+    paperBg = '#ffffff'
+  } else if (template.id === 'pillar') {
+    paperBg = `linear-gradient(to right, ${sidebarColor} 0%, ${sidebarColor} 5%, #ffffff 5%, #ffffff 100%)`
+  } else if (template.id === 'vertical-line') {
+    paperBg = `linear-gradient(to right, ${sidebarColor} 0%, ${sidebarColor} 2%, #ffffff 2%, #ffffff 100%)`
+  } else if (template.id === 'proficiency') {
+    paperBg = '#ffffff'
   } else if (defaultSidebarColor != null) {
     const sidebarPct = template.id === 'vivid' ? 26 : 28
     paperBg = `linear-gradient(to right, ${sidebarColor} 0%, ${sidebarColor} ${sidebarPct}%, #ffffff ${sidebarPct}%, #ffffff 100%)`
   }
-  const isSidebarTemplate = template.id === 'professional' || template.id === 'vivid' || template.id === 'sidebar-right'
+  const sidebarSide: 'left' | 'right' | null =
+    template.id === 'sidebar-right'
+      ? 'right'
+      : (
+          template.id === 'professional' ||
+          template.id === 'vivid' ||
+          template.id === 'pillar' ||
+          template.id === 'vertical-line' ||
+          template.id === 'proficiency'
+        )
+        ? 'left'
+        : null
+  const isSidebarTemplate = sidebarSide !== null
+  
+  // Debug: Force traditional to not be a sidebar template
+  const finalIsSidebarTemplate = template.id === 'traditional' ? false : isSidebarTemplate
+
+  const sidebarWidthPct =
+    template.id === 'pillar'
+      ? 5
+      : template.id === 'vertical-line'
+        ? 2
+        : template.id === 'proficiency'
+          ? 26
+          : template.id === 'sidebar-right'
+            ? 28
+            : template.id === 'vivid'
+              ? 26
+            : 28
+  const edgeOverlayOnTop = template.id === 'vertical-line' || template.id === 'pillar'
+  const useOuterSidebarOverlay = finalIsSidebarTemplate && template.id !== 'proficiency'
 
   return (
     <div
-      className="rounded-sm flex justify-center"
+      className="rounded-sm flex justify-center relative"
       style={{
         width: PREVIEW_PAPER_WIDTH,
         height: PREVIEW_PAPER_HEIGHT,
@@ -261,14 +305,36 @@ function FilledTemplatePreview({
         transformStyle: 'preserve-3d',
       }}
     >
-      {/* Paper: shadow on this layer so it isn't clipped; overflow on child */}
+      {/* Full-height sidebar bar on the card (outer wrapper) so it always runs top-to-bottom */}
+      {useOuterSidebarOverlay && sidebarColor && (
+        <div
+          aria-hidden
+          className={`absolute top-0 bottom-0 pointer-events-none ${sidebarSide === 'right' ? 'right-0 rounded-r-sm' : 'left-0 rounded-l-sm'}`}
+          style={{
+            width: `${sidebarWidthPct}%`,
+            background:
+              template.id === 'proficiency'
+                ? (sidebarColor || '') + '1f'
+                : sidebarColor,
+            zIndex: edgeOverlayOnTop ? 2 : 0,
+          }}
+        />
+      )}
+      {/* Paper + content on top; for sidebar templates left strip is transparent so full-height bar (z-0) shows through */}
       <div
-        className="rounded-sm w-full h-full flex justify-center overflow-visible"
+        className={`rounded-sm w-full h-full flex justify-center overflow-visible relative ${finalIsSidebarTemplate ? 'template-card-paper' : ''}`}
         style={{
           position: 'relative',
-          background: paperBg ?? '#ffffff',
+          background: useOuterSidebarOverlay
+            ? (
+                sidebarSide === 'right'
+                  ? `linear-gradient(to right, #ffffff 0%, #ffffff ${100 - sidebarWidthPct}%, transparent ${100 - sidebarWidthPct}%, transparent 100%)`
+                  : `linear-gradient(to right, transparent 0%, transparent ${sidebarWidthPct}%, #ffffff ${sidebarWidthPct}%, #ffffff 100%)`
+              )
+            : (paperBg ?? '#ffffff'),
           boxShadow: paperShadow,
           isolation: 'isolate',
+          zIndex: 1,
           ...(plainPaper ? { border: 'none' } : {}),
         }}
       >
@@ -284,9 +350,11 @@ function FilledTemplatePreview({
               height: PREVIEW_HEIGHT,
               minHeight: PREVIEW_HEIGHT,
             }}
-            className={isSidebarTemplate ? 'bg-transparent flex flex-col' : 'bg-white'}
+            className={`resume-print-inner w-full relative ${finalIsSidebarTemplate ? 'bg-transparent flex flex-col' : 'bg-white'}`}
           >
-            {previewContent}
+            <div className="resume-template-fill relative z-10" style={{ height: '100%', minHeight: '100%', flex: '1 1 0' }}>
+              {previewContent}
+            </div>
           </div>
         </div>
       </div>
@@ -314,49 +382,6 @@ function PreviewClassic() {
           <div className="h-0.5 bg-[#d2d2d7]/40 rounded w-[90%]" />
         </div>
       ))}
-    </div>
-  )
-}
-
-/* Traditional: grey from very top (root bg grey), no white strip */
-function PreviewTraditional() {
-  return (
-    <div className="w-full max-w-[280px] h-full min-h-0 rounded-md bg-[#f5f5f7] shadow-sm border border-[#d2d2d7]/70 overflow-hidden text-left flex flex-col">
-      <div className="px-3 pt-3 pb-1 border-b border-[#e5e7eb] text-center">
-        <p className="font-bold text-[#1d1d1f] text-[11px]">Tiffany Giroux</p>
-        <p className="text-[#6e6e73] text-[9px] mt-0.5">Freight & Logistics Analyst</p>
-        <div className="flex justify-between text-[6px] text-[#6e6e73] mt-0.5 px-2">
-          <span>Phone</span>
-          <span>Email</span>
-        </div>
-      </div>
-      <div className="border-t border-[#f0f0f0] bg-white">
-        <div className="bg-[#f5f5f7] py-0.5 px-3">
-          <p className="font-semibold text-[#1d1d1f] uppercase tracking-wider text-[7px] text-center">PROFILE</p>
-        </div>
-        <div className="px-3 py-1">
-          <div className="h-0.5 bg-[#d2d2d7]/60 rounded w-full mb-0.5" />
-          <div className="h-0.5 bg-[#d2d2d7]/40 rounded w-[95%]" />
-        </div>
-      </div>
-      <div className="border-t border-[#f0f0f0] bg-white">
-        <div className="bg-[#f5f5f7] py-0.5 px-3">
-          <p className="font-semibold text-[#1d1d1f] uppercase tracking-wider text-[7px] text-center">EXPERIENCE</p>
-        </div>
-        <div className="px-3 py-1">
-          <p className="text-[7px] text-[#1d1d1f]/90 font-medium">Freight Analyst — Ford</p>
-          <p className="text-[6px] text-[#6e6e73] mt-0.5">• Bullet line one</p>
-          <p className="text-[6px] text-[#6e6e73]">• Achievement or duty</p>
-        </div>
-      </div>
-      <div className="border-t border-[#f0f0f0] flex-1 bg-white">
-        <div className="bg-[#f5f5f7] py-0.5 px-3">
-          <p className="font-semibold text-[#1d1d1f] uppercase tracking-wider text-[7px] text-center">EDUCATION</p>
-        </div>
-        <div className="px-3 py-1">
-          <p className="text-[7px] text-[#1d1d1f]/90">Postgraduate Diploma — University</p>
-        </div>
-      </div>
     </div>
   )
 }
@@ -678,7 +703,6 @@ function _PreviewCorporate() {
 function TemplatePreview({ template }: { template: ResumeTemplate }) {
   const { id, previewStyle } = template
   if (id === 'classic') return <PreviewClassic />
-  if (id === 'traditional') return <PreviewTraditional />
   if (id === 'professional') return <PreviewProfessionalGreen />
   if (id === 'modern') return <PreviewVivid />
   if (id === 'simple-ats') return <PreviewSimpleAts />
@@ -707,9 +731,7 @@ const TEMPLATES_WITH_COLOR_OPTIONS = new Set([
   'professional', 'vivid', 'balanced', 'header-ats', 'modern',
   'sidebar-right', 'centered-clean', 'accent-bar',
   'vertical-line', 'initials-header', 'divided',
-  'story', 'deco', 'proficiency', 'header-profile', 'elegant',
-  'pillar', 'spotlight', 'card', 'serif',
-  'bold-block', 'timeline', 'luxe',
+  'story', 'deco', 'proficiency', 'header-profile', 'elegant', 'pillar', 'spotlight', 'card', 'serif', 'bold-block', 'timeline', 'luxe',
 ])
 
 function getDefaultColorIndex(templateId: string): number {
@@ -775,7 +797,7 @@ export function TemplateCard({ template, variant, onSelectTemplate }: TemplateCa
             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               {ACCENT_COLORS.map((c, i) => (
                 <button
-                  key={c}
+                key={c}
                   type="button"
                   aria-label={`Select color ${i + 1}`}
                   onMouseEnter={() => {
@@ -805,10 +827,10 @@ export function TemplateCard({ template, variant, onSelectTemplate }: TemplateCa
                   className={`w-4 h-4 rounded-full border-2 shrink-0 transition-all ${
                     i === selectedColorIndex ? 'border-[#1d1d1f] ring-2 ring-[#1d1d1f]/25' : 'border-[#e5e7eb]'
                   }`}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div>
+                style={{ backgroundColor: c }}
+              />
+            ))}
+          </div>
           )}
           {!hasColorDots && <span className="text-[0.7rem] text-[#9ca3af]">Monochrome</span>}
           {(template.pdf || template.docx) && (

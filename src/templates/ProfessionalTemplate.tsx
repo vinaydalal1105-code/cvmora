@@ -1,6 +1,6 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, truncateForPreview } from './resumeSpacing'
 
 function hasContent(exp: { jobTitle?: string; company?: string; description?: string }) {
   return !!(exp.jobTitle?.trim() || exp.company?.trim() || exp.description?.trim())
@@ -22,7 +22,7 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
   const hasSkills = skills.filter(Boolean).length > 0
 
   return (
-    <div className="professional-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-sm min-h-full">
+    <div className="professional-template bg-white text-[#1c1c1c] pt-10 px-8 pb-8 min-h-[842px] max-w-[210mm] mx-auto font-sans text-sm overflow-visible">
       <header className="border-b border-[#e5e7eb] pb-3 mb-4 flex gap-4 items-start">
         {contact.photo && (
           <img src={contact.photo} alt="" className="w-16 h-16 rounded-full object-cover shrink-0 border border-[#e5e7eb]" />
@@ -62,7 +62,7 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
       {hasSummary && (
         <section className={resumeSpacing.section}>
           <h2 className={resumeSpacing.sectionHeading}>Summary</h2>
-          <p className={resumeSpacing.summary}>{summary}</p>
+          <p className={resumeSpacing.summary}>{truncateForPreview(summary)}</p>
         </section>
       )}
 

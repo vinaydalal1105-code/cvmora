@@ -1,4 +1,4 @@
-import { useRef, useState, forwardRef, useImperativeHandle } from 'react'
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { useResume } from '../context/ResumeContext'
 import { CorporateTemplate } from '../templates/CorporateTemplate'
@@ -82,6 +82,9 @@ const templateMap = {
 const A4_PREVIEW_WIDTH = 595
 const A4_PREVIEW_HEIGHT = 842
 
+/** Exported for dashboard thumbnail and other standalone resume previews */
+export { templateMap, DEFAULT_ACCENTS, A4_PREVIEW_WIDTH, A4_PREVIEW_HEIGHT }
+
 export type ResumePreviewHandle = {
   print: () => void
   downloadWord: () => Promise<void>
@@ -93,8 +96,11 @@ export const ResumePreview = forwardRef<ResumePreviewHandle, { showDownloadButto
 ) {
   const { data, template, accentColor } = useResume()
   const printRef = useRef<HTMLDivElement>(null)
+  const measureRef = useRef<HTMLDivElement>(null)
   const effectiveAccent = accentColor ?? DEFAULT_ACCENTS[template]
   const [downloadingDocx, setDownloadingDocx] = useState(false)
+  const [pageCount, setPageCount] = useState(1)
+  const [contentHeight, setContentHeight] = useState(A4_PREVIEW_HEIGHT)
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -133,6 +139,22 @@ export const ResumePreview = forwardRef<ResumePreviewHandle, { showDownloadButto
 
   const TemplateComponent = templateMap[template]
 
+  // Measure content height so we know page count and can give inner an explicit height so sidebars/gradients stretch
+  useEffect(() => {
+    const el = measureRef.current
+    if (!el) return
+    const update = () => {
+      const h = el.scrollHeight
+      const n = Math.max(1, Math.min(10, Math.ceil(h / A4_PREVIEW_HEIGHT)))
+      setPageCount(n)
+      setContentHeight(h)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [data, template, accentColor])
+
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex-none flex flex-wrap items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2 border-b border-cvmora-ink/8 bg-white/98">
@@ -148,25 +170,64 @@ export const ResumePreview = forwardRef<ResumePreviewHandle, { showDownloadButto
           </div>
         )}
       </div>
-      <div className="flex-1 min-h-0 overflow-auto bg-[#e5e7eb] px-3 py-5 flex flex-col items-center">
+      <div className="flex-1 min-h-0 overflow-auto bg-[#e5e7eb] px-3 pt-8 pb-10 flex flex-col items-center relative">
+        {/* Off-screen measure: full-height content to compute page count (does not affect layout) */}
         <div
-          ref={printRef}
-          className="resume-print-root shadow-xl bg-white flex-shrink-0 overflow-visible"
-          style={{
-            width: A4_PREVIEW_WIDTH,
-            height: A4_PREVIEW_HEIGHT,
-            minWidth: A4_PREVIEW_WIDTH,
-            minHeight: A4_PREVIEW_HEIGHT,
-            maxWidth: '100%',
-            boxSizing: 'border-box',
-          }}
+          ref={measureRef}
+          className="resume-measure absolute left-[-9999px] top-0 w-[595px] pointer-events-none"
+          style={{ visibility: 'hidden' }}
+          aria-hidden
         >
-          <div className="resume-print-inner h-full w-full min-h-[842px]">
+          <div className="w-full">
             <TemplateComponent data={data} accentColor={effectiveAccent} />
           </div>
         </div>
+        {/* Fixed-height pages: one per 842px of content, with spacer between each */}
+        <div className="flex flex-col pt-3 pb-4" style={{ width: A4_PREVIEW_WIDTH, maxWidth: '100%' }}>
+          {Array.from({ length: pageCount }, (_, i) => (
+            <div key={i}>
+              {i > 0 && (
+                <div className="w-full flex-shrink-0 bg-[#e5e7eb]" style={{ minHeight: 56 }} aria-hidden />
+              )}
+              <div
+                className="resume-print-root shadow-xl bg-white flex-shrink-0 overflow-hidden rounded-lg"
+                style={{
+                  width: A4_PREVIEW_WIDTH,
+                  height: A4_PREVIEW_HEIGHT,
+                  minWidth: A4_PREVIEW_WIDTH,
+                  maxWidth: '100%',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <div
+                  className="resume-print-inner w-full box-border"
+                  style={{
+                    /* Explicit height so template root (h-full) and sidebars/gradients run top-to-bottom on every page */
+                    height: Math.max(pageCount * A4_PREVIEW_HEIGHT, contentHeight),
+                    minHeight: pageCount * A4_PREVIEW_HEIGHT,
+                    marginTop: i === 0 ? 0 : -i * A4_PREVIEW_HEIGHT,
+                  }}
+                >
+                  <div className="resume-template-fill" style={{ height: '100%', minHeight: '100%' }}>
+                    <TemplateComponent data={data} accentColor={effectiveAccent} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Print ref: single full content for PDF export */}
+        <div ref={printRef} className="resume-print-root hidden print:block" aria-hidden>
+          <div className="resume-print-inner h-full w-full min-h-[842px]">
+            <div className="resume-template-fill" style={{ height: '100%', minHeight: '100%' }}>
+              <TemplateComponent data={data} accentColor={effectiveAccent} />
+            </div>
+          </div>
+        </div>
         <div className="flex justify-center py-3">
-          <span className="text-[0.8125rem] text-cvmora-ink/60 font-medium tabular-nums">&lt; 1 / 1 &gt;</span>
+          <span className="text-[0.8125rem] text-cvmora-ink/60 font-medium tabular-nums">
+            &lt; 1 / {pageCount} &gt;
+          </span>
         </div>
       </div>
     </div>
