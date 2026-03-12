@@ -20,6 +20,9 @@ interface ResumeContextValue {
   updateEducation: (id: string, patch: Partial<ResumeData['education'][0]>) => void
   removeEducation: (id: string) => void
   setSkills: (skills: string[]) => void
+  setDescriptionFormat: (format: 'bullets' | 'paragraph') => void
+  setExperienceFormat: (format: 'bullets' | 'paragraph') => void
+  setEducationFormat: (format: 'bullets' | 'paragraph') => void
 }
 
 const ResumeContext = createContext<ResumeContextValue | null>(null)
@@ -134,6 +137,18 @@ export function ResumeProvider({ children, initialTemplate, initialAccentColor }
     setData((d) => ({ ...d, skills }))
   }, [])
 
+  const setDescriptionFormat = useCallback((format: 'bullets' | 'paragraph') => {
+    setData((d) => ({ ...d, descriptionFormat: format }))
+  }, [])
+
+  const setExperienceFormat = useCallback((format: 'bullets' | 'paragraph') => {
+    setData((d) => ({ ...d, experienceFormat: format }))
+  }, [])
+
+  const setEducationFormat = useCallback((format: 'bullets' | 'paragraph') => {
+    setData((d) => ({ ...d, educationFormat: format }))
+  }, [])
+
   const value: ResumeContextValue = {
     data,
     template,
@@ -151,6 +166,9 @@ export function ResumeProvider({ children, initialTemplate, initialAccentColor }
     updateEducation,
     removeEducation,
     setSkills,
+    setDescriptionFormat,
+    setExperienceFormat,
+    setEducationFormat,
   }
 
   return <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>

@@ -17,6 +17,7 @@ const columns = [
       { label: 'Resume Templates', to: '/templates' },
       { label: 'Resume Examples', to: '/examples' },
       { label: 'Cover Letter', to: '/cover-letter' },
+      { label: 'Pricing', to: '/pricing' },
     ],
   },
   {

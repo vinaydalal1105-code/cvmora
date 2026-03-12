@@ -72,6 +72,12 @@ function getSqlite() {
         sqliteDb.exec('ALTER TABLE users ADD COLUMN verified INTEGER DEFAULT 0')
         sqliteDb.exec('UPDATE users SET verified = 1 WHERE verified = 0')
       }
+      if (!info.some((c) => c.name === 'stripe_customer_id')) {
+        sqliteDb.exec('ALTER TABLE users ADD COLUMN stripe_customer_id TEXT')
+      }
+      if (!info.some((c) => c.name === 'subscription_status')) {
+        sqliteDb.exec('ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT \'free\'')
+      }
     } catch (_) {}
   }
   return sqliteDb
@@ -80,7 +86,9 @@ function getSqlite() {
 // --- Users
 export async function getUserById(id) {
   if (usePg) return pg.pgGetUserById(id)
-  return getSqlite().prepare('SELECT id, email, name, created_at, verified FROM users WHERE id = ?').get(id)
+  const row = getSqlite().prepare('SELECT id, email, name, created_at, verified, subscription_status FROM users WHERE id = ?').get(id)
+  if (!row) return null
+  return { ...row, subscription_status: row.subscription_status || 'free' }
 }
 
 export async function getUserByEmailForLogin(email) {
@@ -126,6 +134,28 @@ export async function updateUserOAuth(id, provider, providerId) {
 export async function updateUserName(id, name) {
   if (usePg) return pg.pgUpdateUserName(id, name)
   getSqlite().prepare('UPDATE users SET name = ? WHERE id = ?').run(name, id)
+}
+
+export async function getStripeCustomerId(userId) {
+  if (usePg) return pg.pgGetStripeCustomerId(userId)
+  const row = getSqlite().prepare('SELECT stripe_customer_id FROM users WHERE id = ?').get(userId)
+  return row?.stripe_customer_id ?? null
+}
+
+export async function setStripeCustomerId(userId, stripeCustomerId) {
+  if (usePg) return pg.pgSetStripeCustomerId(userId, stripeCustomerId)
+  getSqlite().prepare('UPDATE users SET stripe_customer_id = ? WHERE id = ?').run(stripeCustomerId, userId)
+}
+
+export async function setSubscriptionStatus(userId, status) {
+  if (usePg) return pg.pgSetSubscriptionStatus(userId, status)
+  getSqlite().prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run(status, userId)
+}
+
+export async function getSubscriptionStatus(userId) {
+  if (usePg) return pg.pgGetSubscriptionStatus(userId)
+  const row = getSqlite().prepare('SELECT subscription_status FROM users WHERE id = ?').get(userId)
+  return (row?.subscription_status || 'free')
 }
 
 export function hasOAuthColumns() {

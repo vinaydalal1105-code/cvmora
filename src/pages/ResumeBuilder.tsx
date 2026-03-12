@@ -4,7 +4,7 @@ import { ResumeProvider, useResume } from '../context/ResumeContext'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../api/client'
 import { apiUploadResume } from '../api/client'
-import { ResumePreview, type ResumePreviewHandle } from '../components/ResumePreview'
+import { ResumePreview, type ResumePreviewHandle, DEFAULT_ACCENTS } from '../components/ResumePreview'
 import { TemplatePicker } from '../components/TemplatePicker'
 import {
   BUILDER_STEPS,
@@ -13,9 +13,9 @@ import {
   BuilderStepFooter,
 } from '../components/BuilderSteps'
 import type { ResumeData } from '../types/resume'
-import { defaultResume } from '../data/defaultResume'
 import { filledExamples } from '../data/filledExamples'
 import { displayName } from '../utils/resume'
+import { buildResumeFromUpload, PENDING_UPLOADED_RESUME_KEY } from '../utils/uploadedResume'
 
 import type { TemplateId } from '../types/resume'
 
@@ -26,7 +26,7 @@ const TEMPLATE_MAP: Record<string, TemplateId> = {
   corporate: 'professional',
   modern: 'modern',
   'simple-ats': 'clean',
-  'precision-ats': 'clean', // removed duplicate; old links open Simple ATS
+  'precision-ats': 'clean',
   balanced: 'balanced',
   'header-ats': 'header-ats',
   minimal: 'minimal',
@@ -49,14 +49,29 @@ const TEMPLATE_MAP: Record<string, TemplateId> = {
   'bold-block': 'bold-block',
   timeline: 'timeline',
   luxe: 'luxe',
+  gradient: 'gradient',
+  neon: 'neon',
+  geometric: 'geometric',
+  aura: 'aura',
 }
+
+const ACCENT_COLORS = ['#eccbc3', '#aabcdf', '#baa989', '#696969', '#b0e0dd', '#e38779', '#1e3a5f'] as const
+
+const TEMPLATES_WITH_COLOR_OPTIONS = new Set<TemplateId>([
+  'professional', 'modern', 'balanced', 'header-ats', 'vivid',
+  'sidebar-right', 'centered-clean', 'accent-bar', 'vertical-line',
+  'initials-header', 'divided', 'story', 'deco', 'proficiency',
+  'header-profile', 'elegant', 'pillar', 'spotlight', 'card',
+  'serif', 'bold-block', 'timeline', 'luxe', 'corporate',
+  'gradient', 'neon', 'geometric', 'aura',
+])
 
 function ResumeBuilderInner() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAuthenticated } = useAuth()
-  const { data, template, loadData, setTemplate, setAccentColor } = useResume()
+  const { isAuthenticated, user, refreshUser } = useAuth()
+  const { data, template, accentColor, loadData, setTemplate, setAccentColor } = useResume()
   const [loading, setLoading] = useState(!!id && isAuthenticated)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -69,6 +84,33 @@ function ResumeBuilderInner() {
   const previewRef = useRef<ResumePreviewHandle>(null)
   const scoreInfo = resumeScore(data)
   const [searchParams, setSearchParams] = useSearchParams()
+  const [checkoutMessage, setCheckoutMessage] = useState<'success' | 'cancel' | null>(null)
+  const showAccentPicker = TEMPLATES_WITH_COLOR_OPTIONS.has(template)
+  const activeAccent = accentColor ?? DEFAULT_ACCENTS[template] ?? ACCENT_COLORS[1]
+
+  useEffect(() => {
+    const status = searchParams.get('checkout')
+    if (status === 'success' || status === 'cancel') {
+      setCheckoutMessage(status)
+      if (status === 'success' && isAuthenticated) {
+        refreshUser().catch(() => {})
+      }
+      setSearchParams((p) => {
+        const next = new URLSearchParams(p)
+        next.delete('checkout')
+        next.delete('session_id')
+        return next
+      }, { replace: true })
+      const t = setTimeout(() => setCheckoutMessage(null), 5000)
+      return () => clearTimeout(t)
+    }
+  }, [searchParams, setSearchParams, refreshUser, isAuthenticated])
+
+  useEffect(() => {
+    if (!showAccentPicker) return
+    if (accentColor) return
+    setAccentColor(activeAccent)
+  }, [showAccentPicker, accentColor, activeAccent, setAccentColor])
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -102,6 +144,19 @@ function ResumeBuilderInner() {
       navigate(location.pathname + location.search, { replace: true, state: {} })
     }
   }, [location.state, location.pathname, location.search, navigate])
+
+  useEffect(() => {
+    if (id) return
+    try {
+      const raw = sessionStorage.getItem(PENDING_UPLOADED_RESUME_KEY)
+      if (!raw) return
+      sessionStorage.removeItem(PENDING_UPLOADED_RESUME_KEY)
+      const pending = JSON.parse(raw) as ResumeData
+      loadData(pending)
+    } catch {
+      // ignore malformed session payload
+    }
+  }, [id, loadData])
 
   useEffect(() => {
     if (!id && location.state) {
@@ -169,7 +224,6 @@ function ResumeBuilderInner() {
           method: 'POST',
           body: { title, data: d, template_id: tpl },
         })
-        // Switch to editing the new resume so future auto-saves update it instead of creating more
         if (created?.id) {
           navigate(`/builder/${created.id}`, { replace: true })
         }
@@ -190,7 +244,6 @@ function ResumeBuilderInner() {
     saveResume(true)
   }
 
-  // Auto-save for logged-in users so resumes are stored and show on dashboard
   const hasContent =
     (data.contact?.fullName || '').trim() ||
     (data.contact?.email || '').trim() ||
@@ -211,25 +264,9 @@ function ResumeBuilderInner() {
     setUploading(true)
     try {
       const { text, data: parsed } = await apiUploadResume(file)
-      if (parsed && (parsed.summary || parsed.contact?.fullName || parsed.experience?.length || parsed.education?.length || parsed.skills?.length)) {
-        const contactOverrides = parsed.contact
-          ? Object.fromEntries(
-              Object.entries(parsed.contact).filter(([, v]) => v != null && v !== '')
-            ) as Partial<ResumeData['contact']>
-          : {}
-        const next: ResumeData = {
-          ...defaultResume,
-          contact: { ...defaultResume.contact, ...contactOverrides },
-          summary: (parsed.summary && parsed.summary.trim()) ? parsed.summary : defaultResume.summary,
-          experience: parsed.experience?.length ? parsed.experience : defaultResume.experience,
-          education: parsed.education?.length ? parsed.education : defaultResume.education,
-          skills: parsed.skills?.length ? parsed.skills : defaultResume.skills,
-        }
-        if (!next.experience.length) next.experience = [...defaultResume.experience]
-        if (!next.education.length) next.education = [...defaultResume.education]
+      const next = buildResumeFromUpload({ text, parsed })
+      if (next) {
         loadData(next)
-      } else if (text) {
-        loadData({ ...defaultResume, summary: text.slice(0, 4000) })
       }
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed')
@@ -242,114 +279,173 @@ function ResumeBuilderInner() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center text-cvmora-muted text-[0.9375rem] font-medium">
-        Loading resume…
+        Loading resume...
       </div>
     )
   }
 
+  const scoreColor = scoreInfo.score >= 80 ? 'bg-green-50 text-green-700' : scoreInfo.score >= 50 ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'
+
   return (
     <div className="h-full flex flex-col min-h-0">
-      {/* Single minimal bar: logo, template, Edit|Customize, score, actions */}
-      <header className="flex-none flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-2.5 border-b border-cvmora-ink/8 bg-white shrink-0 min-h-[52px]">
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 overflow-hidden">
-          <a href="/" className="flex items-center gap-2 shrink-0 text-cvmora-ink no-underline min-h-[44px] items-center">
-            <span className="w-8 h-8 rounded-xl bg-[#f97316] flex items-center justify-center text-white font-semibold text-sm">C</span>
-            <span className="text-base font-semibold tracking-tight hidden sm:inline">Cvmora</span>
+      <header className="flex-none flex items-center justify-between gap-3 px-4 py-2 border-b border-[#e7e5e4] bg-white shrink-0 min-h-[52px]">
+        <div className="flex items-center gap-3 min-w-0">
+          <a href="/" className="flex items-center gap-2 shrink-0 text-[#1c1917] no-underline">
+            <span className="w-7 h-7 rounded-lg bg-[#f97316] flex items-center justify-center text-white font-semibold text-xs">C</span>
+            <span className="text-sm font-semibold tracking-tight hidden sm:inline">Cvmora</span>
           </a>
-          <div className="flex items-center gap-0.5 border-l border-cvmora-ink/10 pl-2 sm:pl-4 shrink-0">
+
+          <div className="h-5 w-px bg-[#e7e5e4] hidden sm:block" />
+
+          <div className="flex items-center bg-[#f5f5f4] rounded-lg p-0.5">
             <button
               type="button"
               onClick={() => setActiveTab('edit')}
-              className={`min-h-[40px] px-3 py-2 rounded-md text-[0.8125rem] font-medium transition-colors ${activeTab === 'edit' ? 'bg-cvmora-ink/10 text-cvmora-ink' : 'text-cvmora-ink/60 hover:bg-cvmora-ink/5'}`}
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all ${activeTab === 'edit' ? 'bg-white text-[#1c1917] shadow-sm' : 'text-[#78716c] hover:text-[#1c1917]'}`}
             >
               Edit
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('customize')}
-              className={`min-h-[40px] px-3 py-2 rounded-md text-[0.8125rem] font-medium transition-colors ${activeTab === 'customize' ? 'bg-cvmora-ink/10 text-cvmora-ink' : 'text-cvmora-ink/60 hover:bg-cvmora-ink/5'}`}
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all ${activeTab === 'customize' ? 'bg-white text-[#1c1917] shadow-sm' : 'text-[#78716c] hover:text-[#1c1917]'}`}
             >
               Customize
             </button>
           </div>
-          {/* Score/suggestion: only on md+ to avoid cramped overlap on mobile */}
-          <div className="hidden md:flex items-center gap-2 text-[0.75rem] shrink-0 overflow-hidden">
-            <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 font-medium whitespace-nowrap">{scoreInfo.score}%</span>
-            <span className="text-green-700 font-medium truncate max-w-[120px] lg:max-w-[140px]" title={scoreInfo.suggestion}>{scoreInfo.suggestion}</span>
+
+          <div className="hidden md:flex items-center gap-1.5">
+            <span className={`px-2 py-0.5 rounded-md text-xs font-semibold tabular-nums ${scoreColor}`}>{scoreInfo.score}%</span>
+            <span className="text-xs text-green-600 font-medium truncate max-w-[160px]">{scoreInfo.suggestion}</span>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <label className="cursor-pointer flex items-center min-h-[44px]">
+
+        <div className="flex items-center gap-2 shrink-0">
+          <label className="cursor-pointer shrink-0">
             <input ref={uploadInputRef} type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={handleUpload} disabled={uploading} />
-            <span className="text-[14px] sm:text-[16px] font-medium text-[#f97316] hover:opacity-80 px-2.5 py-2 rounded-md hover:bg-black/5 active:bg-black/10">{uploading ? '…' : 'Upload PDF or Word'}</span>
+            <span className="text-[13px] font-medium text-[#f97316] hover:text-[#ea580c] px-2 py-1.5 rounded-md hover:bg-orange-50 transition-colors cursor-pointer hidden sm:inline-flex items-center">
+              {uploading ? 'Uploading...' : 'Upload PDF or Word'}
+            </span>
           </label>
-          {uploadError && <span className="text-[0.6875rem] text-red-600" title={uploadError}>Failed</span>}
+          {uploadError && <span className="text-[11px] text-red-600" title={uploadError}>Failed</span>}
           {isAuthenticated ? (
-            <button type="button" onClick={handleSave} disabled={saving} className="min-h-[44px] px-4 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[14px] sm:text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] disabled:opacity-50 flex items-center">
-              {saving ? '…' : 'Save'}
+            <button type="button" onClick={handleSave} disabled={saving} className="min-h-[36px] px-4 py-1.5 rounded-full bg-[#BFED8D] text-[#1c1917] text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] disabled:opacity-50 transition-colors">
+              {saving ? 'Saving...' : 'Save'}
             </button>
           ) : (
-            <a href="/signup" className="min-h-[44px] px-4 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[14px] sm:text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] inline-flex items-center">Sign up to save</a>
+            <a href="/signup" className="min-h-[36px] px-4 py-1.5 rounded-full bg-[#BFED8D] text-[#1c1917] text-[13px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] inline-flex items-center transition-colors">Sign up to save</a>
           )}
+          {checkoutMessage === 'success' && <span className="text-[11px] text-green-700">Payment complete!</span>}
         </div>
       </header>
 
       <main className="flex-1 flex min-h-0 flex-col relative">
         {hasFinished && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 p-4">
-            <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 flex flex-col items-center gap-6">
-              <h2 className="text-xl font-bold text-[#1c1917] text-center">Your resume is ready</h2>
-              <p className="text-[#78716c] text-center text-sm">Choose a format to download.</p>
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <button
-                  type="button"
-                  onClick={() => previewRef.current?.print()}
-                  className="flex-1 px-5 py-3 rounded-full bg-[#BFED8D] text-[#1c1917] text-base font-medium border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
-                >
-                  Download PDF
-                </button>
-                <button
-                  type="button"
-                  onClick={() => previewRef.current?.downloadWord()}
-                  className="flex-1 px-5 py-3 rounded-full border-2 border-[#f97316] text-[#f97316] text-base font-medium hover:bg-[#fff7ed] transition-colors"
-                >
-                  Download Word
-                </button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-10 flex flex-col items-center gap-5 animate-in fade-in zoom-in duration-200">
+              <div className="w-14 h-14 rounded-full bg-[#BFED8D]/30 flex items-center justify-center mb-1">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
               </div>
+              <h2 className="text-xl font-bold text-[#1c1917] text-center">Your resume is ready</h2>
+
+              {user?.subscription_status === 'active' ? (
+                <>
+                  <p className="text-[#78716c] text-center text-sm">Choose a format to download.</p>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+                    <button
+                      type="button"
+                      onClick={() => previewRef.current?.print()}
+                      className="flex-1 px-5 py-3.5 rounded-full bg-[#BFED8D] text-[#1c1917] text-base font-semibold border border-[#a8e070] hover:bg-[#b0e87d] active:scale-[0.98] transition-all shadow-sm"
+                    >
+                      Download PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => previewRef.current?.downloadWord()}
+                      className="flex-1 px-5 py-3.5 rounded-full border-2 border-[#f97316] text-[#f97316] text-base font-semibold hover:bg-[#fff7ed] active:scale-[0.98] transition-all"
+                    >
+                      Download Word
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-[#78716c] text-center text-sm">Upgrade to Pro to download your resume as PDF or Word.</p>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/pricing')}
+                    className="w-full px-5 py-3.5 rounded-full bg-[#f97316] text-white text-base font-semibold hover:bg-[#ea580c] active:scale-[0.98] transition-all shadow-sm"
+                  >
+                    View pricing plans
+                  </button>
+                </>
+              )}
+
               <button
                 type="button"
                 onClick={() => setHasFinished(false)}
-                className="text-sm text-[#78716c] hover:text-[#1c1917] underline"
+                className="text-sm text-[#78716c] hover:text-[#1c1917] underline mt-1"
               >
                 Back to editing
               </button>
             </div>
           </div>
         )}
-        {/* On mobile: stack editor above preview; editor scrolls inside. On md+: side by side */}
+
         <div className="flex-1 flex flex-col md:flex-row min-h-0 min-w-0 overflow-hidden">
           {activeTab === 'edit' ? (
             <>
-              <aside className="w-full md:max-w-[420px] flex-1 min-h-0 md:flex-none md:border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0 overflow-y-auto md:overflow-y-auto">
-                <div className="pb-28">
+              <aside className="w-full md:w-[380px] lg:w-[400px] flex-shrink-0 min-h-0 md:border-r border-[#e7e5e4] bg-white flex flex-col overflow-y-auto">
+                <div className="flex-1 pb-28">
                   <BuilderStepContent stepIndex={builderStep} />
                 </div>
               </aside>
-              <section className="flex-1 min-w-0 min-h-[40vh] md:min-h-0 flex flex-col bg-[#f5f5f7] border-t md:border-t-0 border-cvmora-ink/8">
+              <section className="flex-1 min-w-0 min-h-[40vh] md:min-h-0 flex flex-col bg-[#f0f0f0] border-t md:border-t-0 border-[#e7e5e4]">
                 <ResumePreview ref={previewRef} showDownloadButtons={false} />
               </section>
             </>
           ) : (
             <>
-              <aside className="w-full md:max-w-[360px] flex-none md:border-r border-cvmora-ink/8 bg-white flex flex-col min-h-0 overflow-y-auto">
-                <div className="flex-none px-4 py-3 border-b border-cvmora-ink/6">
-                  <h2 className="text-[0.8125rem] font-semibold text-cvmora-ink">Customize</h2>
+              <aside className="w-full md:w-[380px] lg:w-[400px] flex-shrink-0 md:border-r border-[#e7e5e4] bg-white flex flex-col min-h-0 overflow-y-auto">
+                <div className="flex-none px-5 py-4 border-b border-[#e7e5e4]">
+                  <h2 className="text-sm font-semibold text-[#1c1917]">Customize</h2>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4 min-h-0">
+                <div className="flex-1 overflow-y-auto p-5 min-h-0">
+                  {showAccentPicker && (
+                    <div className="mb-5 rounded-xl border border-[#e7e5e4] bg-[#fafaf9] p-4">
+                      <p className="text-xs font-semibold text-[#1c1917] mb-3">Accent color</p>
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        {ACCENT_COLORS.map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            aria-label={`Set accent ${c}`}
+                            onClick={() => {
+                              setAccentColor(c)
+                              try {
+                                sessionStorage.setItem(ACCENT_STORAGE_KEY, c)
+                              } catch (_) {}
+                              setSearchParams((prev) => {
+                                const p = new URLSearchParams(prev)
+                                p.set('accent', c)
+                                return p
+                              }, { replace: true })
+                            }}
+                            className={`w-7 h-7 rounded-full border-2 transition-all ${
+                              activeAccent.toLowerCase() === c.toLowerCase()
+                                ? 'border-[#1c1917] ring-2 ring-[#1c1917]/20 scale-110'
+                                : 'border-[#d6d3d1] hover:border-[#a8a29e]'
+                            }`}
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <TemplatePicker />
                 </div>
               </aside>
-              <section className="flex-1 min-w-0 flex flex-col min-h-[50vh] md:min-h-0 bg-[#f5f5f7] border-t md:border-t-0 border-cvmora-ink/8">
+              <section className="flex-1 min-w-0 flex flex-col min-h-[50vh] md:min-h-0 bg-[#f0f0f0] border-t md:border-t-0 border-[#e7e5e4]">
                 <ResumePreview ref={previewRef} showDownloadButtons={false} />
               </section>
             </>

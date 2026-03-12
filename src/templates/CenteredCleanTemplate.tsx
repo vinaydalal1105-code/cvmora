@@ -1,6 +1,6 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, truncateForPreview } from './resumeSpacing'
 
 function hasContent(exp: { jobTitle?: string; company?: string; description?: string }) {
   return !!(exp.jobTitle?.trim() || exp.company?.trim() || exp.description?.trim())
@@ -9,9 +9,10 @@ function hasEduContent(edu: { degree?: string; school?: string; description?: st
   return !!(edu.degree?.trim() || edu.school?.trim() || edu.description?.trim())
 }
 
-/** Single column, name centered, thin accent line, summary, skills in two columns, work, education. */
+/** Single column, perfectly centered. Name centered (28px light), thin accent line below (40px wide).
+ * Job title small caps. Section headings centered with accent underline. Skills as centered pills. */
 export function CenteredCleanTemplate({ data, accentColor }: { data: ResumeData; accentColor?: string }) {
-  const { contact, summary, experience, education, skills, references } = data
+  const { jobTarget, contact, summary, experience, education, skills, references } = data
   const line = (s: string) => s.split('\n').filter(Boolean)
   const name = displayName(contact)
   const showExperience = experience.some(hasContent)
@@ -19,17 +20,38 @@ export function CenteredCleanTemplate({ data, accentColor }: { data: ResumeData;
   const hasRefs = references && references.length > 0
   const hasSummary = !!(summary?.trim())
   const hasSkills = skills.filter(Boolean).length > 0
-  const accent = accentColor ?? '#1e3a5f'
-  const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
+  const accent = accentColor ?? '#334155'
+  const ph = (s: string) => <span className="text-[#94a3b8]">{s}</span>
 
   return (
-    <div className="centered-clean-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-sm">
-      <header className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight uppercase">{name || ph('Your name')}</h1>
-        <div className="flex flex-wrap justify-center gap-x-4 text-[12px] text-[#6b7280] mt-2">
-          {contact.location || contact.phone || contact.email ? (
+    <div className="centered-clean-template bg-white text-[#374151] pt-12 px-10 pb-8 min-h-0 max-w-[210mm] mx-auto font-sans">
+      <header className="text-center mb-10">
+        {contact.photo && (
+          <img
+            src={contact.photo}
+            alt=""
+            className="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-2 border-[#e2e8f0] shadow-sm"
+          />
+        )}
+        <h1 className="text-[28px] font-light text-[#0f172a] tracking-tight">
+          {name || ph('Your name')}
+        </h1>
+        <div
+          className="h-[2px] w-10 mx-auto mt-3 mb-4 rounded-full"
+          style={{ backgroundColor: accent }}
+          aria-hidden
+        />
+        {jobTarget?.trim() && (
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#64748b]">
+            {jobTarget.trim()}
+          </p>
+        )}
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-0.5 text-[12.5px] text-[#64748b] mt-4">
+          {(contact.address?.trim() || contact.location) || contact.phone || contact.email ? (
             <>
-              {contact.location && <span>{contact.location}</span>}
+              {(contact.address?.trim() || contact.location) && (
+                <span>{(contact.address?.trim() || contact.location)}</span>
+              )}
               {contact.phone && <span>{contact.phone}</span>}
               {contact.email && <span>{contact.email}</span>}
             </>
@@ -37,25 +59,40 @@ export function CenteredCleanTemplate({ data, accentColor }: { data: ResumeData;
             ph('Email · Phone · Location')
           )}
         </div>
-        <div className="mt-4 h-0.5 w-full" style={{ backgroundColor: accent }} />
       </header>
 
       {hasSummary && (
         <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Professional Summary</h2>
-          <p className={resumeSpacing.summary}>{summary}</p>
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0f172a] text-center mb-2 pb-1.5 border-b border-[#e2e8f0] w-fit mx-auto" style={{ borderBottomColor: accent }}>
+            Professional Summary
+          </h2>
+          {data.descriptionFormat === 'bullets' && summary.includes('\n') ? (
+            <ul className="list-disc pl-5 text-[12.5px] text-[#374151] space-y-1 leading-[1.65] summary-desc max-w-[85%] mx-auto">
+              {summary.split('\n').filter((l) => l.trim()).map((l, i) => (
+                <li key={i}>{l.replace(/^[•\-]\s*/, '').trim()}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[12.5px] text-[#374151] leading-[1.65] text-center max-w-[90%] mx-auto">
+              {truncateForPreview(summary)}
+            </p>
+          )}
         </section>
       )}
 
       {hasSkills && (
         <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-1">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0f172a] text-center mb-3 pb-1.5 border-b border-[#e2e8f0] w-fit mx-auto" style={{ borderBottomColor: accent }}>
+            Skills
+          </h2>
+          <div className="flex flex-wrap justify-center gap-2 mt-2">
             {skills.filter(Boolean).map((s, i) => (
-              <div key={i} className="flex items-center gap-2 text-[13px] text-[#333]">
-                <span className="w-1 h-1 rounded-full bg-[#1c1917] shrink-0" aria-hidden />
+              <span
+                key={i}
+                className="px-3 py-1 text-[11px] font-medium text-[#374151] bg-[#f8fafc] rounded-full border border-[#e2e8f0]"
+              >
                 {s}
-              </div>
+              </span>
             ))}
           </div>
         </section>
@@ -63,22 +100,26 @@ export function CenteredCleanTemplate({ data, accentColor }: { data: ResumeData;
 
       {showExperience && (
         <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Work History</h2>
-          <div className={resumeSpacing.expWrapper}>
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0f172a] text-center mb-3 pb-1.5 border-b border-[#e2e8f0] w-fit mx-auto" style={{ borderBottomColor: accent }}>
+            Work History
+          </h2>
+          <div className={resumeSpacing.expWrapper} style={{ maxWidth: '92%', margin: '0 auto' }}>
             {experience.filter(hasContent).map((exp) => (
               <div key={exp.id}>
-                <div className="flex justify-between items-baseline gap-2 flex-wrap">
-                  <span className="font-semibold text-[#1c1c1c]">{exp.jobTitle}</span>
-                  <span className="text-[11px] text-[#6b7280]">
+                <div className="flex justify-between items-baseline gap-2 flex-nowrap">
+                  <span className="font-semibold text-[#0f172a] min-w-0 truncate text-[12.5px]">
+                    {exp.jobTitle}
+                  </span>
+                  <span className="text-[10.5px] text-[#64748b] whitespace-nowrap shrink-0">
                     {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
                   </span>
                 </div>
-                <div className="text-[12px] text-[#4b5563] mt-0.5">
+                <div className="text-[12.5px] text-[#64748b] mt-0.5">
                   {exp.company}
                   {exp.location && ` · ${exp.location}`}
                 </div>
                 {exp.description && (
-                  <ul className={resumeSpacing.bulletList}>
+                  <ul className={`${resumeSpacing.bulletList} exp-desc`}>
                     {line(exp.description).map((bullet, i) => (
                       <li key={i}>{bullet.replace(/^[•\-]\s*/, '')}</li>
                     ))}
@@ -92,31 +133,49 @@ export function CenteredCleanTemplate({ data, accentColor }: { data: ResumeData;
 
       {showEducation && (
         <section className={resumeSpacing.section}>
-          <h2 className={resumeSpacing.sectionHeading}>Education</h2>
-          {education.filter(hasEduContent).map((edu) => (
-            <div key={edu.id} className={resumeSpacing.eduEntry}>
-              <div className="font-semibold text-[#1c1c1c]">{edu.degree}</div>
-              <div className="text-[12px] text-[#4b5563] mt-0.5">
-                {edu.school}
-                {edu.location && ` · ${edu.location}`}
-                {edu.startDate && ` · ${edu.startDate} – ${edu.endDate}`}
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0f172a] text-center mb-3 pb-1.5 border-b border-[#e2e8f0] w-fit mx-auto" style={{ borderBottomColor: accent }}>
+            Education
+          </h2>
+          <div style={{ maxWidth: '92%', margin: '0 auto' }}>
+            {education.filter(hasEduContent).map((edu) => (
+              <div key={edu.id} className={resumeSpacing.eduEntry} style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
+                <div className="font-semibold text-[#0f172a] text-[12.5px]">{edu.degree}</div>
+                <div className="flex justify-between items-baseline gap-x-2 mt-0.5">
+                  <span className="text-[12.5px] text-[#64748b] font-medium">
+                    {edu.school}
+                    {edu.location && ` · ${edu.location}`}
+                  </span>
+                  {edu.startDate && (
+                    <span className="text-[10.5px] text-[#94a3b8] whitespace-nowrap shrink-0 ml-auto">
+                      {edu.startDate} – {edu.endDate}
+                    </span>
+                  )}
+                </div>
+                {edu.description && (
+                  <ul className="list-disc pl-5 mt-1 text-[12.5px] text-[#374151] space-y-0.5 edu-desc">
+                    {edu.description.split('\n').filter(Boolean).map((line, j) => (
+                      <li key={j}>{line}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              {edu.description && <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>}
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
       )}
 
       {hasRefs && (
         <section>
-          <h2 className={resumeSpacing.sectionHeading}>References</h2>
-          <div className={resumeSpacing.refBlock}>
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0f172a] text-center mb-3 pb-1.5 border-b border-[#e2e8f0] w-fit mx-auto" style={{ borderBottomColor: accent }}>
+            References
+          </h2>
+          <div className={`${resumeSpacing.refBlock} text-center`} style={{ maxWidth: '92%', margin: '0 auto' }}>
             {references!.map((ref, i) => (
               <div key={i}>
-                <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
-                {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
-                {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
-                {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
+                <span className="font-medium text-[#0f172a]">{ref.name}</span>
+                {ref.affiliation && <span className="text-[#64748b]">, {ref.affiliation}</span>}
+                {ref.email && <span className="text-[#94a3b8]"> · {ref.email}</span>}
+                {ref.phone && <span className="text-[#94a3b8]"> · {ref.phone}</span>}
               </div>
             ))}
           </div>

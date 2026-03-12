@@ -1,9 +1,12 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, type ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { categoryFilters, atsTemplates } from '../data/templates'
 import { TemplateCard } from '../components/TemplateCard'
 import { LetsGetStartedModal } from '../components/LetsGetStartedModal'
+import { apiUploadResume } from '../api/client'
+import { buildResumeFromUpload, PENDING_UPLOADED_RESUME_KEY } from '../utils/uploadedResume'
 import type { ResumeTemplate } from '../data/templates'
+import type { ResumeData } from '../types/resume'
 
 export function TemplatesATS() {
   const [modalOpen, setModalOpen] = useState(false)
@@ -11,6 +14,10 @@ export function TemplatesATS() {
   const [selectedAccentColor, setSelectedAccentColor] = useState<string | undefined>(undefined)
   const [builderQuery, setBuilderQuery] = useState<string>('')
   const pendingRef = useRef<{ templateId: string; accentColor: string | undefined } | null>(null)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
+  const [uploadingResume, setUploadingResume] = useState(false)
+  const [uploadResumeError, setUploadResumeError] = useState('')
+  const [previewResume, setPreviewResume] = useState<ResumeData | null>(null)
 
   const handleSelectTemplate = (template: ResumeTemplate, accentColor?: string, query?: string) => {
     pendingRef.current = { templateId: template.id, accentColor }
@@ -23,6 +30,39 @@ export function TemplatesATS() {
       } catch (_) {}
     }
     setModalOpen(true)
+  }
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(PENDING_UPLOADED_RESUME_KEY)
+      if (raw) {
+        const pending = JSON.parse(raw) as ResumeData
+        setPreviewResume(pending)
+      }
+    } catch {
+      // ignore malformed session payload
+    }
+  }, [])
+
+  const handleTemplateUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadResumeError('')
+    setUploadingResume(true)
+    try {
+      const { text, data: parsed } = await apiUploadResume(file)
+      const next = buildResumeFromUpload({ text, parsed })
+      if (!next) {
+        throw new Error('Could not read resume content from that file.')
+      }
+      sessionStorage.setItem(PENDING_UPLOADED_RESUME_KEY, JSON.stringify(next))
+      setPreviewResume(next)
+    } catch (err) {
+      setUploadResumeError(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setUploadingResume(false)
+      e.target.value = ''
+    }
   }
 
   return (
@@ -52,14 +92,26 @@ export function TemplatesATS() {
             >
               Create my resume
             </Link>
-            <Link
-              to="/builder"
-              state={{ showUpload: true }}
-              className="inline-flex items-center justify-center px-6 py-3 rounded-full border-2 border-[#e7e5e4] text-[#1c1917] text-[16px] font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors"
+            <button
+              type="button"
+              onClick={() => uploadInputRef.current?.click()}
+              disabled={uploadingResume}
+              className="inline-flex items-center justify-center px-6 py-3 rounded-full border-2 border-[#e7e5e4] text-[#1c1917] text-[16px] font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors disabled:opacity-60"
             >
-              Upload my resume
-            </Link>
+              {uploadingResume ? 'Uploading…' : 'Upload my resume'}
+            </button>
+            <input
+              ref={uploadInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              className="hidden"
+              onChange={handleTemplateUpload}
+              disabled={uploadingResume}
+            />
           </div>
+          {uploadResumeError && (
+            <p className="text-sm text-red-600 mt-3">{uploadResumeError}</p>
+          )}
         </header>
 
         {/* Category filter bar - same style as Templates page */}
@@ -87,6 +139,7 @@ export function TemplatesATS() {
               template={t}
               variant="ats"
               onSelectTemplate={handleSelectTemplate}
+              previewData={previewResume ?? undefined}
             />
           ))}
         </div>

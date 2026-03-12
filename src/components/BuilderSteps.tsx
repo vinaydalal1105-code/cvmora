@@ -3,7 +3,6 @@ import { useResume } from '../context/ResumeContext'
 import { Input, TextArea } from './Editor'
 import { SKILL_SUGGESTIONS } from '../data/skillSuggestions'
 
-/** Template IDs that display a profile photo in their layout – show photo upload only for these */
 const TEMPLATES_WITH_PHOTO: string[] = [
   'classic',
   'traditional',
@@ -22,6 +21,16 @@ export const BUILDER_STEPS = [
   { id: 'skills', title: 'Skills', nextLabel: 'Summary' },
   { id: 'summary', title: 'Summary', nextLabel: 'Finish' },
 ] as const
+
+function toBulletedLines(value: string): string {
+  return value
+    .split('\n')
+    .map((line) => {
+      const cleaned = line.replace(/^\s*[•-]\s*/, '').trimStart()
+      return cleaned ? `• ${cleaned}` : ''
+    })
+    .join('\n')
+}
 
 export function resumeScore(data: {
   jobTarget?: string
@@ -52,6 +61,27 @@ export function resumeScore(data: {
   }
 }
 
+function FormatToggle({ value, onChange }: { value: 'bullets' | 'paragraph'; onChange: (v: 'bullets' | 'paragraph') => void }) {
+  return (
+    <div className="flex items-center gap-1 bg-[#f5f5f4] rounded-lg p-0.5 mb-4">
+      <button
+        type="button"
+        onClick={() => onChange('bullets')}
+        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${value === 'bullets' ? 'bg-white text-[#1c1917] shadow-sm' : 'text-[#78716c] hover:text-[#1c1917]'}`}
+      >
+        Bullet points
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange('paragraph')}
+        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${value === 'paragraph' ? 'bg-white text-[#1c1917] shadow-sm' : 'text-[#78716c] hover:text-[#1c1917]'}`}
+      >
+        Paragraph
+      </button>
+    </div>
+  )
+}
+
 function PersonalDetailsStep() {
   const { data, updateContact, updateJobTarget, template } = useResume()
   const [showMore, setShowMore] = useState(false)
@@ -72,26 +102,22 @@ function PersonalDetailsStep() {
   }
 
   return (
-    <div className="px-4 py-4">
-      <h1 className="text-lg font-bold text-cvmora-ink tracking-tight mb-1">Personal Details</h1>
-      <p className="text-[0.8125rem] text-cvmora-muted mb-6">
+    <div className="px-5 py-5">
+      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Personal Details</h1>
+      <p className="text-[13px] text-[#78716c] mb-5 leading-relaxed">
         Users who added phone number and email received 64% more positive feedback from recruiters.
       </p>
 
-      <div className="mb-3">
-        <label className="block text-[0.8125rem] font-semibold text-cvmora-ink/80 mb-1.5">Job Target</label>
-        <input
-          type="text"
-          value={data.jobTarget ?? ''}
-          onChange={(e) => updateJobTarget(e.target.value)}
-          placeholder="The role you want"
-          className="input-premium text-[0.9375rem] py-2.5 w-full"
-        />
-      </div>
+      <Input
+        label="Job Target"
+        value={data.jobTarget ?? ''}
+        onChange={(v) => updateJobTarget(v)}
+        placeholder="The role you want"
+      />
 
       {showPhotoOption && (
         <div className="mb-4">
-          <label className="block text-[0.8125rem] font-semibold text-cvmora-ink/80 mb-1.5">Profile photo</label>
+          <label className="block text-[13px] font-medium text-[#44403c] mb-2">Profile photo</label>
           <input
             ref={photoInputRef}
             type="file"
@@ -100,29 +126,29 @@ function PersonalDetailsStep() {
             className="hidden"
             aria-label="Upload profile photo"
           />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => photoInputRef.current?.click()}
-              className="w-20 h-20 rounded-full overflow-hidden border-2 border-dashed border-[#e7e5e4] bg-[#f5f5f4] flex items-center justify-center shrink-0 hover:border-[#f97316] hover:bg-[#fff7ed] transition-colors"
+              className="w-16 h-16 rounded-full overflow-hidden border-2 border-dashed border-[#d6d3d1] bg-[#fafaf9] flex items-center justify-center shrink-0 hover:border-[#f97316] hover:bg-[#fff7ed] transition-colors"
             >
               {c.photo ? (
                 <img src={c.photo} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-[#86868b] text-2xl" aria-hidden>+</span>
+                <svg className="w-5 h-5 text-[#a8a29e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg>
               )}
             </button>
             <div className="min-w-0">
-              <p className="text-[0.8125rem] text-[#6e6e73]">
-                {c.photo ? 'Click to change photo' : 'Add a professional headshot. JPG, PNG or WebP.'}
+              <p className="text-[13px] text-[#78716c]">
+                {c.photo ? 'Click to change photo' : 'JPG, PNG or WebP'}
               </p>
               {c.photo && (
                 <button
                   type="button"
                   onClick={() => updateContact({ photo: '' })}
-                  className="text-[0.8125rem] font-medium text-[#f97316] hover:underline mt-0.5"
+                  className="text-[13px] font-medium text-[#f97316] hover:underline mt-0.5"
                 >
-                  Remove photo
+                  Remove
                 </button>
               )}
             </div>
@@ -130,7 +156,7 @@ function PersonalDetailsStep() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3">
         <Input
           label="First Name"
           value={c.firstName ?? ''}
@@ -144,9 +170,9 @@ function PersonalDetailsStep() {
           placeholder="Last name"
         />
       </div>
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3">
         <Input
-          label="Email*"
+          label="Email"
           value={c.email}
           onChange={(v) => updateContact({ email: v })}
           placeholder="you@example.com"
@@ -165,7 +191,7 @@ function PersonalDetailsStep() {
         onChange={(v) => updateContact({ address: v })}
         placeholder="Street address"
       />
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3">
         <Input
           label="City, State"
           value={(c.city ?? '') + (c.state ? ', ' + (c.state ?? '') : '')}
@@ -202,7 +228,7 @@ function PersonalDetailsStep() {
           <button
             type="button"
             onClick={() => setShowMore(false)}
-            className="text-sm text-[var(--color-primary)] font-medium hover:underline"
+            className="text-[13px] text-[#f97316] font-medium hover:underline"
           >
             Show less
           </button>
@@ -211,9 +237,9 @@ function PersonalDetailsStep() {
         <button
           type="button"
           onClick={() => setShowMore(true)}
-          className="flex items-center gap-1.5 text-sm text-[var(--color-primary)] font-medium hover:underline"
+          className="flex items-center gap-1.5 text-[13px] text-[#f97316] font-medium hover:underline mt-1"
         >
-          <span className="text-[0.75rem]" aria-hidden>▼</span>
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
           Add more details
         </button>
       )}
@@ -222,27 +248,29 @@ function PersonalDetailsStep() {
 }
 
 function ExperienceStepContent() {
-  const { data, addExperience, updateExperience, removeExperience } = useResume()
+  const { data, addExperience, updateExperience, removeExperience, setExperienceFormat } = useResume()
   const experience = data.experience
+  const fmt = data.experienceFormat ?? 'bullets'
 
   return (
-    <div className="px-4 py-4">
-      <h1 className="text-xl font-bold text-cvmora-ink tracking-tight mb-1">Employment History</h1>
-      <p className="text-[0.8125rem] text-cvmora-muted mb-6">
+    <div className="px-5 py-5">
+      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Employment History</h1>
+      <p className="text-[13px] text-[#78716c] mb-5 leading-relaxed">
         List your most recent roles first. Include job title, company, dates and key achievements.
       </p>
+      <FormatToggle value={fmt} onChange={setExperienceFormat} />
       {experience.map((exp) => (
         <div
           key={exp.id}
-          className="mb-4 p-5 rounded-xl border border-cvmora-ink/8 bg-white shadow-[var(--shadow-xs)]"
+          className="mb-4 p-4 rounded-xl border border-[#e7e5e4] bg-white"
         >
-          <div className="flex justify-between items-start gap-2 mb-2">
-            <span className="text-xs text-[var(--color-primary)] font-medium">Job</span>
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-xs font-semibold text-[#f97316]">Job</span>
             {experience.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeExperience(exp.id)}
-                className="text-xs text-red-600 hover:underline"
+                className="text-xs text-[#dc2626] font-medium hover:underline"
               >
                 Remove
               </button>
@@ -251,7 +279,7 @@ function ExperienceStepContent() {
           <Input label="Job title" value={exp.jobTitle} onChange={(v) => updateExperience(exp.id, { jobTitle: v })} />
           <Input label="Company" value={exp.company} onChange={(v) => updateExperience(exp.id, { company: v })} />
           <Input label="Location" value={exp.location} onChange={(v) => updateExperience(exp.id, { location: v })} />
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <Input
               label="Start"
               value={exp.startDate}
@@ -265,59 +293,62 @@ function ExperienceStepContent() {
               placeholder="Present"
             />
           </div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-3">
             <input
               type="checkbox"
               id={`current-${exp.id}`}
               checked={exp.current}
               onChange={(e) => updateExperience(exp.id, { current: e.target.checked })}
-              className="rounded border-cvmora-ink/30"
+              className="rounded border-[#d6d3d1] text-[#f97316] focus:ring-[#f97316]"
             />
-            <label htmlFor={`current-${exp.id}`} className="text-xs text-cvmora-ink/80">
+            <label htmlFor={`current-${exp.id}`} className="text-[13px] text-[#44403c]">
               I currently work here
             </label>
           </div>
           <TextArea
             label="Description (bullets on new lines)"
             value={exp.description}
-            onChange={(v) => updateExperience(exp.id, { description: v })}
-            rows={8}
+            onChange={(v) => updateExperience(exp.id, { description: toBulletedLines(v) })}
+            rows={6}
           />
         </div>
       ))}
       <button
         type="button"
         onClick={addExperience}
-        className="text-sm text-[var(--color-primary)] font-medium hover:underline"
+        className="flex items-center gap-1.5 text-[13px] text-[#f97316] font-semibold hover:underline"
       >
-        + Add experience
+        <span className="text-base leading-none">+</span>
+        Add experience
       </button>
     </div>
   )
 }
 
 function EducationStepContent() {
-  const { data, addEducation, updateEducation, removeEducation } = useResume()
+  const { data, addEducation, updateEducation, removeEducation, setEducationFormat } = useResume()
   const education = data.education
+  const fmt = data.educationFormat ?? 'bullets'
 
   return (
-    <div className="px-4 py-4">
-      <h1 className="text-xl font-bold text-cvmora-ink tracking-tight mb-1">Education</h1>
-      <p className="text-[0.8125rem] text-cvmora-muted mb-6">
+    <div className="px-5 py-5">
+      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Education</h1>
+      <p className="text-[13px] text-[#78716c] mb-5 leading-relaxed">
         Add your degrees and certifications. Most recent first.
       </p>
+      <FormatToggle value={fmt} onChange={setEducationFormat} />
       {education.map((edu) => (
         <div
           key={edu.id}
-          className="mb-4 p-5 rounded-xl border border-cvmora-ink/8 bg-white shadow-[var(--shadow-xs)]"
+          className="mb-4 p-4 rounded-xl border border-[#e7e5e4] bg-white"
         >
-          <div className="flex justify-between items-start gap-2 mb-2">
-            <span className="text-xs text-[var(--color-primary)] font-medium">School</span>
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-xs font-semibold text-[#f97316]">School</span>
             {education.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeEducation(edu.id)}
-                className="text-xs text-red-600 hover:underline"
+                className="text-xs text-[#dc2626] font-medium hover:underline"
               >
                 Remove
               </button>
@@ -326,7 +357,7 @@ function EducationStepContent() {
           <Input label="Degree" value={edu.degree} onChange={(v) => updateEducation(edu.id, { degree: v })} />
           <Input label="School" value={edu.school} onChange={(v) => updateEducation(edu.id, { school: v })} />
           <Input label="Location" value={edu.location} onChange={(v) => updateEducation(edu.id, { location: v })} />
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <Input
               label="Start"
               value={edu.startDate}
@@ -342,16 +373,17 @@ function EducationStepContent() {
             label="Details"
             value={edu.description}
             onChange={(v) => updateEducation(edu.id, { description: v })}
-            rows={8}
+            rows={4}
           />
         </div>
       ))}
       <button
         type="button"
         onClick={addEducation}
-        className="text-sm text-[var(--color-primary)] font-medium hover:underline"
+        className="flex items-center gap-1.5 text-[13px] text-[#f97316] font-semibold hover:underline"
       >
-        + Add education
+        <span className="text-base leading-none">+</span>
+        Add education
       </button>
     </div>
   )
@@ -400,12 +432,12 @@ function SkillsStepContent() {
   }
 
   return (
-    <div className="px-4 py-4">
-      <h1 className="text-lg font-bold text-cvmora-ink tracking-tight mb-1">Skills</h1>
-      <p className="text-[0.8125rem] text-cvmora-muted mb-4">
-        Choose important skills that show you fit the position. Match key skills from the job listing when applying online.
+    <div className="px-5 py-5">
+      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Skills</h1>
+      <p className="text-[13px] text-[#78716c] mb-4 leading-relaxed">
+        Choose skills that show you fit the position. Match key skills from the job listing.
       </p>
-      <div className="space-y-3 mb-4">
+      <div className="space-y-2.5 mb-4">
         {skills.map((skill, index) => {
           const suggestions = getSkillSuggestions(skill)
           const showList = focusedIndex === index && suggestions.length > 0
@@ -413,7 +445,7 @@ function SkillsStepContent() {
           return (
             <div
               key={index}
-              className="relative flex flex-col gap-0 p-3 rounded-lg border border-cvmora-ink/10 bg-white"
+              className="relative flex flex-col gap-0 p-3 rounded-xl border border-[#e7e5e4] bg-white"
             >
               <div className="flex items-center gap-2">
                 <input
@@ -423,7 +455,7 @@ function SkillsStepContent() {
                   onFocus={() => setFocusedIndex(index)}
                   onBlur={() => setTimeout(() => setFocusedIndex(null), 180)}
                   placeholder="e.g. Leadership, Python, Project management"
-                  className="input-premium text-[0.9375rem] py-2 flex-1 min-w-0"
+                  className="input-premium text-[15px] py-2 flex-1 min-w-0"
                   autoComplete="off"
                 />
                 <div className="flex items-center gap-0.5 shrink-0">
@@ -431,35 +463,35 @@ function SkillsStepContent() {
                     <button
                       type="button"
                       onClick={() => moveSkill(index, -1)}
-                      className="p-1.5 rounded text-cvmora-ink/50 hover:bg-cvmora-ink/10 hover:text-cvmora-ink"
+                      className="p-1.5 rounded-md text-[#a8a29e] hover:bg-[#f5f5f4] hover:text-[#1c1917] transition-colors"
                       aria-label="Move up"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
                     </button>
                   )}
                   {index < skills.length - 1 && (
                     <button
                       type="button"
                       onClick={() => moveSkill(index, 1)}
-                      className="p-1.5 rounded text-cvmora-ink/50 hover:bg-cvmora-ink/10 hover:text-cvmora-ink"
+                      className="p-1.5 rounded-md text-[#a8a29e] hover:bg-[#f5f5f4] hover:text-[#1c1917] transition-colors"
                       aria-label="Move down"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={() => removeSkill(index)}
-                    className="p-1.5 rounded text-cvmora-ink/50 hover:bg-red-50 hover:text-red-600"
+                    className="p-1.5 rounded-md text-[#a8a29e] hover:bg-red-50 hover:text-[#dc2626] transition-colors"
                     aria-label="Remove skill"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
               </div>
               {showList && (
                 <ul
-                  className="absolute left-3 right-14 top-full z-10 mt-1 max-h-[220px] overflow-y-auto rounded-lg border border-cvmora-ink/15 bg-white py-1 shadow-lg"
+                  className="absolute left-3 right-14 top-full z-10 mt-1 max-h-[200px] overflow-y-auto rounded-xl border border-[#e7e5e4] bg-white py-1 shadow-lg"
                   onMouseDown={(e) => e.preventDefault()}
                   role="listbox"
                 >
@@ -467,7 +499,7 @@ function SkillsStepContent() {
                     <li key={i} role="option">
                       <button
                         type="button"
-                        className="w-full px-3 py-2 text-left text-[0.9375rem] text-cvmora-ink hover:bg-[var(--color-primary)]/10 focus:bg-[var(--color-primary)]/10 focus:outline-none"
+                        className="w-full px-3 py-2 text-left text-[14px] text-[#1c1917] hover:bg-[#fff7ed] focus:bg-[#fff7ed] focus:outline-none transition-colors"
                         onMouseDown={() => applySuggestion(index, s)}
                       >
                         {s}
@@ -483,9 +515,9 @@ function SkillsStepContent() {
       <button
         type="button"
         onClick={addSkill}
-        className="flex items-center gap-2 text-[var(--color-primary)] font-semibold text-[0.9375rem] hover:underline"
+        className="flex items-center gap-1.5 text-[13px] text-[#f97316] font-semibold hover:underline"
       >
-        <span className="text-lg leading-none">+</span>
+        <span className="text-base leading-none">+</span>
         Add one more skill
       </button>
     </div>
@@ -493,19 +525,21 @@ function SkillsStepContent() {
 }
 
 function SummaryStepContent() {
-  const { data, updateSummary } = useResume()
+  const { data, updateSummary, setDescriptionFormat } = useResume()
+  const fmt = data.descriptionFormat ?? 'bullets'
   return (
-    <div className="px-4 py-4">
-      <h1 className="text-xl font-bold text-cvmora-ink tracking-tight mb-1">Professional summary</h1>
-      <p className="text-[0.8125rem] text-cvmora-muted mb-6">
+    <div className="px-5 py-5">
+      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Professional Summary</h1>
+      <p className="text-[13px] text-[#78716c] mb-5 leading-relaxed">
         A few sentences about your experience and goals. Recruiters often read this first.
       </p>
+      <FormatToggle value={fmt} onChange={setDescriptionFormat} />
       <TextArea
         label="Summary"
         value={data.summary}
         onChange={updateSummary}
         placeholder="A few lines about your experience and goals..."
-        rows={4}
+        rows={8}
       />
     </div>
   )
@@ -540,9 +574,7 @@ export function BuilderStepFooter({
   onNext: () => void
   onBack: () => void
   onStepClick?: (index: number) => void
-  /** When on last step, clicking Finish calls this instead of onNext */
   onFinish?: () => void
-  /** When false, Next button is disabled (e.g. required email on Personal Details) */
   canProceed?: boolean
 }) {
   const total = BUILDER_STEPS.length
@@ -551,47 +583,45 @@ export function BuilderStepFooter({
   const handleMainAction = isLast && onFinish ? onFinish : onNext
 
   return (
-    <footer className="flex-none flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 px-3 sm:px-4 py-3 border-t border-cvmora-ink/8 bg-white">
-      {/* Top row on mobile: Terms + Back (left), Next (right). Bottom row: dots */}
-      <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 min-w-0 order-1 sm:order-1">
-        <p className="text-[0.6875rem] text-cvmora-ink/50 shrink-0">
-          <a href="/privacy" className="text-[var(--color-primary)] hover:underline py-2">Terms</a> & <a href="/privacy" className="text-[var(--color-primary)] hover:underline py-2">Privacy</a>
-        </p>
-        {stepIndex > 0 && (
+    <footer className="flex-none flex items-center justify-between gap-3 px-4 py-3 border-t border-[#e7e5e4] bg-white">
+      <div className="flex items-center gap-2">
+        {stepIndex > 0 ? (
           <button
             type="button"
             onClick={onBack}
-            className="shrink-0 min-h-[44px] px-4 py-2 rounded-[980px] border border-cvmora-ink/15 text-[15px] sm:text-[17px] font-normal text-cvmora-ink/80 hover:bg-cvmora-ink/5 active:bg-cvmora-ink/10 transition-colors flex items-center"
+            className="min-h-[40px] px-4 py-2 rounded-full border border-[#e7e5e4] text-[14px] font-medium text-[#44403c] hover:bg-[#fafaf9] active:bg-[#f5f5f4] transition-colors"
           >
             Back
           </button>
+        ) : (
+          <a href="/privacy" className="text-[11px] text-[#a8a29e] hover:text-[#78716c]">Terms & Privacy</a>
         )}
       </div>
-      <div className="flex items-center justify-center gap-2 shrink-0 order-3 sm:order-2">
+
+      <div className="flex items-center gap-1.5">
         {Array.from({ length: total }, (_, i) => (
           <button
             key={i}
             type="button"
             onClick={() => onStepClick?.(i)}
-            aria-label={`Step ${i + 1}`}
-            className={`w-3 h-3 sm:w-2.5 sm:h-2.5 rounded-full transition-colors p-0.5 ${
-              i === stepIndex ? 'bg-[#f97316]' : 'bg-black/15 hover:bg-black/25'
-            } ${onStepClick ? 'cursor-pointer' : 'cursor-default'}`}
+            aria-label={`Step ${i + 1}: ${BUILDER_STEPS[i].title}`}
+            className={`w-2.5 h-2.5 rounded-full transition-all ${
+              i === stepIndex ? 'bg-[#f97316] scale-125' : i < stepIndex ? 'bg-[#f97316]/40' : 'bg-[#d6d3d1]'
+            } ${onStepClick ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
           />
         ))}
+        <span className="text-[11px] text-[#a8a29e] tabular-nums ml-1">{stepIndex + 1}/{total}</span>
       </div>
-      <div className="flex items-center justify-end gap-2 shrink-0 order-2 sm:order-3">
-        <span className="text-[0.75rem] text-cvmora-ink/60 tabular-nums hidden sm:inline">{stepIndex + 1}/{total}</span>
-        <button
-          type="button"
-          onClick={handleMainAction}
-          disabled={!canProceed}
-          title={!canProceed && stepIndex === 0 ? 'Please enter your email to continue' : undefined}
-          className="min-h-[44px] px-4 py-2.5 rounded-full bg-[#BFED8D] text-[#1c1917] text-[15px] sm:text-[16px] font-medium border border-[#a8e070] hover:bg-[#b0e87d] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#BFED8D] flex items-center"
-        >
-          {isLast ? 'Finish' : `Next: ${step.nextLabel}`}
-        </button>
-      </div>
+
+      <button
+        type="button"
+        onClick={handleMainAction}
+        disabled={!canProceed}
+        title={!canProceed && stepIndex === 0 ? 'Please enter your email to continue' : undefined}
+        className="min-h-[40px] px-5 py-2 rounded-full bg-[#BFED8D] text-[#1c1917] text-[14px] font-semibold border border-[#a8e070] hover:bg-[#b0e87d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        {isLast ? 'Finish' : `Next: ${step.nextLabel}`}
+      </button>
     </footer>
   )
 }

@@ -1,6 +1,6 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing, textSafeAccent, truncateForPreview } from './resumeSpacing'
+import { resumeSpacing, textSafeAccent } from './resumeSpacing'
 
 function hasContent(exp: { jobTitle?: string; company?: string; description?: string }) {
   return !!(exp.jobTitle?.trim() || exp.company?.trim() || exp.description?.trim())
@@ -9,71 +9,68 @@ function hasEduContent(edu: { degree?: string; school?: string; description?: st
   return !!(edu.degree?.trim() || edu.school?.trim() || edu.description?.trim())
 }
 
-/** Thin vertical accent line on left (3px). Editorial magazine-inspired. Section headings in accent with tracking. */
-export function VerticalLineTemplate({ data, accentColor }: { data: ResumeData; accentColor?: string }) {
-  const { contact, summary, experience, education, skills, references } = data
+export function AuraTemplate({ data, accentColor }: { data: ResumeData; accentColor?: string }) {
+  const { contact, summary, experience, education, skills, references, jobTarget } = data
   const line = (s: string) => s.split('\n').filter(Boolean)
   const name = displayName(contact)
+  const accent = accentColor ?? '#ec4899'
+  const safeAccent = textSafeAccent(accent)
+
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
   const hasSummary = !!(summary?.trim())
   const hasSkills = skills.filter(Boolean).length > 0
-  const accent = accentColor ?? '#6366f1'
-  const safeAccent = textSafeAccent(accent)
-  const ph = (s: string) => <span className="text-[#94a3b8]">{s}</span>
 
-  return (
-    <div className="vertical-line-template bg-white text-[#374151] min-h-[842px] max-w-[210mm] mx-auto font-sans relative">
-      {/* Vertical accent line - full height, absolute */}
-      <div
-        className="absolute left-0 top-0 bottom-0 w-[3px]"
+  const contactItems: string[] = []
+  if (contact.email) contactItems.push(contact.email)
+  if (contact.phone) contactItems.push(contact.phone)
+  if (contact.address?.trim()) contactItems.push(contact.address.trim())
+  else if (contact.location) contactItems.push(contact.location)
+
+  const SectionH = ({ title }: { title: string }) => (
+    <h2 className="text-[11px] font-semibold text-[#0f172a] tracking-[0.15em] uppercase text-center mb-2">
+      {title}
+      <span
+        className="block w-6 h-[2px] mx-auto mt-1 rounded-full"
         style={{ backgroundColor: accent }}
         aria-hidden
       />
-      <div className="pl-10 pt-10 pr-8 pb-8 min-w-0">
-        <div className="flex items-start gap-4 mb-6">
-          {contact.photo && (
-            <img
-              src={contact.photo}
-              alt=""
-              className="w-14 h-14 rounded object-cover shrink-0 border-2"
-              style={{ borderColor: accent }}
-            />
-          )}
-          <div>
-            <h1 className="text-[24px] font-bold text-[#0f172a] tracking-tight">
-              {name || ph('Your name')}
-            </h1>
-            {data.jobTarget?.trim() && (
-              <p className="text-[11px] font-medium text-[#64748b] mt-0.5">
-                {data.jobTarget.trim()}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[12.5px] text-[#64748b] mt-2">
-              {contact.email || contact.phone || (contact.address?.trim() || contact.location) ? (
-                <>
-                  {contact.email && <span>{contact.email}</span>}
-                  {contact.phone && <span>{contact.phone}</span>}
-                  {(contact.address?.trim() || contact.location) && (
-                    <span>{(contact.address?.trim() || contact.location)}</span>
-                  )}
-                </>
-              ) : (
-                ph('Email · Phone · Location')
-              )}
-            </div>
-          </div>
-        </div>
+    </h2>
+  )
 
+  return (
+    <div className="aura-template bg-white text-[#0f172a] min-h-[842px] max-w-[210mm] mx-auto font-sans text-[13px] leading-[1.55] overflow-visible">
+      <header className="text-center pt-7 pb-3 px-8">
+        {contact.photo && (
+          <img
+            src={contact.photo}
+            alt=""
+            className="w-14 h-14 rounded-full object-cover mx-auto mb-3 shadow-sm border border-[#e2e8f0]"
+          />
+        )}
+        <h1 className="text-[24px] font-bold text-[#0f172a] tracking-tight">
+          {name || <span className="text-[#94a3b8]">Your name</span>}
+        </h1>
+        {jobTarget?.trim() && (
+          <p className="text-[12px] text-[#64748b] mt-0.5">{jobTarget.trim()}</p>
+        )}
+        {contactItems.length > 0 && (
+          <div className="inline-flex items-center justify-center bg-[#f8fafc] border border-[#e2e8f0] px-4 py-1.5 rounded-2xl mt-2">
+            <span className="text-[11px] text-[#64748b]">{contactItems.join('  ·  ')}</span>
+          </div>
+        )}
+        <div
+          className="w-10 h-[2px] mx-auto mt-3 rounded-full"
+          style={{ backgroundColor: accent }}
+          aria-hidden
+        />
+      </header>
+
+      <div className="px-8 pt-3 pb-8">
         {hasSummary && (
           <section className={resumeSpacing.section}>
-            <h2
-              className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
-              style={{ color: safeAccent }}
-            >
-              Professional Summary
-            </h2>
+            <SectionH title="Summary" />
             {data.descriptionFormat === 'bullets' && summary.includes('\n') ? (
               <ul className="list-disc pl-5 text-[12.5px] text-[#374151] space-y-1 leading-[1.65] summary-desc">
                 {summary.split('\n').filter((l) => l.trim()).map((l, i) => (
@@ -81,47 +78,24 @@ export function VerticalLineTemplate({ data, accentColor }: { data: ResumeData; 
                 ))}
               </ul>
             ) : (
-              <p className="text-[12.5px] text-[#374151] leading-[1.65] mt-1">
-                {truncateForPreview(summary)}
-              </p>
+              <p className={resumeSpacing.summary}>{summary}</p>
             )}
-          </section>
-        )}
-
-        {hasSkills && (
-          <section className={resumeSpacing.section}>
-            <h2
-              className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
-              style={{ color: safeAccent }}
-            >
-              Skills
-            </h2>
-            <p className="text-[12.5px] text-[#374151] leading-[1.65] mt-1">
-              {skills.filter(Boolean).join(' · ')}
-            </p>
           </section>
         )}
 
         {showExperience && (
           <section className={resumeSpacing.section}>
-            <h2
-              className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
-              style={{ color: safeAccent }}
-            >
-              Work History
-            </h2>
+            <SectionH title="Experience" />
             <div className={resumeSpacing.expWrapper}>
               {experience.filter(hasContent).map((exp) => (
                 <div key={exp.id}>
                   <div className="flex justify-between items-baseline gap-2 flex-nowrap">
-                    <span className="font-semibold text-[#0f172a] min-w-0 truncate text-[12.5px]">
-                      {exp.jobTitle}
-                    </span>
+                    <span className="font-bold text-[#0f172a] min-w-0 truncate text-[12.5px]">{exp.jobTitle}</span>
                     <span className="text-[10.5px] text-[#64748b] whitespace-nowrap shrink-0">
                       {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
                     </span>
                   </div>
-                  <div className="text-[12.5px] text-[#64748b] mt-0.5">
+                  <div className={resumeSpacing.companyLine}>
                     {exp.company}
                     {exp.location && ` · ${exp.location}`}
                   </div>
@@ -140,12 +114,7 @@ export function VerticalLineTemplate({ data, accentColor }: { data: ResumeData; 
 
         {showEducation && (
           <section className={resumeSpacing.section}>
-            <h2
-              className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
-              style={{ color: safeAccent }}
-            >
-              Education
-            </h2>
+            <SectionH title="Education" />
             {education.filter(hasEduContent).map((edu) => (
               <div key={edu.id} className={resumeSpacing.eduEntry} style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
                 <div className="font-semibold text-[#0f172a] text-[12.5px]">{edu.degree}</div>
@@ -155,15 +124,15 @@ export function VerticalLineTemplate({ data, accentColor }: { data: ResumeData; 
                     {edu.location && ` · ${edu.location}`}
                   </span>
                   {edu.startDate && (
-                    <span className="text-[10.5px] text-[#94a3b8] whitespace-nowrap shrink-0 ml-auto">
+                    <span className="text-[10.5px] text-[#64748b] whitespace-nowrap shrink-0 ml-auto">
                       {edu.startDate} – {edu.endDate}
                     </span>
                   )}
                 </div>
                 {edu.description && (
-                  <ul className="list-disc pl-5 mt-1 text-[12.5px] text-[#374151] space-y-0.5 edu-desc">
-                    {edu.description.split('\n').filter(Boolean).map((line, j) => (
-                      <li key={j}>{line}</li>
+                  <ul className="list-disc pl-5 mt-1 text-[12.5px] text-[#374151] space-y-0.5 edu-desc leading-[1.6]">
+                    {edu.description.split('\n').filter(Boolean).map((eduLine, j) => (
+                      <li key={j}>{eduLine}</li>
                     ))}
                   </ul>
                 )}
@@ -172,14 +141,25 @@ export function VerticalLineTemplate({ data, accentColor }: { data: ResumeData; 
           </section>
         )}
 
+        {hasSkills && (
+          <section className={resumeSpacing.section}>
+            <SectionH title="Skills" />
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {skills.filter(Boolean).map((s, i) => (
+                <span
+                  key={i}
+                  className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border border-[#e2e8f0] bg-[#fafafa] text-[#374151]"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
         {hasRefs && (
           <section>
-            <h2
-              className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
-              style={{ color: safeAccent }}
-            >
-              References
-            </h2>
+            <SectionH title="References" />
             <div className={resumeSpacing.refBlock}>
               {references!.map((ref, i) => (
                 <div key={i}>

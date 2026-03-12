@@ -6,6 +6,7 @@ interface User {
   email: string
   name: string
   created_at?: string
+  subscription_status?: string
 }
 
 interface AuthContextValue {
@@ -16,6 +17,7 @@ interface AuthContextValue {
   register: (email: string, password: string, name?: string, confirmPassword?: string) => Promise<{ needVerification?: boolean; email?: string } | void>
   completeOAuthLogin: (token: string) => Promise<void>
   updateProfile: (updates: { name?: string }) => Promise<void>
+  refreshUser: () => Promise<void>
   logout: () => void
   isAuthenticated: boolean
 }
@@ -96,6 +98,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [token, persist]
   )
 
+  const refreshUser = useCallback(async () => {
+    if (!token) return
+    const u = await api<User>('/auth/me')
+    persist(token, u)
+  }, [token, persist])
+
   useEffect(() => {
     setLoading(false)
   }, [])
@@ -108,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     completeOAuthLogin,
     updateProfile,
+    refreshUser,
     logout,
     isAuthenticated: !!token && !!user,
   }

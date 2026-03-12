@@ -17,7 +17,7 @@ const previewExample: ResumeData = {
     email: 'jordan.taylor@email.com',
     phone: '(555) 321-6543',
     location: 'Denver, CO',
-    address: '150 Main Street, Denver',
+    address: '72 Firestview',
     city: 'Denver',
     state: 'CO',
     country: 'USA',

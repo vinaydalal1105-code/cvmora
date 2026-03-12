@@ -8,37 +8,40 @@ export function truncateForPreview(text: string, maxLen = 2500): string {
 }
 
 /**
+ * Returns a color safe for text on white backgrounds.
+ * Dark accents (navy, forest, charcoal) pass through unchanged.
+ * Light/pastel accents fall back to #1e293b (dark slate) since darkening
+ * pastels just produces muddy, unattractive colors.
+ */
+export function textSafeAccent(hex: string): string {
+  const h = hex.replace(/^#/, '')
+  if (h.length !== 6) return hex
+  const r = parseInt(h.slice(0, 2), 16) / 255
+  const g = parseInt(h.slice(2, 4), 16) / 255
+  const b = parseInt(h.slice(4, 6), 16) / 255
+  const lum = 0.299 * r + 0.587 * g + 0.114 * b
+  if (lum <= 0.4) return hex
+  return '#1e293b'
+}
+
+/**
  * Shared spacing and typography for resume templates.
  * Use these constants so line spacing and section spacing are identical across all templates.
  */
 export const resumeSpacing = {
-  /** Section wrapper (e.g. Summary, Experience, Education) */
-  section: 'mb-4',
-  /** Section heading (h2) */
+  section: 'mb-5',
   sectionHeading:
-    'text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 pb-0.5 border-b border-[#e5e7eb]',
-  /** Summary / profile paragraph */
-  summary: 'text-[13px] text-[#333] leading-relaxed mt-1',
-  /** Summary when parent already sets text size (e.g. CleanTemplate) */
-  summaryPlain: 'text-[#333] leading-relaxed mt-1',
-  /** Bullet list (experience descriptions) */
-  bulletList: 'mt-1.5 list-disc pl-4 space-y-1 text-[#333] text-[13px] leading-relaxed',
-  /** Single experience/education entry block */
+    'text-[11px] font-bold uppercase tracking-[0.18em] text-[#111827] mb-2 pb-1 border-b border-[#d1d5db]',
+  summary: 'text-[12.5px] text-[#374151] leading-[1.65] mt-1',
+  summaryPlain: 'text-[#374151] leading-[1.65] mt-1',
+  bulletList: 'mt-1.5 list-disc pl-4 space-y-[3px] text-[#374151] text-[12.5px] leading-[1.6]',
   expEntry: 'mb-4',
-  /** Company / institution line under job title */
-  companyLine: 'text-[12px] text-[#4b5563] mt-0.5',
-  /** Education entry block */
+  companyLine: 'text-[11.5px] text-[#6b7280] mt-0.5 font-medium',
   eduEntry: 'mb-3',
-  /** Education description paragraph */
-  eduDescription: 'text-[13px] text-[#333] mt-1 leading-relaxed',
-  /** Education description (same size as experience for visibility) */
-  eduDescriptionSm: 'text-[13px] text-[#333] mt-1 leading-relaxed',
-  /** Skills paragraph */
-  skills: 'text-[13px] text-[#333] leading-relaxed mt-1',
-  /** Skills when parent sets text size */
-  skillsPlain: 'text-[#333] leading-relaxed mt-1',
-  /** References container - break-words so long emails stay inside bounds */
-  refBlock: 'text-[13px] text-[#333] space-y-1.5 leading-relaxed mt-1 break-words overflow-hidden',
-  /** Wrapper for multiple experience entries (space between jobs) */
+  eduDescription: 'text-[12.5px] text-[#374151] mt-1 leading-[1.6]',
+  eduDescriptionSm: 'text-[12.5px] text-[#374151] mt-1 leading-[1.6]',
+  skills: 'text-[12.5px] text-[#374151] leading-[1.65] mt-1',
+  skillsPlain: 'text-[#374151] leading-[1.65] mt-1',
+  refBlock: 'text-[12.5px] text-[#374151] space-y-1.5 leading-[1.6] mt-1 break-words overflow-hidden',
   expWrapper: 'space-y-4',
 } as const

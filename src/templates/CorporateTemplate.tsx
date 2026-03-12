@@ -2,7 +2,6 @@ import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
 import { resumeSpacing, truncateForPreview } from './resumeSpacing'
 
-/** True if hex background is light, so we should use dark text for contrast. */
 function isLightBg(hex: string): boolean {
   const h = hex.replace(/^#/, '')
   if (h.length !== 6) return false
@@ -33,7 +32,10 @@ export function CorporateTemplate({
 }) {
   const { jobTarget, contact, summary, experience, education, skills, references } = data
 
-  const line = (s: string) => s.split('\n').filter(Boolean)
+  const line = (s: string) => {
+    const rows = s.split('\n').map((row) => row.trim()).filter(Boolean)
+    return rows.filter((row, i) => i === 0 || row !== rows[i - 1])
+  }
   const name = displayName(contact)
   const showExperience = experience.some(hasContent)
   const showEducation = education.some(hasEduContent)
@@ -41,65 +43,53 @@ export function CorporateTemplate({
   const hasSummary = !!(summary?.trim())
   const hasSkills = skills.filter(Boolean).length > 0
 
-  const contactItems = [
-    contact.email,
-    contact.phone,
-    contact.address?.trim(),
-    contact.location,
-    contact.website,
-    contact.linkedin,
-  ].filter(Boolean)
-
   const isAccent = variant === 'accent'
-  const sidebarHex = accentColor ?? (isAccent ? '#002244' : '#f8f9fa')
+  const sidebarHex = accentColor ?? (isAccent ? '#0f172a' : '#f8fafc')
   const useAccentStyles = isAccent || !!accentColor
   const sidebarLight = useAccentStyles && isLightBg(sidebarHex)
-  const asideBg = useAccentStyles ? 'bg-transparent' : 'bg-[#f8f9fa]'
-  const asideStyle = useAccentStyles ? undefined : undefined
-  const asideBorder = useAccentStyles ? (sidebarLight ? 'border-[#1c1917]/15' : 'border-white/20') : 'border-[#e5e7eb]'
-  const asideTitle = useAccentStyles ? (sidebarLight ? 'text-[#1c1917]' : 'text-white') : 'text-[#374151]'
-  const asideText = useAccentStyles ? (sidebarLight ? 'text-[#374151]' : 'text-white/90') : 'text-[#4b5563]'
-  const asideLink = useAccentStyles ? (sidebarLight ? 'text-[#1d4ed8] underline' : 'text-white/90 underline') : 'text-[#2563eb] underline'
-  const nameClass = useAccentStyles ? (sidebarLight ? 'text-[#1c1917]' : 'text-white') : 'text-[#1c1c1c]'
-  const jobClass = useAccentStyles ? (sidebarLight ? 'text-[#4b5563]' : 'text-white/90') : 'text-[#6b7280]'
+
+  const asideBorder = useAccentStyles ? (sidebarLight ? 'border-[#0f172a]/10' : 'border-white/10') : 'border-[#e2e8f0]'
+  const asideTitle = useAccentStyles ? (sidebarLight ? 'text-[#0f172a]' : 'text-white') : 'text-[#0f172a]'
+  const asideText = useAccentStyles ? (sidebarLight ? 'text-[#1e293b]' : 'text-white/85') : 'text-[#64748b]'
+  const asideLink = useAccentStyles ? (sidebarLight ? 'text-[#0f172a] underline' : 'text-white/85 underline') : 'text-[#2563eb] underline'
+  const nameClass = useAccentStyles ? (sidebarLight ? 'text-[#0f172a]' : 'text-white') : 'text-[#0f172a]'
+  const jobClass = useAccentStyles ? (sidebarLight ? 'text-[#1e293b]' : 'text-white/80') : 'text-[#64748b]'
   const skillTag = useAccentStyles
     ? sidebarLight
-      ? 'px-2 py-1 rounded bg-[#1c1917]/10 text-[11px] text-[#1c1917] border border-[#1c1917]/20'
-      : 'px-2 py-1 rounded bg-white/10 text-[11px] text-white border border-white/20'
-    : 'px-2 py-0.5 rounded bg-white border border-[#e5e7eb] text-[11px] text-[#374151]'
+      ? 'px-2 py-[2px] rounded text-[10.5px] text-[#0f172a] bg-[#0f172a]/8 border border-[#0f172a]/15 font-medium'
+      : 'px-2 py-[2px] rounded text-[10.5px] text-white/90 bg-white/10 border border-white/15 font-medium'
+    : 'px-2 py-[2px] rounded bg-white border border-[#e2e8f0] text-[10.5px] text-[#334155] font-medium'
 
   const rootStyle =
     isAccent || accentColor
-      ? {
-          background: `linear-gradient(to right, ${sidebarHex} 0%, ${sidebarHex} 28%, #ffffff 28%, #ffffff 100%)`,
-        }
+      ? { background: `linear-gradient(to right, ${sidebarHex} 0%, ${sidebarHex} 28%, #ffffff 28%, #ffffff 100%)` }
       : undefined
 
   return (
     <div
-      className={`corporate-template text-[#1c1c1c] pt-6 px-0 pb-0 h-full min-h-[297mm] max-w-[210mm] mx-auto font-sans text-sm flex items-stretch overflow-hidden ${useAccentStyles ? 'rounded-t-lg' : ''}`}
+      className="corporate-template text-[#1a1a1a] pt-6 px-0 pb-0 h-full min-h-[297mm] max-w-[210mm] mx-auto font-sans text-[13px] leading-[1.55] flex items-stretch overflow-hidden"
       style={rootStyle}
     >
-      {/* Left sidebar – full height so color bar runs top to bottom */}
-      <aside className={`w-[28%] max-w-[60mm] border-r ${asideBorder} p-2.5 pt-6 shrink-0 min-h-full self-stretch ${asideBg}`} style={asideStyle}>
+      <aside className={`w-[28%] max-w-[60mm] border-r ${asideBorder} p-3 pt-6 shrink-0 min-h-full self-stretch ${useAccentStyles ? 'bg-transparent' : 'bg-[#f8fafc]'}`}>
         {contact.photo && (
           <img
             src={contact.photo}
             alt=""
-            className={`w-20 h-20 rounded-full object-cover mx-auto mb-2 border-2 ${sidebarLight ? 'border-[#1c1917]/25' : 'border-white/40'}`}
+            className={`w-[72px] h-[72px] rounded-full object-cover mx-auto mb-3 border-2 ${sidebarLight ? 'border-[#0f172a]/20' : 'border-white/30'}`}
           />
         )}
-        <h1 className={`text-xl font-bold tracking-tight mb-0.5 ${nameClass}`}>
-          {name || <span className="opacity-70 font-normal">Your name</span>}
+        <h1 className={`text-[18px] font-extrabold tracking-tight mb-0.5 ${nameClass}`}>
+          {name || <span className="opacity-50 font-normal">Your name</span>}
         </h1>
-        <p className={`text-[11px] uppercase tracking-wider mb-2 ${jobClass}`}>
-          {jobTarget?.trim() || <span className="normal-case opacity-70">Job title</span>}
+        <p className={`text-[10.5px] uppercase tracking-[0.15em] mb-3 font-semibold ${jobClass}`}>
+          {jobTarget?.trim() || <span className="normal-case opacity-50">Job title</span>}
         </p>
-        {contactItems.length > 0 && (
-          <div className="mb-2">
-            <h2 className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${asideTitle}`}>Details</h2>
-            <div className={`text-[12px] space-y-1 ${asideText}`}>
-              {contact.email && <div>{contact.email}</div>}
+
+        {(contact.email || contact.phone || contact.address?.trim() || contact.location || contact.website || contact.linkedin) && (
+          <div className="mb-4">
+            <h2 className={`text-[9.5px] font-bold uppercase tracking-[0.2em] mb-1.5 ${asideTitle}`}>Contact</h2>
+            <div className={`text-[11px] space-y-1.5 ${asideText}`}>
+              {contact.email && <div className="break-all">{contact.email}</div>}
               {contact.phone && <div>{contact.phone}</div>}
               {contact.address?.trim() && <div>{contact.address.trim()}</div>}
               {contact.location && <div>{contact.location}</div>}
@@ -109,54 +99,58 @@ export function CorporateTemplate({
                 </a>
               )}
               {contact.linkedin && (
-                <a href={contact.linkedin} className={asideLink + ' block'}>
-                  LinkedIn
-                </a>
+                <a href={contact.linkedin} className={asideLink + ' block'}>LinkedIn</a>
               )}
             </div>
           </div>
         )}
+
         {hasSkills && (
           <div>
-            <h2 className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${asideTitle}`}>Skills</h2>
+            <h2 className={`text-[9.5px] font-bold uppercase tracking-[0.2em] mb-1.5 ${asideTitle}`}>Skills</h2>
             <div className="flex flex-wrap gap-1.5">
               {skills.filter(Boolean).map((s, i) => (
-                <span key={i} className={skillTag}>
-                  {s}
-                </span>
+                <span key={i} className={skillTag}>{s}</span>
               ))}
             </div>
           </div>
         )}
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 px-6 pt-6 pb-6 min-w-0">
+      <div className="flex-1 px-6 pt-6 pb-8 min-w-0">
         {hasSummary && (
           <section className={resumeSpacing.section}>
             <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
-            <p className={resumeSpacing.summary}>{truncateForPreview(summary)}</p>
+            {data.descriptionFormat === 'bullets' && summary.includes('\n') ? (
+              <ul className="list-disc ml-4 text-[12.5px] text-[#374151] space-y-1 summary-desc leading-[1.65]">
+                {summary.split('\n').filter((l) => l.trim()).map((l, i) => (
+                  <li key={i}>{l.replace(/^[•\-]\s*/, '').trim()}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className={resumeSpacing.summary}>{truncateForPreview(summary)}</p>
+            )}
           </section>
         )}
 
         {showExperience && (
           <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Employment History</h2>
+            <h2 className={resumeSpacing.sectionHeading}>Experience</h2>
             <div className={resumeSpacing.expWrapper}>
               {experience.filter(hasContent).map((exp) => (
                 <div key={exp.id}>
-                  <div className="flex justify-between items-baseline gap-2 flex-wrap">
-                    <span className="font-semibold text-[#1c1c1c]">{exp.jobTitle}</span>
-                    <span className="text-[11px] text-[#6b7280]">
+                  <div className="flex justify-between items-baseline gap-2 flex-nowrap">
+                    <span className="font-bold text-[#0f172a] min-w-0 truncate">{exp.jobTitle}</span>
+                    <span className="text-[10.5px] text-[#94a3b8] whitespace-nowrap shrink-0 font-medium">
                       {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
                     </span>
                   </div>
-                  <div className="text-[12px] text-[#4b5563] font-medium mt-0.5">
+                  <div className="text-[11.5px] text-[#64748b] font-medium mt-0.5">
                     {exp.company}
                     {exp.location && ` · ${exp.location}`}
                   </div>
                   {exp.description && (
-                    <ul className={resumeSpacing.bulletList}>
+                    <ul className={`${resumeSpacing.bulletList} exp-desc`}>
                       {line(exp.description).map((bullet, i) => (
                         <li key={i}>{bullet.replace(/^[•\-]\s*/, '')}</li>
                       ))}
@@ -172,17 +166,25 @@ export function CorporateTemplate({
           <section className={resumeSpacing.section}>
             <h2 className={resumeSpacing.sectionHeading}>Education</h2>
             {education.filter(hasEduContent).map((edu) => (
-              <div key={edu.id} className={resumeSpacing.eduEntry}>
-                <span className="font-semibold text-[#1c1c1c]">{edu.degree}</span>
-                <span className="text-[#4b5563]"> — {edu.school}</span>
-                {(edu.location || edu.startDate) && (
-                  <span className="text-[12px] text-[#6b7280]">
-                    {' '}
-                    · {[edu.location, `${edu.startDate} – ${edu.endDate}`].filter(Boolean).join(' · ')}
+              <div key={edu.id} className={resumeSpacing.eduEntry} style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
+                <div className="font-bold text-[#0f172a]">{edu.degree}</div>
+                <div className="flex justify-between items-baseline gap-x-2 mt-0.5">
+                  <span className="text-[11.5px] text-[#64748b] font-medium">
+                    {edu.school}
+                    {edu.location && ` · ${edu.location}`}
                   </span>
-                )}
+                  {edu.startDate && (
+                    <span className="text-[10.5px] text-[#94a3b8] whitespace-nowrap shrink-0 ml-auto">
+                      {edu.startDate} – {edu.endDate}
+                    </span>
+                  )}
+                </div>
                 {edu.description && (
-                  <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>
+                  <ul className="list-disc ml-4 mt-1 text-[12px] text-[#374151] space-y-0.5 edu-desc leading-[1.6]">
+                    {edu.description.split('\n').filter(Boolean).map((line, j) => (
+                      <li key={j}>{line}</li>
+                    ))}
+                  </ul>
                 )}
               </div>
             ))}
@@ -195,10 +197,10 @@ export function CorporateTemplate({
             <div className={resumeSpacing.refBlock}>
               {references!.map((ref, i) => (
                 <div key={i}>
-                  <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
-                  {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
-                  {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
-                  {ref.phone && <span className="text-[#6b7280]"> · {ref.phone}</span>}
+                  <span className="font-semibold text-[#0f172a]">{ref.name}</span>
+                  {ref.affiliation && <span className="text-[#64748b]">, {ref.affiliation}</span>}
+                  {ref.email && <span className="text-[#94a3b8]"> · {ref.email}</span>}
+                  {ref.phone && <span className="text-[#94a3b8]"> · {ref.phone}</span>}
                 </div>
               ))}
             </div>

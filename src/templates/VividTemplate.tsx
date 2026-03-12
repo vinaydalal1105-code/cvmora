@@ -1,16 +1,14 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, textSafeAccent } from './resumeSpacing'
 
-/** True if hex background is light, so we should use dark text for contrast. */
 function isLightBg(hex: string): boolean {
   const h = hex.replace(/^#/, '')
   if (h.length !== 6) return false
   const r = parseInt(h.slice(0, 2), 16) / 255
   const g = parseInt(h.slice(2, 4), 16) / 255
   const b = parseInt(h.slice(4, 6), 16) / 255
-  const luminance = 0.299 * r + 0.587 * g + 0.114 * b
-  return luminance > 0.55
+  return 0.299 * r + 0.587 * g + 0.114 * b > 0.55
 }
 
 function hasContent(exp: { jobTitle?: string; company?: string; description?: string }) {
@@ -20,9 +18,17 @@ function hasEduContent(edu: { degree?: string; school?: string; description?: st
   return !!(edu.degree?.trim() || edu.school?.trim() || edu.description?.trim())
 }
 
-/** Vivid style: full-height colored left bar (amber/orange) with name, photo, contact; content on right */
 export function VividTemplate({ data, accentColor }: { data: ResumeData; accentColor?: string }) {
   const { jobTarget, contact, summary, experience, education, skills, references } = data
+  const accent = accentColor ?? '#f59e0b'
+  const safeAccent = textSafeAccent(accent)
+  const barLight = isLightBg(accent)
+  const asideNameClass = barLight ? 'text-[#0f172a]' : 'text-white'
+  const asideSubClass = barLight ? 'text-[#1e293b]' : 'text-white/90'
+  const asideTextClass = barLight ? 'text-[#1e293b]' : 'text-white/95'
+  const asideLinkClass = barLight ? 'text-[#0f172a] underline' : 'text-white underline'
+  const asidePhotoBorder = barLight ? 'border-[#0f172a]/20' : 'border-white/50'
+  const asidePlaceholder = barLight ? 'text-[#0f172a]/50' : 'text-white/50'
 
   const line = (s: string) => s.split('\n').filter(Boolean)
   const name = displayName(contact)
@@ -31,49 +37,42 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
   const hasRefs = references && references.length > 0
   const hasSummary = !!(summary?.trim())
   const hasSkills = skills.filter(Boolean).length > 0
-  const barColor = accentColor ?? '#f59e0b'
-  const barLight = isLightBg(barColor)
+  const ph = (s: string) => <span className={asidePlaceholder}>{s}</span>
+
   const rootStyle = {
-    background: `linear-gradient(to right, ${barColor} 0%, ${barColor} 26%, #ffffff 26%, #ffffff 100%)`,
+    background: `linear-gradient(to right, ${accent} 0%, ${accent} 28%, #ffffff 28%, #ffffff 100%)`,
   }
 
-  const asideNameClass = barLight ? 'text-[#1c1917]' : 'text-white'
-  const asideSubClass = barLight ? 'text-[#4b5563]' : 'text-amber-100'
-  const asideTextClass = barLight ? 'text-[#374151]' : 'text-amber-50'
-  const asideLinkClass = barLight ? 'text-[#1d4ed8] underline' : 'text-white underline'
-  const asidePhotoBorder = barLight ? 'border-[#1c1917]/25' : 'border-white/50'
-  const ph = (s: string) => <span className="text-[#9ca3af]">{s}</span>
+  const SectionH = ({ title }: { title: string }) => (
+    <h2 className="text-[10.5px] font-bold uppercase tracking-[0.18em] mb-2 pb-1.5 border-b border-[#e5e7eb]" style={{ color: safeAccent }}>
+      {title}
+    </h2>
+  )
 
   return (
     <div
-      className="vivid-template text-[#1a1a1a] min-h-full h-full max-w-[210mm] mx-auto font-sans text-sm flex items-stretch overflow-hidden rounded-t-lg"
+      className="vivid-template text-[#0f172a] min-h-[297mm] max-w-[210mm] mx-auto font-sans text-[13px] leading-[1.55] flex items-stretch overflow-hidden"
       style={rootStyle}
     >
-      {/* Full-height left bar: single block centered in the stripe */}
-      <aside className={`w-[26%] max-w-[55mm] bg-transparent p-3 shrink-0 h-full flex items-center justify-center min-h-0 ${barLight ? 'text-[#1c1917]' : 'text-white'}`}>
+      <aside
+        className={`w-[28%] max-w-[58mm] bg-transparent px-5 pt-8 pb-6 shrink-0 flex flex-col items-center self-stretch min-h-full ${barLight ? 'text-[#1e293b]' : 'text-white'}`}
+      >
         <div className="flex flex-col items-center gap-4 w-full text-center">
           {contact.photo && (
-            <img
-              src={contact.photo}
-              alt=""
-              className={`w-20 h-20 rounded-full object-cover border-2 ${asidePhotoBorder}`}
-            />
+            <img src={contact.photo} alt="" className={`w-24 h-24 rounded-full object-cover border-2 flex-shrink-0 ${asidePhotoBorder}`} />
           )}
-          <h1 className={`text-xl font-bold tracking-tight uppercase w-full ${asideNameClass}`}>
+          <h1 className={`text-[18px] font-bold tracking-tight uppercase w-full leading-tight ${asideNameClass}`}>
             {name || ph('Your name')}
           </h1>
-          <p className={`text-[12px] w-full ${asideSubClass}`}>{jobTarget?.trim() || ph('Job title')}</p>
-          <div className={`text-[12px] space-y-1.5 w-full ${asideTextClass}`}>
+          <p className={`text-[11px] w-full ${asideSubClass}`}>{jobTarget?.trim() || ph('Job title')}</p>
+          <div className={`text-[11px] space-y-2 w-full ${asideTextClass}`}>
             {contact.email || contact.phone || contact.address?.trim() || contact.location || contact.website || contact.linkedin ? (
               <>
-                {contact.email && <div>{contact.email}</div>}
+                {contact.email && <div className="break-all">{contact.email}</div>}
                 {contact.phone && <div>{contact.phone}</div>}
-                {contact.address?.trim() && <div>{contact.address.trim()}</div>}
-                {contact.location && <div>{contact.location}</div>}
+                {(contact.address?.trim() || contact.location) && <div>{(contact.address?.trim() || contact.location)}</div>}
                 {contact.website && (
-                  <a href={contact.website} className={`underline block truncate ${asideLinkClass}`}>
-                    {contact.website.replace(/^https?:\/\//, '')}
-                  </a>
+                  <a href={contact.website} className={`underline block truncate ${asideLinkClass}`}>{contact.website.replace(/^https?:\/\//, '')}</a>
                 )}
                 {contact.linkedin && (
                   <a href={contact.linkedin} className={`underline block ${asideLinkClass}`}>LinkedIn</a>
@@ -89,20 +88,28 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
       <div className="flex-1 px-6 pt-6 pb-6 min-w-0">
         {hasSummary && (
           <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Profile</h2>
-            <p className={resumeSpacing.summary}>{summary}</p>
+            <SectionH title="Profile" />
+            {data.descriptionFormat === 'bullets' && summary.includes('\n') ? (
+              <ul className="list-disc ml-4 text-[12.5px] text-[#374151] space-y-1 summary-desc leading-[1.65]">
+                {summary.split('\n').filter((l) => l.trim()).map((l, i) => (
+                  <li key={i}>{l.replace(/^[•\-]\s*/, '').trim()}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className={resumeSpacing.summary}>{summary}</p>
+            )}
           </section>
         )}
 
         {showExperience && (
           <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Employment History</h2>
+            <SectionH title="Employment History" />
             <div className={resumeSpacing.expWrapper}>
               {experience.filter(hasContent).map((exp) => (
                 <div key={exp.id}>
-                  <div className="flex justify-between items-baseline gap-2 flex-wrap">
-                    <span className="font-semibold text-[#1c1c1c]">{exp.jobTitle}</span>
-                    <span className="text-[11px] text-[#6b7280]">
+                  <div className="flex justify-between items-baseline gap-2 flex-nowrap">
+                    <span className="font-semibold text-[#0f172a] min-w-0 truncate text-[12.5px]">{exp.jobTitle}</span>
+                    <span className="text-[10.5px] text-[#475569] whitespace-nowrap shrink-0">
                       {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
                     </span>
                   </div>
@@ -111,7 +118,7 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
                     {exp.location && ` · ${exp.location}`}
                   </div>
                   {exp.description && (
-                    <ul className={resumeSpacing.bulletList}>
+                    <ul className={`${resumeSpacing.bulletList} exp-desc`}>
                       {line(exp.description).map((bullet, i) => (
                         <li key={i}>{bullet.replace(/^[•\-]\s*/, '')}</li>
                       ))}
@@ -125,21 +132,25 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
 
         {showEducation && (
           <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Education</h2>
+            <SectionH title="Education" />
             {education.filter(hasEduContent).map((edu) => (
-              <div key={edu.id} className={resumeSpacing.eduEntry}>
-                <span className="font-semibold text-[#1c1c1c]">{edu.degree}</span>
-                <span className="text-[#4b5563]"> — {edu.school}</span>
-                {(edu.location || edu.startDate) && (
-                  <span className="text-[12px] text-[#6b7280]">
-                    {' '}
-                    · {[edu.location, `${edu.startDate} – ${edu.endDate}`].filter(Boolean).join(' · ')}
+              <div key={edu.id} className={resumeSpacing.eduEntry} style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
+                <div className="font-semibold text-[#0f172a] text-[12.5px]">{edu.degree}</div>
+                <div className="flex justify-between items-baseline gap-x-2 mt-0.5">
+                  <span className="text-[12.5px] text-[#475569] font-medium">
+                    {edu.school}
+                    {edu.location && ` · ${edu.location}`}
                   </span>
-                )}
+                  {edu.startDate && (
+                    <span className="text-[10.5px] text-[#64748b] whitespace-nowrap shrink-0 ml-auto">
+                      {edu.startDate} – {edu.endDate}
+                    </span>
+                  )}
+                </div>
                 {edu.description && (
-                  <ul className={resumeSpacing.bulletList}>
-                    {line(edu.description).map((bullet, i) => (
-                      <li key={i}>{bullet.replace(/^[•\-]\s*/, '')}</li>
+                  <ul className="list-disc ml-4 mt-1 text-[12.5px] text-[#374151] space-y-0.5 edu-desc leading-[1.6]">
+                    {edu.description.split('\n').filter(Boolean).map((line, j) => (
+                      <li key={j}>{line}</li>
                     ))}
                   </ul>
                 )}
@@ -150,13 +161,10 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
 
         {hasSkills && (
           <section className={resumeSpacing.section}>
-            <h2 className={resumeSpacing.sectionHeading}>Skills</h2>
-            <div className="flex flex-wrap gap-1.5">
+            <SectionH title="Skills" />
+            <div className="flex flex-wrap gap-2">
               {skills.filter(Boolean).map((s, i) => (
-                <span
-                  key={i}
-                  className="px-2 py-0.5 rounded bg-amber-50 text-[#92400e] text-[11px] border border-amber-200"
-                >
+                <span key={i} className="px-2.5 py-1 rounded-md text-[11px] font-semibold border border-[#d1d5db] bg-[#f9fafb] text-[#1e293b]">
                   {s}
                 </span>
               ))}
@@ -166,13 +174,13 @@ export function VividTemplate({ data, accentColor }: { data: ResumeData; accentC
 
         {hasRefs && (
           <section>
-            <h2 className={resumeSpacing.sectionHeading}>References</h2>
+            <SectionH title="References" />
             <div className={resumeSpacing.refBlock}>
               {references!.map((ref, i) => (
                 <div key={i}>
-                  {ref.name}
-                  {ref.affiliation && `, ${ref.affiliation}`}
-                  {ref.email && ` · ${ref.email}`}
+                  <span className="font-semibold text-[#0f172a]">{ref.name}</span>
+                  {ref.affiliation && <span className="text-[#475569]">, {ref.affiliation}</span>}
+                  {ref.email && <span className="text-[#64748b]"> · {ref.email}</span>}
                 </div>
               ))}
             </div>

@@ -41,12 +41,15 @@ import { resumesRouter } from './routes/resumes.js'
 import { coverLettersRouter } from './routes/coverLetters.js'
 import { uploadRouter } from './routes/upload.js'
 import { jobsRouter } from './routes/jobs.js'
+import { createCheckoutSession, verifySession, customerPortal, stripeWebhook } from './routes/stripe.js'
 import { getUserIdByEmail } from './db.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
 
 app.use(cors({ origin: true, credentials: true }))
+// Stripe webhook must receive raw body for signature verification
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhook)
 app.use(express.json({ limit: '5mb' }))
 
 app.post('/api/auth/register', async (req, res) => {
@@ -143,6 +146,9 @@ app.patch('/api/auth/me', async (req, res) => {
 })
 
 app.use('/api/auth', oauthRouter)
+app.post('/api/stripe/create-checkout-session', createCheckoutSession)
+app.get('/api/stripe/verify-session', verifySession)
+app.post('/api/stripe/customer-portal', customerPortal)
 app.use('/api/resumes', resumesRouter)
 app.use('/api/cover-letters', coverLettersRouter)
 app.use('/api/upload', uploadRouter)

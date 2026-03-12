@@ -54,7 +54,7 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
               </>
             ) : (
               <span className="text-[#9ca3af]">Email · Phone · Address</span>
-            )}
+              )}
           </div>
         </div>
       </header>
@@ -62,7 +62,15 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
       {hasSummary && (
         <section className={resumeSpacing.section}>
           <h2 className={resumeSpacing.sectionHeading}>Summary</h2>
-          <p className={resumeSpacing.summary}>{truncateForPreview(summary)}</p>
+          {data.descriptionFormat === 'bullets' && summary.includes('\n') ? (
+            <ul className="list-disc ml-4 text-[12px] text-[#374151] space-y-0.5 summary-desc">
+              {summary.split('\n').filter((l) => l.trim()).map((l, i) => (
+                <li key={i}>{l.replace(/^[•\-]\s*/, '').trim()}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className={resumeSpacing.summary}>{truncateForPreview(summary)}</p>
+          )}
         </section>
       )}
 
@@ -71,9 +79,9 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
           <h2 className={resumeSpacing.sectionHeading}>Experience</h2>
           {experience.filter(hasContent).map((exp) => (
             <div key={exp.id} className={resumeSpacing.expEntry}>
-              <div className="flex justify-between items-baseline gap-2 flex-wrap">
-                <span className="font-semibold text-[#1c1c1c]">{exp.jobTitle}</span>
-                <span className="text-[11px] text-[#6b7280]">
+              <div className="flex justify-between items-baseline gap-2 flex-nowrap">
+                <span className="font-semibold text-[#1c1c1c] min-w-0 truncate">{exp.jobTitle}</span>
+                <span className="text-[11px] text-[#6b7280] whitespace-nowrap shrink-0">
                   {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
                 </span>
               </div>
@@ -82,7 +90,7 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
                 {exp.location && ` · ${exp.location}`}
               </div>
               {exp.description && (
-                <ul className={resumeSpacing.bulletList}>
+                <ul className={`${resumeSpacing.bulletList} exp-desc`}>
                   {line(exp.description).map((bullet, i) => (
                     <li key={i}>{bullet.replace(/^[•\-]\s*/, '')}</li>
                   ))}
@@ -97,15 +105,23 @@ export function ProfessionalTemplate({ data }: { data: ResumeData }) {
         <section className={resumeSpacing.section}>
           <h2 className={resumeSpacing.sectionHeading}>Education</h2>
           {education.filter(hasEduContent).map((edu) => (
-            <div key={edu.id} className={resumeSpacing.eduEntry}>
+            <div key={edu.id} className={resumeSpacing.eduEntry} style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
               <div className="font-semibold text-[#1c1c1c]">{edu.degree}</div>
-              <div className="text-[13px] text-[#4b5563] mt-0.5">
-                {edu.school}
-                {edu.location && ` · ${edu.location}`}
-                {edu.startDate && ` · ${edu.startDate} – ${edu.endDate}`}
+              <div className="flex justify-between items-baseline gap-x-2 mt-0.5">
+                <span className="text-[13px] text-[#4b5563] font-medium">
+                  {edu.school}
+                  {edu.location && ` · ${edu.location}`}
+                </span>
+                {edu.startDate && (
+                  <span className="text-[11px] text-[#6b7280] whitespace-nowrap shrink-0 ml-auto">{edu.startDate} – {edu.endDate}</span>
+                )}
               </div>
               {edu.description && (
-                <p className={resumeSpacing.eduDescription}>{edu.description}</p>
+                <ul className="list-disc ml-4 mt-1 text-[12px] text-[#374151] space-y-0.5 edu-desc">
+                  {edu.description.split('\n').filter(Boolean).map((line, j) => (
+                    <li key={j}>{line}</li>
+                  ))}
+                </ul>
               )}
             </div>
           ))}

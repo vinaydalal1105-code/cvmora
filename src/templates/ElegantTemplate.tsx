@@ -1,6 +1,6 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, textSafeAccent } from './resumeSpacing'
 
 function hasContent(exp: { jobTitle?: string; company?: string; description?: string }) {
   return !!(exp.jobTitle?.trim() || exp.company?.trim() || exp.description?.trim())
@@ -9,51 +9,70 @@ function hasEduContent(edu: { degree?: string; school?: string; description?: st
   return !!(edu.degree?.trim() || edu.school?.trim() || edu.description?.trim())
 }
 
-/** Centered name and contact; section titles centered with short accent underline under text only. */
 export function ElegantTemplate({ data, accentColor }: { data: ResumeData; accentColor?: string }) {
-  const { contact, summary, experience, education, skills, references } = data
+  const { contact, summary, experience, education, skills, references, jobTarget } = data
   const line = (s: string) => s.split('\n').filter(Boolean)
   const name = displayName(contact)
   const showExp = experience.some(hasContent)
   const showEdu = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
-  const accent = accentColor ?? '#1e3a5f'
+  const accent = accentColor ?? '#7c3aed'
+  const safeAccent = textSafeAccent(accent)
 
-  const CenteredHeading = ({ title }: { title: string }) => (
-    <h2 className="text-center mb-2">
-      <span className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] inline-block pb-1 border-b-2" style={{ borderBottomColor: accent }}>
+  const SectionTitle = ({ title }: { title: string }) => (
+    <h2 className="text-center mb-3">
+      <span className="text-[10.5px] font-bold uppercase tracking-[0.25em] text-[#374151] inline-block relative pb-2">
         {title}
+        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full" style={{ backgroundColor: accent }} />
       </span>
     </h2>
   )
 
   return (
-    <div className="elegant-template bg-white text-[#1c1c1c] pt-10 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-sm">
-      <header className="text-center mb-8">
-        {name && <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight">{name}</h1>}
-        <div className="flex flex-wrap justify-center gap-x-4 text-[12px] text-[#6b7280] mt-2">
+    <div className="elegant-template bg-white text-[#1a1a1a] pt-10 px-10 pb-8 min-h-[842px] max-w-[210mm] mx-auto font-sans text-[13px] leading-[1.55] overflow-visible">
+      <header className="text-center mb-8 pt-2">
+        <div className="w-10 h-px mx-auto mb-4" style={{ backgroundColor: accent }} />
+        {name && (
+          <h1 className="text-[28px] font-light text-[#0f172a] tracking-[0.04em]" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+            {name}
+          </h1>
+        )}
+        {jobTarget?.trim() && (
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] mt-2" style={{ color: safeAccent }}>
+            {jobTarget.trim()}
+          </p>
+        )}
+        <div className="flex flex-wrap justify-center gap-x-4 text-[11px] text-[#94a3b8] mt-3">
           {contact.email && <span>{contact.email}</span>}
           {contact.phone && <span>{contact.phone}</span>}
-          {contact.location && <span>{contact.location}</span>}
+          {(contact.address?.trim() || contact.location) && <span>{(contact.address?.trim() || contact.location)}</span>}
         </div>
+        <div className="w-10 h-px mx-auto mt-4" style={{ backgroundColor: accent }} />
       </header>
 
       {summary && (
         <section className={resumeSpacing.section}>
-          <CenteredHeading title="Professional Summary" />
-          <p className={`${resumeSpacing.summary} text-center max-w-[85%] mx-auto`}>{summary}</p>
+          <SectionTitle title="About" />
+          {data.descriptionFormat === 'bullets' && summary.includes('\n') ? (
+            <ul className="list-disc ml-4 text-[12.5px] text-[#374151] space-y-1 summary-desc leading-[1.65]">
+              {summary.split('\n').filter((l) => l.trim()).map((l, i) => (
+                <li key={i}>{l.replace(/^[•\-]\s*/, '').trim()}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[12.5px] text-[#475569] leading-[1.7] text-center max-w-[88%] mx-auto italic">{summary}</p>
+          )}
         </section>
       )}
 
       {skills.filter(Boolean).length > 0 && (
         <section className={resumeSpacing.section}>
-          <CenteredHeading title="Skills" />
-          <div className="grid grid-cols-2 gap-x-8 gap-y-1 mt-2 text-[13px] text-[#333] max-w-[90%] mx-auto">
+          <SectionTitle title="Skills" />
+          <div className="flex flex-wrap justify-center gap-2 mt-1">
             {skills.filter(Boolean).map((s, i) => (
-              <div key={i} className="flex items-center justify-center gap-2">
-                <span className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: accent }} aria-hidden />
+              <span key={i} className="text-[11px] px-2.5 py-[3px] rounded-full border border-[#d1d5db] bg-[#f8fafc] text-[#1e293b] font-medium">
                 {s}
-              </div>
+              </span>
             ))}
           </div>
         </section>
@@ -61,17 +80,17 @@ export function ElegantTemplate({ data, accentColor }: { data: ResumeData; accen
 
       {showExp && (
         <section className={resumeSpacing.section}>
-          <CenteredHeading title="Work History" />
+          <SectionTitle title="Experience" />
           <div className={resumeSpacing.expWrapper} style={{ maxWidth: '95%', margin: '0 auto' }}>
             {experience.filter(hasContent).map((exp) => (
               <div key={exp.id}>
-                <div className="flex justify-between items-baseline gap-2 flex-wrap">
-                  <span className="font-semibold text-[#1c1c1c]">{exp.jobTitle}</span>
-                  <span className="text-[11px] text-[#6b7280]">{exp.startDate} – {exp.current ? 'Present' : exp.endDate}</span>
+                <div className="flex justify-between items-baseline gap-2 flex-nowrap">
+                  <span className="font-semibold text-[#0f172a] min-w-0 truncate">{exp.jobTitle}</span>
+                  <span className="text-[10.5px] text-[#94a3b8] whitespace-nowrap shrink-0">{exp.startDate} – {exp.current ? 'Present' : exp.endDate}</span>
                 </div>
-                <div className="text-[12px] text-[#4b5563] mt-0.5">{exp.company}{exp.location && ` · ${exp.location}`}</div>
+                <div className="text-[11.5px] text-[#64748b] mt-0.5 font-medium">{exp.company}{exp.location && ` · ${exp.location}`}</div>
                 {exp.description && (
-                  <ul className={resumeSpacing.bulletList}>
+                  <ul className={`${resumeSpacing.bulletList} exp-desc`}>
                     {line(exp.description).map((b, i) => (
                       <li key={i}>{b.replace(/^[•\-]\s*/, '')}</li>
                     ))}
@@ -85,13 +104,27 @@ export function ElegantTemplate({ data, accentColor }: { data: ResumeData; accen
 
       {showEdu && (
         <section className={resumeSpacing.section}>
-          <CenteredHeading title="Education" />
+          <SectionTitle title="Education" />
           <div style={{ maxWidth: '95%', margin: '0 auto' }}>
             {education.filter(hasEduContent).map((edu) => (
-              <div key={edu.id} className={resumeSpacing.eduEntry}>
-                <div className="font-semibold text-[#1c1c1c]">{edu.degree}</div>
-                <div className="text-[12px] text-[#4b5563] mt-0.5">{edu.school}{edu.location && ` · ${edu.location}`}</div>
-                {edu.description && <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>}
+              <div key={edu.id} className={resumeSpacing.eduEntry} style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
+                <div className="font-semibold text-[#0f172a]">{edu.degree}</div>
+                <div className="flex justify-between items-baseline gap-x-2 mt-0.5">
+                  <span className="text-[11.5px] text-[#64748b] font-medium">
+                    {edu.school}
+                    {edu.location && ` · ${edu.location}`}
+                  </span>
+                  {edu.startDate && (
+                    <span className="text-[10.5px] text-[#94a3b8] whitespace-nowrap shrink-0 ml-auto">{edu.startDate} – {edu.endDate}</span>
+                  )}
+                </div>
+                {edu.description && (
+                  <ul className="list-disc ml-4 mt-1 text-[12px] text-[#374151] space-y-0.5 edu-desc leading-[1.6]">
+                    {edu.description.split('\n').filter(Boolean).map((line, j) => (
+                      <li key={j}>{line}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             ))}
           </div>
@@ -100,13 +133,13 @@ export function ElegantTemplate({ data, accentColor }: { data: ResumeData; accen
 
       {hasRefs && (
         <section>
-          <CenteredHeading title="References" />
+          <SectionTitle title="References" />
           <div className={resumeSpacing.refBlock} style={{ maxWidth: '95%', margin: '0 auto' }}>
             {references!.map((ref, i) => (
               <div key={i} className="text-center">
-                <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
-                {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
-                {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
+                <span className="font-medium text-[#0f172a]">{ref.name}</span>
+                {ref.affiliation && <span className="text-[#64748b]">, {ref.affiliation}</span>}
+                {ref.email && <span className="text-[#94a3b8]"> · {ref.email}</span>}
               </div>
             ))}
           </div>

@@ -42,4 +42,5 @@ export const defaultResume: ResumeData = {
     },
   ],
   skills: [],
+  descriptionFormat: 'bullets',
 }

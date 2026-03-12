@@ -1,6 +1,6 @@
 import type { ResumeData } from '../types/resume'
 import { displayName } from '../utils/resume'
-import { resumeSpacing } from './resumeSpacing'
+import { resumeSpacing, textSafeAccent } from './resumeSpacing'
 
 function hasContent(exp: { jobTitle?: string; company?: string; description?: string }) {
   return !!(exp.jobTitle?.trim() || exp.company?.trim() || exp.description?.trim())
@@ -17,56 +17,70 @@ export function SpotlightTemplate({ data, accentColor }: { data: ResumeData; acc
   const showEdu = education.some(hasEduContent)
   const hasRefs = references && references.length > 0
   const accent = accentColor ?? '#7c3aed'
+  const safeAccent = textSafeAccent(accent)
 
   const H = ({ title }: { title: string }) => (
-    <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1c] mb-1.5 flex items-center gap-2">
-      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: accent }} aria-hidden />
+    <h2 className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-[#0f172a] mb-2 flex items-center gap-2">
+      <span className="w-[6px] h-[6px] rounded-full shrink-0" style={{ backgroundColor: accent }} aria-hidden />
       {title}
     </h2>
   )
 
   return (
-    <div className="spotlight-template bg-white text-[#1c1c1c] pt-8 px-8 pb-6 min-h-0 max-w-[210mm] mx-auto font-sans text-sm">
-      <header className="mb-8">
-        <div className="inline-block px-4 py-2 rounded-lg mb-3" style={{ backgroundColor: `${accent}14` }}>
-          {name && <h1 className="text-2xl font-bold text-[#1e1b4b] tracking-tight">{name}</h1>}
+    <div className="spotlight-template bg-white text-[#1a1a1a] pt-8 px-10 pb-8 min-h-[842px] max-w-[210mm] mx-auto font-sans text-[13px] leading-[1.55] overflow-visible">
+      <header className="mb-7">
+        <div className="inline-block px-5 py-3 rounded-xl mb-3" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+          {name && <h1 className="text-[26px] font-extrabold tracking-tight" style={{ color: safeAccent }}>{name}</h1>}
         </div>
-        {jobTarget?.trim() && <p className="text-[13px] font-medium text-[#4b5563]">{jobTarget.trim()}</p>}
-        <div className="flex flex-wrap gap-x-4 text-[12px] text-[#6b7280] mt-2">
+        {jobTarget?.trim() && <p className="text-[12px] font-semibold text-[#64748b] mt-1">{jobTarget.trim()}</p>}
+        <div className="flex flex-wrap gap-x-4 text-[11px] text-[#94a3b8] mt-2.5">
           {contact.email && <span>{contact.email}</span>}
           {contact.phone && <span>{contact.phone}</span>}
-          {contact.location && <span>{contact.location}</span>}
+          {(contact.address?.trim() || contact.location) && <span>{(contact.address?.trim() || contact.location)}</span>}
+          {contact.website && <a href={contact.website} style={{ color: safeAccent }} className="hover:underline">{contact.website.replace(/^https?:\/\//, '')}</a>}
+          {contact.linkedin && <a href={contact.linkedin} style={{ color: safeAccent }} className="hover:underline">LinkedIn</a>}
         </div>
       </header>
+
       {summary && (
         <section className={resumeSpacing.section}>
           <H title="Summary" />
-          <p className={resumeSpacing.summary}>{summary}</p>
+          {data.descriptionFormat === 'bullets' && summary.includes('\n') ? (
+            <ul className="list-disc ml-4 text-[12.5px] text-[#374151] space-y-1 summary-desc leading-[1.65]">
+              {summary.split('\n').filter((l) => l.trim()).map((l, i) => (
+                <li key={i}>{l.replace(/^[•\-]\s*/, '').trim()}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className={resumeSpacing.summary}>{summary}</p>
+          )}
         </section>
       )}
+
       {skills.filter(Boolean).length > 0 && (
         <section className={resumeSpacing.section}>
           <H title="Skills" />
-          <div className="flex flex-wrap gap-2 mt-1 text-[13px] text-[#374151]">
+          <div className="flex flex-wrap gap-1.5 mt-1">
             {skills.filter(Boolean).map((s, i) => (
-              <span key={i} className="px-2.5 py-0.5 rounded-full border border-[#e5e7eb] bg-[#f9fafb]">{s}</span>
+              <span key={i} className="px-2.5 py-[3px] rounded-full text-[11px] font-medium border border-[#d1d5db] bg-[#f8fafc] text-[#1e293b]">{s}</span>
             ))}
           </div>
         </section>
       )}
+
       {showExp && (
         <section className={resumeSpacing.section}>
           <H title="Experience" />
           <div className={resumeSpacing.expWrapper}>
             {experience.filter(hasContent).map((exp) => (
               <div key={exp.id}>
-                <div className="flex justify-between items-baseline gap-2 flex-wrap">
-                  <span className="font-semibold text-[#1c1c1c]">{exp.jobTitle}</span>
-                  <span className="text-[11px] text-[#6b7280]">{exp.startDate} – {exp.current ? 'Present' : exp.endDate}</span>
+                <div className="flex justify-between items-baseline gap-2 flex-nowrap">
+                  <span className="font-bold text-[#0f172a] min-w-0 truncate">{exp.jobTitle}</span>
+                  <span className="text-[10.5px] text-[#94a3b8] whitespace-nowrap shrink-0 font-medium">{exp.startDate} – {exp.current ? 'Present' : exp.endDate}</span>
                 </div>
-                <div className="text-[12px] text-[#4b5563] mt-0.5">{exp.company}{exp.location && ` · ${exp.location}`}</div>
+                <div className="text-[11.5px] text-[#64748b] mt-0.5 font-medium">{exp.company}{exp.location && ` · ${exp.location}`}</div>
                 {exp.description && (
-                  <ul className={resumeSpacing.bulletList}>
+                  <ul className={`${resumeSpacing.bulletList} exp-desc`}>
                     {line(exp.description).map((b, i) => <li key={i}>{b.replace(/^[•\-]\s*/, '')}</li>)}
                   </ul>
                 )}
@@ -75,27 +89,43 @@ export function SpotlightTemplate({ data, accentColor }: { data: ResumeData; acc
           </div>
         </section>
       )}
+
       {showEdu && (
         <section className={resumeSpacing.section}>
           <H title="Education" />
           {education.filter(hasEduContent).map((edu) => (
-            <div key={edu.id} className={resumeSpacing.eduEntry}>
-              <div className="font-semibold text-[#1c1c1c]">{edu.degree}</div>
-              <div className="text-[12px] text-[#4b5563] mt-0.5">{edu.school}{edu.location && ` · ${edu.location}`}</div>
-              {edu.description && <p className={resumeSpacing.eduDescriptionSm}>{edu.description}</p>}
+            <div key={edu.id} className={resumeSpacing.eduEntry} style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
+              <div className="font-bold text-[#0f172a]">{edu.degree}</div>
+              <div className="flex justify-between items-baseline gap-x-2 mt-0.5">
+                <span className="text-[11.5px] text-[#64748b] font-medium">
+                  {edu.school}
+                  {edu.location && ` · ${edu.location}`}
+                </span>
+                {edu.startDate && (
+                  <span className="text-[10.5px] text-[#94a3b8] whitespace-nowrap shrink-0 ml-auto">{edu.startDate} – {edu.endDate}</span>
+                )}
+              </div>
+              {edu.description && (
+                <ul className="list-disc ml-4 mt-1 text-[12px] text-[#374151] space-y-0.5 edu-desc leading-[1.6]">
+                  {edu.description.split('\n').filter(Boolean).map((line, j) => (
+                    <li key={j}>{line}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
         </section>
       )}
+
       {hasRefs && (
         <section>
           <H title="References" />
           <div className={resumeSpacing.refBlock}>
             {references!.map((ref, i) => (
               <div key={i}>
-                <span className="font-medium text-[#1c1c1c]">{ref.name}</span>
-                {ref.affiliation && <span className="text-[#4b5563]">, {ref.affiliation}</span>}
-                {ref.email && <span className="text-[#6b7280]"> · {ref.email}</span>}
+                <span className="font-semibold text-[#0f172a]">{ref.name}</span>
+                {ref.affiliation && <span className="text-[#64748b]">, {ref.affiliation}</span>}
+                {ref.email && <span className="text-[#94a3b8]"> · {ref.email}</span>}
               </div>
             ))}
           </div>

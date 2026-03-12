@@ -12,44 +12,40 @@ const mainNav: { to: string; label: string; dropdown?: DropdownId }[] = [
   { to: '/templates', label: 'Resume Templates', dropdown: 'templates' },
   { to: '/examples', label: 'Resume Examples', dropdown: 'examples' },
   { to: '/cover-letter', label: 'Cover Letter', dropdown: 'cover-letter' },
-  { to: '/faq', label: 'FAQ' },
+  { to: '/pricing', label: 'Pricing' },
   { to: '/resources', label: 'Resources', dropdown: 'resources' },
 ]
 
-const exampleCategories = [
-  { to: '/examples', icon: '🎓', title: 'Education', desc: 'Resumes for roles in or outside the classroom' },
-  { to: '/examples', icon: '🏛️', title: 'Government', desc: 'Resumes that fit department recruiters' },
-  { to: '/examples', icon: '⚙️', title: 'Engineering', desc: 'Resumes that highlight technical expertise' },
-  { to: '/examples', icon: '🛒', title: 'Retail', desc: 'Resumes as well-crafted as your experience' },
+const templateItems = [
+  { to: '/templates', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z', title: 'All Templates', desc: 'Browse all resume templates in one place' },
+  { to: '/templates/ats', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', title: 'ATS-Friendly', desc: 'Optimized for applicant tracking systems' },
+  { to: '/templates', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', title: 'Professional', desc: 'Job-winning, recruiter-friendly layouts' },
+  { to: '/templates', icon: 'M13 10V3L4 14h7v7l9-11h-7z', title: 'Modern', desc: 'Current and stylish for innovative roles' },
+  { to: '/templates', icon: 'M4 6h16M4 12h16M4 18h7', title: 'Simple', desc: 'Clean, timeless single-column structure' },
+  { to: '/builder', icon: 'M12 4v16m8-8H4', title: 'Create Resume', desc: 'Start building your resume now' },
 ]
 
-const mostPopular = [
-  { label: 'Nurse', to: '/examples' },
-  { label: 'High School Student', to: '/examples' },
-  { label: 'Internship', to: '/examples' },
-  { label: 'Student', to: '/examples' },
-  { label: 'Accountant', to: '/examples' },
+const exampleItems = [
+  { to: '/examples', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', title: 'Education', desc: 'Resumes for teaching and academic roles' },
+  { to: '/examples', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', title: 'Government', desc: 'Resumes that fit department requirements' },
+  { to: '/examples', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', title: 'Engineering', desc: 'Highlight your technical expertise' },
+  { to: '/examples', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z', title: 'Retail', desc: 'Resumes crafted for customer-facing roles' },
+  { to: '/examples', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', title: 'All Examples', desc: '500+ free resume examples by industry' },
+  { to: '/builder', icon: 'M12 4v16m8-8H4', title: 'Build Resume', desc: 'Create your resume from scratch' },
 ]
 
-const templateStyles = [
-  { to: '/templates/ats', label: 'ATS', desc: 'Optimize for applicant tracking systems' },
-  { to: '/templates', label: 'Professional', desc: 'Job-winning, recruiter-friendly layouts' },
-  { to: '/templates', label: 'Modern', desc: 'Current and stylish for tech & creative' },
-  { to: '/templates', label: 'Simple', desc: 'Clean, timeless structure' },
+const coverLetterItems = [
+  { to: '/cover-letter', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', title: 'Cover Letter Builder', desc: 'Create a tailored cover letter in minutes' },
+  { to: '/cover-letter/templates', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z', title: 'Cover Letter Templates', desc: 'Professional templates for any industry' },
+  { to: '/cover-letter', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', title: 'Cover Letter Examples', desc: 'See real examples that got results' },
+  { to: '/resources/guide/cover-letter', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', title: 'How to Write', desc: 'Step-by-step guide to a great cover letter' },
 ]
 
-const coverLetterLinks = [
-  { label: 'Cover Letter Builder', to: '/cover-letter' },
-  { label: 'Cover Letter Templates', to: '/cover-letter/templates' },
-  { label: 'Cover Letter Examples', to: '/cover-letter' },
-  { label: 'How to write a cover letter', to: '/resources/guide/cover-letter' },
-]
-
-const resourceCategories = [
-  { to: '/resources', icon: '📝', title: 'Resume Help', desc: 'How to write a resume, sections, and examples' },
-  { to: '/resources', icon: '✉️', title: 'Cover Letter', desc: 'Structure, tone, and how to stand out' },
-  { to: '/faq', icon: '❓', title: 'FAQ', desc: 'Quick answers about Cvmora' },
-  { to: '/interview', icon: '🎤', title: 'Job Interview', desc: 'Practice questions and interview tips' },
+const resourceItems = [
+  { to: '/resources', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', title: 'Resume Guide', desc: 'How to write a resume, sections and tips' },
+  { to: '/resources', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', title: 'Cover Letter Guide', desc: 'Structure, tone, and how to stand out' },
+  { to: '/faq', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', title: 'FAQ', desc: 'Quick answers about Cvmora' },
+  { to: '/interview', icon: 'M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z', title: 'Job Interview', desc: 'Practice questions and interview tips' },
 ]
 
 function NavLink({
@@ -104,127 +100,47 @@ function NavLink({
   )
 }
 
-function ExamplesDropdown() {
+function DropdownItem({ to, icon, title, desc }: { to: string; icon: string; title: string; desc: string }) {
   return (
-    <div className="bg-white border-t border-cvmora-ink/8 shadow-[var(--shadow-card-hover)]">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* Left: Resume Examples by category */}
-          <div>
-            <h3 className="text-sm font-semibold text-cvmora-ink uppercase tracking-wider mb-4">Resume Examples</h3>
-            <ul className="space-y-1">
-              {exampleCategories.map((cat) => (
-                <li key={cat.title}>
-                  <Link
-                    to={cat.to}
-                    className="flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-lg text-left group hover:bg-cvmora-ink/5 transition-colors"
-                  >
-                    <span className="text-lg shrink-0" aria-hidden>{cat.icon}</span>
-                    <div className="min-w-0 flex-1">
-                      <span className="font-medium text-cvmora-ink text-[0.9375rem] group-hover:text-[var(--color-primary)] transition-colors block">
-                        {cat.title}
-                      </span>
-                      <span className="text-[0.8125rem] text-cvmora-muted block mt-0.5">{cat.desc}</span>
-                    </div>
-                    <span className="text-cvmora-muted group-hover:text-[var(--color-primary)] shrink-0" aria-hidden>›</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          {/* Middle: Most Popular */}
-          <div>
-            <h3 className="text-sm font-semibold text-cvmora-ink uppercase tracking-wider mb-4">Most Popular</h3>
-            <ul className="space-y-1">
-              {mostPopular.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    to={item.to}
-                    className="block py-2.5 px-2 -mx-2 rounded-lg text-[0.9375rem] text-cvmora-ink hover:bg-cvmora-ink/5 hover:text-[var(--color-primary)] transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Link
-              to="/examples"
-              className="inline-flex items-center gap-1 mt-4 text-[0.9375rem] font-semibold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
-            >
-              All Examples
-              <span aria-hidden>›</span>
-            </Link>
-          </div>
-          {/* Right: CTA */}
-          <div className="flex flex-col">
-            <div className="flex-1 rounded-xl bg-cvmora-cream border border-cvmora-ink/8 p-6 flex flex-col items-center text-center">
-              <div className="w-20 h-24 rounded-lg bg-white border border-cvmora-ink/10 shadow-sm flex items-center justify-center mb-4">
-                <span className="text-2xl text-cvmora-muted">📄</span>
-              </div>
-              <p className="font-semibold text-cvmora-ink text-[0.9375rem] mb-1">500+ Free Resume Examples by industry</p>
-              <p className="text-[0.8125rem] text-cvmora-muted leading-relaxed mb-4">
-                Use the expert guides and our resume builder to create a beautiful resume in minutes.
-              </p>
-              <Link
-                to="/builder"
-                className="text-[0.9375rem] font-semibold text-[var(--color-primary)] hover:opacity-80 transition-opacity inline-flex items-center gap-1"
-              >
-                Get started now
-                <span aria-hidden>›</span>
-              </Link>
-            </div>
-          </div>
+    <Link
+      to={to}
+      className="flex items-start gap-3.5 px-3 py-3 rounded-xl hover:bg-[#f5f5f4] transition-colors group"
+    >
+      <span className="w-9 h-9 rounded-lg bg-[#f5f5f4] group-hover:bg-white flex items-center justify-center shrink-0 mt-0.5 transition-colors">
+        <svg className="w-[18px] h-[18px] text-[#44403c]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+          <path d={icon} />
+        </svg>
+      </span>
+      <div className="min-w-0">
+        <span className="text-[14px] font-semibold text-[#1c1917] block leading-tight">{title}</span>
+        <span className="text-[13px] text-[#78716c] block mt-0.5 leading-snug">{desc}</span>
+      </div>
+    </Link>
+  )
+}
+
+function TemplatesDropdown() {
+  return (
+    <div className="bg-white border-t border-[#e7e5e4] shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+      <div className="max-w-[900px] mx-auto px-6 py-5">
+        <div className="grid grid-cols-3 gap-x-2">
+          {templateItems.map((item) => (
+            <DropdownItem key={item.title} {...item} />
+          ))}
         </div>
       </div>
     </div>
   )
 }
 
-function TemplatesDropdown() {
+function ExamplesDropdown() {
   return (
-    <div className="bg-white border-t border-cvmora-ink/8 shadow-[var(--shadow-card-hover)]">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          <div>
-            <h3 className="text-sm font-semibold text-cvmora-ink uppercase tracking-wider mb-4">Resume Templates</h3>
-            <ul className="space-y-1">
-              {templateStyles.map((t) => (
-                <li key={t.label}>
-                  <Link
-                    to={t.to}
-                    className="flex items-center justify-between gap-3 py-2.5 px-2 -mx-2 rounded-lg text-left group hover:bg-cvmora-ink/5 transition-colors"
-                  >
-                    <div>
-                      <span className="font-medium text-cvmora-ink text-[0.9375rem] group-hover:text-[var(--color-primary)] transition-colors block">{t.label}</span>
-                      <span className="text-[0.8125rem] text-cvmora-muted block mt-0.5">{t.desc}</span>
-                    </div>
-                    <span className="text-cvmora-muted group-hover:text-[var(--color-primary)] shrink-0" aria-hidden>›</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="flex flex-col justify-center">
-            <div className="rounded-xl bg-cvmora-cream border border-cvmora-ink/8 p-6 text-center">
-              <p className="font-semibold text-cvmora-ink text-[0.9375rem] mb-1">Tested resume templates</p>
-              <p className="text-[0.8125rem] text-cvmora-muted leading-relaxed mb-4">Use the templates recruiters like. Download to Word or PDF.</p>
-              <Link to="/templates" className="text-[0.9375rem] font-semibold text-[var(--color-primary)] hover:opacity-80 inline-flex items-center gap-1">
-                View all templates <span aria-hidden>›</span>
-              </Link>
-            </div>
-          </div>
-          <div className="flex flex-col">
-            <div className="rounded-xl bg-cvmora-cream border border-cvmora-ink/8 p-6 flex flex-col items-center text-center">
-              <div className="w-20 h-24 rounded-lg bg-white border border-cvmora-ink/10 shadow-sm flex items-center justify-center mb-4">
-                <span className="text-2xl text-cvmora-muted">📄</span>
-              </div>
-              <p className="font-semibold text-cvmora-ink text-[0.9375rem] mb-1">Create your resume in minutes</p>
-              <p className="text-[0.8125rem] text-cvmora-muted leading-relaxed mb-4">Pick a template, fill in your details, export to PDF or Word.</p>
-              <Link to="/builder" className="text-[0.9375rem] font-semibold text-[var(--color-primary)] hover:opacity-80 inline-flex items-center gap-1">
-                Get started now <span aria-hidden>›</span>
-              </Link>
-            </div>
-          </div>
+    <div className="bg-white border-t border-[#e7e5e4] shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+      <div className="max-w-[900px] mx-auto px-6 py-5">
+        <div className="grid grid-cols-3 gap-x-2">
+          {exampleItems.map((item) => (
+            <DropdownItem key={item.title} {...item} />
+          ))}
         </div>
       </div>
     </div>
@@ -233,38 +149,12 @@ function TemplatesDropdown() {
 
 function CoverLetterDropdown() {
   return (
-    <div className="bg-white border-t border-cvmora-ink/8 shadow-[var(--shadow-card-hover)]">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          <div>
-            <h3 className="text-sm font-semibold text-cvmora-ink uppercase tracking-wider mb-4">Cover Letter</h3>
-            <ul className="space-y-1">
-              {coverLetterLinks.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    to={item.to}
-                    className="block py-2.5 px-2 -mx-2 rounded-lg text-[0.9375rem] text-cvmora-ink hover:bg-cvmora-ink/5 hover:text-[var(--color-primary)] transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="lg:col-span-2 flex flex-col">
-            <div className="rounded-xl bg-cvmora-cream border border-cvmora-ink/8 p-6 flex flex-col sm:flex-row items-center gap-6">
-              <div className="w-20 h-24 rounded-lg bg-white border border-cvmora-ink/10 shadow-sm flex items-center justify-center shrink-0">
-                <span className="text-2xl text-cvmora-muted">✉️</span>
-              </div>
-              <div className="text-center sm:text-left">
-                <p className="font-semibold text-cvmora-ink text-[0.9375rem] mb-1">Build a cover letter that matches your resume</p>
-                <p className="text-[0.8125rem] text-cvmora-muted leading-relaxed mb-4">Paste the job, tailor your pitch, download as PDF or Word.</p>
-                <Link to="/cover-letter" className="text-[0.9375rem] font-semibold text-[var(--color-primary)] hover:opacity-80 inline-flex items-center gap-1">
-                  Create cover letter <span aria-hidden>›</span>
-                </Link>
-              </div>
-            </div>
-          </div>
+    <div className="bg-white border-t border-[#e7e5e4] shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+      <div className="max-w-[900px] mx-auto px-6 py-5">
+        <div className="grid grid-cols-2 gap-x-2">
+          {coverLetterItems.map((item) => (
+            <DropdownItem key={item.title} {...item} />
+          ))}
         </div>
       </div>
     </div>
@@ -273,38 +163,12 @@ function CoverLetterDropdown() {
 
 function ResourcesDropdown() {
   return (
-    <div className="bg-white border-t border-cvmora-ink/8 shadow-[var(--shadow-card-hover)]">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          <div>
-            <h3 className="text-sm font-semibold text-cvmora-ink uppercase tracking-wider mb-4">Resources</h3>
-            <ul className="space-y-1">
-              {resourceCategories.map((cat) => (
-                <li key={cat.title}>
-                  <Link
-                    to={cat.to}
-                    className="flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-lg text-left group hover:bg-cvmora-ink/5 transition-colors"
-                  >
-                    <span className="text-lg shrink-0" aria-hidden>{cat.icon}</span>
-                    <div className="min-w-0 flex-1">
-                      <span className="font-medium text-cvmora-ink text-[0.9375rem] group-hover:text-[var(--color-primary)] transition-colors block">{cat.title}</span>
-                      <span className="text-[0.8125rem] text-cvmora-muted block mt-0.5">{cat.desc}</span>
-                    </div>
-                    <span className="text-cvmora-muted group-hover:text-[var(--color-primary)] shrink-0" aria-hidden>›</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="lg:col-span-2 flex flex-col">
-            <div className="rounded-xl bg-cvmora-cream border border-cvmora-ink/8 p-6 flex flex-col items-center text-center">
-              <p className="font-semibold text-cvmora-ink text-[0.9375rem] mb-1">Need some expert advice?</p>
-              <p className="text-[0.8125rem] text-cvmora-muted leading-relaxed mb-4">Guides on resumes, cover letters, and career advice. Field-tested tips.</p>
-              <Link to="/resources" className="text-[0.9375rem] font-semibold text-[var(--color-primary)] hover:opacity-80 inline-flex items-center gap-1">
-                Read the blog <span aria-hidden>›</span>
-              </Link>
-            </div>
-          </div>
+    <div className="bg-white border-t border-[#e7e5e4] shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+      <div className="max-w-[900px] mx-auto px-6 py-5">
+        <div className="grid grid-cols-2 gap-x-2">
+          {resourceItems.map((item) => (
+            <DropdownItem key={item.title} {...item} />
+          ))}
         </div>
       </div>
     </div>
@@ -442,6 +306,7 @@ export function Layout() {
                 </>
               ) : (
                 <>
+                  <Link to="/pricing" className="text-[15px] font-medium text-[#f97316] hover:text-[#ea580c] transition-colors py-2.5 px-2 min-h-[44px] flex items-center rounded-full lg:min-h-0 hidden sm:flex">Pricing</Link>
                   <Link to="/login" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center rounded-full lg:min-h-0">Sign in</Link>
                   <Link to="/builder" className="px-3 py-2.5 min-h-[44px] flex items-center rounded-full bg-[#BFED8D] text-[#1c1917] text-[14px] sm:text-[15px] font-medium border border-[#a8e070] shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors whitespace-nowrap shrink-0">Start building</Link>
                 </>

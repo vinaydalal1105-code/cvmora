@@ -29,6 +29,10 @@ import { SerifTemplate } from '../templates/SerifTemplate'
 import { BoldBlockTemplate } from '../templates/BoldBlockTemplate'
 import { TimelineTemplate } from '../templates/TimelineTemplate'
 import { LuxeTemplate } from '../templates/LuxeTemplate'
+import { GradientTemplate } from '../templates/GradientTemplate'
+import { NeonTemplate } from '../templates/NeonTemplate'
+import { GeometricTemplate } from '../templates/GeometricTemplate'
+import { AuraTemplate } from '../templates/AuraTemplate'
 import type { ResumeData } from '../types/resume'
 
 export type TemplateCardClickHandler = (template: ResumeTemplate, accentColor?: string, builderQuery?: string) => void
@@ -62,6 +66,10 @@ const TEMPLATE_COMPONENT_MAP: Record<string, React.ComponentType<{ data: ResumeD
   'bold-block': BoldBlockTemplate,
   timeline: TimelineTemplate,
   luxe: LuxeTemplate,
+  gradient: GradientTemplate,
+  neon: NeonTemplate,
+  geometric: GeometricTemplate,
+  aura: AuraTemplate,
 }
 
 /** Use one balanced example for all template previews so fill is consistent (not over/under filled). */
@@ -96,11 +104,15 @@ const TEMPLATE_EXAMPLE_MAP: Record<string, keyof typeof filledExamples> = {
   'bold-block': PREVIEW_EXAMPLE_KEY,
   timeline: PREVIEW_EXAMPLE_KEY,
   luxe: PREVIEW_EXAMPLE_KEY,
+  gradient: PREVIEW_EXAMPLE_KEY,
+  neon: PREVIEW_EXAMPLE_KEY,
+  geometric: PREVIEW_EXAMPLE_KEY,
+  aura: PREVIEW_EXAMPLE_KEY,
 }
 
 
-/** Accent colors: soft palette from design – pink, muted blue, tan, grey, teal, coral */
-const ACCENT_COLORS = ['#eccbc3', '#aabcdf', '#baa989', '#696969', '#b0e0dd', '#e38779'] as const
+/** Accent colors: soft palette from design – pink, muted blue, tan, grey, teal, coral, dark navy */
+const ACCENT_COLORS = ['#eccbc3', '#aabcdf', '#baa989', '#696969', '#b0e0dd', '#e38779', '#1e3a5f'] as const
 
 /** Default color index per template (indices into ACCENT_COLORS). */
 const DEFAULT_COLOR_INDEX_BY_TEMPLATE: Record<string, number> = {
@@ -131,28 +143,42 @@ const DEFAULT_COLOR_INDEX_BY_TEMPLATE: Record<string, number> = {
 
 /** Full resume render size (logical pixels) */
 const PREVIEW_WIDTH = 794
-const PREVIEW_HEIGHT = 842
+const PREVIEW_HEIGHT = 1123
 
 /** A4 aspect ratio = 210/297. Preview area has fixed height; paper fits inside with padding. */
 const PREVIEW_AREA_HEIGHT = 520
 const PREVIEW_AREA_PADDING = 12
 const PREVIEW_PAPER_HEIGHT = PREVIEW_AREA_HEIGHT - PREVIEW_AREA_PADDING * 2
+const HERO_SCALE = PREVIEW_AREA_HEIGHT / PREVIEW_PAPER_HEIGHT
 const PREVIEW_PAPER_WIDTH = Math.round((PREVIEW_PAPER_HEIGHT * 210) / 297)
+const FIRST_PAGE_GUARD = {
+  section: 120,
+  heading: 56,
+}
 
 /** Renders the resume content scaled to fit inside the fixed-size white "paper" (A4 ratio). */
 function FilledTemplatePreview({
   template,
   accentColor,
   plainPaper,
+  previewData,
 }: {
   template: ResumeTemplate
   accentColor?: string
   /** When true, no shadow or border (e.g. for hero preview). */
   plainPaper?: boolean
+  /** Optional resume data override for live previews. */
+  previewData?: ResumeData
 }) {
   const Component = TEMPLATE_COMPONENT_MAP[template.id] ?? ClassicTemplate
   const exampleKey = TEMPLATE_EXAMPLE_MAP[template.id] ?? 'accountant'
-  const data = filledExamples[exampleKey]
+  const data = previewData ?? filledExamples[exampleKey]
+  const measureRef = useRef<HTMLDivElement>(null)
+  const [contentHeight, setContentHeight] = useState(PREVIEW_HEIGHT)
+  const [pageOffsets, setPageOffsets] = useState<number[]>([0])
+  const offset = pageOffsets[0] ?? 0
+  const nextOffset = pageOffsets[1]
+
   const paperShadow = plainPaper
     ? 'none'
     : '0 2px 4px rgba(0,0,0,0.05), 0 6px 12px rgba(0,0,0,0.07), 0 12px 24px rgba(0,0,0,0.06)'
@@ -180,6 +206,9 @@ function FilledTemplatePreview({
   }
 
   const scale = Math.min(PREVIEW_PAPER_WIDTH / PREVIEW_WIDTH, PREVIEW_PAPER_HEIGHT / PREVIEW_HEIGHT)
+  const end = Math.min(contentHeight, nextOffset ?? (offset + PREVIEW_HEIGHT))
+  const bleedGuard = nextOffset != null ? Math.ceil(2 / scale) : 0
+  const sliceHeight = Math.max(1, Math.min(PREVIEW_HEIGHT, end - offset - bleedGuard))
 
   const previewContent =
     template.id === 'professional' ? (
@@ -228,9 +257,179 @@ function FilledTemplatePreview({
       <TimelineTemplate data={data} accentColor={accentColor} />
     ) : template.id === 'luxe' ? (
       <LuxeTemplate data={data} accentColor={accentColor} />
+    ) : template.id === 'gradient' ? (
+      <GradientTemplate data={data} accentColor={accentColor} />
+    ) : template.id === 'neon' ? (
+      <NeonTemplate data={data} accentColor={accentColor} />
+    ) : template.id === 'geometric' ? (
+      <GeometricTemplate data={data} accentColor={accentColor} />
+    ) : template.id === 'aura' ? (
+      <AuraTemplate data={data} accentColor={accentColor} />
     ) : (
       <Component data={data} />
     )
+
+  useEffect(() => {
+    if (!previewData) {
+      setContentHeight(PREVIEW_HEIGHT)
+      setPageOffsets([0])
+      return
+    }
+    const el = measureRef.current
+    if (!el) return
+
+    let rafId = 0
+    const update = () => {
+      const h = el.scrollHeight
+      const containerRect = el.getBoundingClientRect()
+
+      const lineMap = new Map<number, number>()
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          if (!node.textContent || !node.textContent.trim()) return NodeFilter.FILTER_REJECT
+          return NodeFilter.FILTER_ACCEPT
+        },
+      })
+      while (walker.nextNode()) {
+        const node = walker.currentNode as Text
+        const range = document.createRange()
+        range.selectNodeContents(node)
+        const rects = range.getClientRects()
+        for (const rect of rects) {
+          if (rect.height < 4) continue
+          const top = Math.max(0, Math.floor(rect.top - containerRect.top))
+          const bottom = Math.max(0, Math.ceil(rect.bottom - containerRect.top))
+          const prev = lineMap.get(top)
+          if (prev == null || bottom > prev) lineMap.set(top, bottom)
+        }
+        range.detach?.()
+      }
+      const lineRects = Array.from(lineMap.entries())
+        .map(([top, bottom]) => ({ top, bottom }))
+        .sort((a, b) => a.top - b.top)
+
+      const findLastLineIndex = (maxY: number, minY: number): number => {
+        for (let i = lineRects.length - 1; i >= 0; i -= 1) {
+          const { top, bottom } = lineRects[i]
+          if (bottom <= maxY && top > minY) return i
+        }
+        return -1
+      }
+      const getLineGap = (maxY: number, minY: number): number | null => {
+        const idx = findLastLineIndex(maxY, minY)
+        if (idx < 0) return null
+        const lineBottom = lineRects[idx].bottom
+        const nextLineTop = idx + 1 < lineRects.length ? lineRects[idx + 1].top : lineBottom + 8
+        return Math.ceil(lineBottom + (nextLineTop - lineBottom) / 2)
+      }
+
+      const sections = Array.from(el.querySelectorAll('section'))
+      const sectionTops = sections
+        .map((section) => Math.floor((section as HTMLElement).offsetTop))
+        .filter((top) => top > 0)
+        .sort((a, b) => a - b)
+
+      const headingTops = Array.from(el.querySelectorAll('h2, h3'))
+        .map((heading) => Math.floor((heading as HTMLElement).offsetTop))
+        .filter((top) => top > 0)
+        .sort((a, b) => a - b)
+
+      const blockRanges: Array<{ start: number; end: number }> = []
+      const blockParents = el.querySelectorAll('.space-y-4, .space-y-3')
+      blockParents.forEach((parent) => {
+        Array.from(parent.children).forEach((child) => {
+          const node = child as HTMLElement
+          const start = Math.floor(node.offsetTop)
+          const end = Math.ceil(node.offsetTop + node.offsetHeight)
+          if (end > start) blockRanges.push({ start, end })
+        })
+      })
+      el.querySelectorAll('[style*="break-inside"]').forEach((node) => {
+        const n = node as HTMLElement
+        const start = Math.floor(n.offsetTop)
+        const end = Math.ceil(n.offsetTop + n.offsetHeight)
+        if (end > start) blockRanges.push({ start, end })
+      })
+      const entryNodes = new Set<HTMLElement>()
+      el.querySelectorAll('.exp-desc, .edu-desc').forEach((list) => {
+        const entry = (list as HTMLElement).parentElement
+        if (entry) entryNodes.add(entry)
+      })
+      entryNodes.forEach((node) => {
+        const start = Math.floor(node.offsetTop)
+        const end = Math.ceil(node.offsetTop + node.offsetHeight)
+        if (end > start) blockRanges.push({ start, end })
+      })
+      blockRanges.sort((a, b) => a.start - b.start)
+
+      const offsets: number[] = [0]
+      const maxPages = 10
+      const SECTION_GUARD = FIRST_PAGE_GUARD.section
+      const HEADING_GUARD = FIRST_PAGE_GUARD.heading
+      const PAGE_TOP_PAD = 32
+      let top = 0
+
+      while (offsets.length < maxPages && top + PREVIEW_HEIGHT < h - 1) {
+        const pageH = offsets.length === 0 ? PREVIEW_HEIGHT : PREVIEW_HEIGHT - PAGE_TOP_PAD
+        const target = top + pageH
+        let breakAt = getLineGap(target - 1, top + 8) ?? target
+
+        let blockStart = 0
+        for (let i = 0; i < blockRanges.length; i += 1) {
+          const block = blockRanges[i]
+          if (block.start > top + 16 && block.start < target && block.end > target + 2) {
+            if (block.start > blockStart) blockStart = block.start
+          }
+        }
+        if (blockStart > 0) {
+          breakAt = blockStart
+        } else {
+          let sectionStart = 0
+          for (let i = 0; i < sectionTops.length; i += 1) {
+            const st = sectionTops[i]
+            if (st > top + 16 && st <= target && st > target - SECTION_GUARD) {
+              if (st > sectionStart) sectionStart = st
+            }
+          }
+          if (sectionStart > 0) {
+            breakAt = sectionStart
+          } else {
+            let headingStart = 0
+            for (let i = 0; i < headingTops.length; i += 1) {
+              const ht = headingTops[i]
+              if (ht > top + 16 && ht <= target && ht > target - HEADING_GUARD) {
+                if (ht > headingStart) headingStart = ht
+              }
+            }
+            if (headingStart > 0) breakAt = headingStart
+          }
+        }
+
+        const snapped = getLineGap(Math.min(breakAt, target), top + 8)
+        if (snapped != null) breakAt = snapped
+
+        const nextTop = Math.max(top + 1, Math.min(Math.ceil(breakAt) + 2, h))
+        offsets.push(nextTop)
+        top = nextTop
+      }
+
+      setContentHeight(h)
+      setPageOffsets(offsets)
+    }
+
+    const schedule = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(update)
+    }
+
+    schedule()
+    const ro = new ResizeObserver(schedule)
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      cancelAnimationFrame(rafId)
+    }
+  }, [previewData, template.id, accentColor])
 
   // Paper background: for templates with a vertical color bar, draw bar on paper so it extends full card height (top to bottom)
   const defaultSidebarColor =
@@ -260,7 +459,7 @@ function FilledTemplatePreview({
   } else if (template.id === 'proficiency') {
     paperBg = '#ffffff'
   } else if (defaultSidebarColor != null) {
-    const sidebarPct = template.id === 'vivid' ? 26 : 28
+    const sidebarPct = 28
     paperBg = `linear-gradient(to right, ${sidebarColor} 0%, ${sidebarColor} ${sidebarPct}%, #ffffff ${sidebarPct}%, #ffffff 100%)`
   }
   const sidebarSide: 'left' | 'right' | null =
@@ -289,11 +488,16 @@ function FilledTemplatePreview({
           ? 26
           : template.id === 'sidebar-right'
             ? 28
-            : template.id === 'vivid'
-              ? 26
             : 28
   const edgeOverlayOnTop = template.id === 'vertical-line' || template.id === 'pillar'
   const useOuterSidebarOverlay = finalIsSidebarTemplate && template.id !== 'proficiency'
+  const paperBackground = useOuterSidebarOverlay
+    ? (
+        sidebarSide === 'right'
+          ? `linear-gradient(to right, #ffffff 0%, #ffffff ${100 - sidebarWidthPct}%, transparent ${100 - sidebarWidthPct}%, transparent 100%)`
+          : `linear-gradient(to right, transparent 0%, transparent ${sidebarWidthPct}%, #ffffff ${sidebarWidthPct}%, #ffffff 100%)`
+      )
+    : (paperBg ?? '#ffffff')
 
   return (
     <div
@@ -320,18 +524,24 @@ function FilledTemplatePreview({
           }}
         />
       )}
+      {previewData && (
+        <div
+          ref={measureRef}
+          className="resume-measure absolute left-[-9999px] top-0 pointer-events-none"
+          style={{ visibility: 'hidden', width: PREVIEW_WIDTH }}
+          aria-hidden
+        >
+          <div className="w-full">
+            {previewContent}
+          </div>
+        </div>
+      )}
       {/* Paper + content on top; for sidebar templates left strip is transparent so full-height bar (z-0) shows through */}
       <div
         className={`rounded-sm w-full h-full flex justify-center overflow-visible relative ${finalIsSidebarTemplate ? 'template-card-paper' : ''}`}
         style={{
           position: 'relative',
-          background: useOuterSidebarOverlay
-            ? (
-                sidebarSide === 'right'
-                  ? `linear-gradient(to right, #ffffff 0%, #ffffff ${100 - sidebarWidthPct}%, transparent ${100 - sidebarWidthPct}%, transparent 100%)`
-                  : `linear-gradient(to right, transparent 0%, transparent ${sidebarWidthPct}%, #ffffff ${sidebarWidthPct}%, #ffffff 100%)`
-              )
-            : (paperBg ?? '#ffffff'),
+          background: paperBackground,
           boxShadow: paperShadow,
           isolation: 'isolate',
           zIndex: 1,
@@ -352,8 +562,35 @@ function FilledTemplatePreview({
             }}
             className={`resume-print-inner w-full relative ${finalIsSidebarTemplate ? 'bg-transparent flex flex-col' : 'bg-white'}`}
           >
-            <div className="resume-template-fill relative z-10" style={{ height: '100%', minHeight: '100%', flex: '1 1 0' }}>
-              {previewContent}
+            <div
+              className="resume-template-fill relative z-10"
+              style={{
+                height: '100%',
+                minHeight: '100%',
+                flex: '1 1 0',
+                transform: offset === 0 ? 'none' : `translate3d(0, ${-offset}px, 0)`,
+                willChange: offset === 0 ? undefined : 'transform',
+              }}
+            >
+              <div 
+                style={{ 
+                  height: previewData ? PREVIEW_HEIGHT : '100%', 
+                  maxHeight: PREVIEW_HEIGHT,
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
+                {previewContent}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 right-0 bottom-0"
+                  style={{
+                    height: Math.ceil(40 / scale),
+                    background: 'linear-gradient(to bottom, transparent, white)',
+                    zIndex: 20,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -724,6 +961,7 @@ interface TemplateCardProps {
   template: ResumeTemplate
   variant: 'default' | 'ats' | 'hero'
   onSelectTemplate?: TemplateCardClickHandler
+  previewData?: ResumeData
 }
 
 /** Templates that have a colored element (sidebar, header bar, accent) show color dots; dots change that color. */
@@ -732,6 +970,7 @@ const TEMPLATES_WITH_COLOR_OPTIONS = new Set([
   'sidebar-right', 'centered-clean', 'accent-bar',
   'vertical-line', 'initials-header', 'divided',
   'story', 'deco', 'proficiency', 'header-profile', 'elegant', 'pillar', 'spotlight', 'card', 'serif', 'bold-block', 'timeline', 'luxe',
+  'gradient', 'neon', 'geometric', 'aura',
 ])
 
 function getDefaultColorIndex(templateId: string): number {
@@ -739,7 +978,7 @@ function getDefaultColorIndex(templateId: string): number {
   return i !== undefined ? Math.min(i, ACCENT_COLORS.length - 1) : 0
 }
 
-export function TemplateCard({ template, variant, onSelectTemplate }: TemplateCardProps) {
+export function TemplateCard({ template, variant, onSelectTemplate, previewData }: TemplateCardProps) {
   const [selectedColorIndex, setSelectedColorIndex] = useState(() => getDefaultColorIndex(template.id))
   const [hoveredColorIndex, setHoveredColorIndex] = useState<number | null>(null)
   const hasColorDots = TEMPLATES_WITH_COLOR_OPTIONS.has(template.id)
@@ -756,17 +995,32 @@ export function TemplateCard({ template, variant, onSelectTemplate }: TemplateCa
   }, [hoveredColorIndex])
 
   if (variant === 'hero') {
+    const heroRef = useRef<HTMLDivElement>(null)
+    const [heroScale, setHeroScale] = useState(1)
+    useEffect(() => {
+      const el = heroRef.current
+      if (!el) return
+      const ro = new ResizeObserver(([entry]) => {
+        setHeroScale(entry.contentRect.width / PREVIEW_PAPER_WIDTH)
+      })
+      ro.observe(el)
+      return () => ro.disconnect()
+    }, [])
+
     return (
       <div
-        className="flex flex-col h-full w-full items-center justify-center overflow-visible"
-        style={{
-          height: PREVIEW_AREA_HEIGHT,
-          padding: PREVIEW_AREA_PADDING,
-          perspective: '1200px',
-        }}
+        ref={heroRef}
+        className="w-full overflow-hidden"
+        style={{ aspectRatio: '210/297' }}
       >
-        <div style={{ transformStyle: 'preserve-3d' }} className="bg-transparent">
-          <FilledTemplatePreview template={template} accentColor={accentColor} plainPaper />
+        <div
+          className="origin-top-left"
+          style={{
+            transform: `scale(${heroScale})`,
+            transformOrigin: 'top left',
+          }}
+        >
+          <FilledTemplatePreview template={template} accentColor={accentColor} plainPaper previewData={previewData} />
         </div>
       </div>
     )
@@ -784,7 +1038,7 @@ export function TemplateCard({ template, variant, onSelectTemplate }: TemplateCa
         }}
       >
         <div style={{ transformStyle: 'preserve-3d' }}>
-          <FilledTemplatePreview template={template} accentColor={accentColor} />
+          <FilledTemplatePreview template={template} accentColor={accentColor} previewData={previewData} />
         </div>
       </div>
 

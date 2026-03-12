@@ -68,11 +68,37 @@ export async function apiUploadResume(
 ): Promise<{ text: string; pages?: number; data?: ParsedResumeData | null }> {
   const form = new FormData()
   form.append('file', file)
-  const res = await fetch(API + '/upload/resume', {
-    method: 'POST',
-    body: form,
-  })
-  const data = await res.json()
-  if (!res.ok) throw new Error((data as { error?: string }).error || 'Upload failed')
-  return data
+  let res: Response
+  try {
+    res = await fetch(API + '/upload/resume', {
+      method: 'POST',
+      body: form,
+    })
+  } catch (err) {
+    const base = err instanceof Error ? err.message : 'Network error'
+    const hint = import.meta.env?.DEV ? ' Make sure the API server is running at http://localhost:3001.' : ''
+    throw new Error(base + hint)
+  }
+  const raw = await res.text()
+  let data: { text?: string; pages?: number; data?: ParsedResumeData | null; error?: string } = {}
+
+  if (raw) {
+    try {
+      data = JSON.parse(raw) as typeof data
+    } catch {
+      if (!res.ok) throw new Error(raw || 'Upload failed')
+      return { text: raw }
+    }
+  }
+
+  if (!res.ok) {
+    const status = `${res.status} ${res.statusText}`.trim()
+    const rawHint = raw && raw.length <= 160 ? raw : ''
+    throw new Error(data.error || rawHint || `Upload failed (${status || 'unknown error'})`)
+  }
+  return {
+    text: data.text ?? '',
+    pages: data.pages,
+    data: data.data ?? null,
+  }
 }

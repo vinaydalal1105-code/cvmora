@@ -54,6 +54,10 @@ export interface ResumeData {
   skills: string[]
   /** Optional references (e.g. for customer service / traditional resumes) */
   references?: ReferenceItem[]
+  /** How to render descriptions per section: bullet list or continuous paragraph */
+  descriptionFormat?: 'bullets' | 'paragraph'
+  experienceFormat?: 'bullets' | 'paragraph'
+  educationFormat?: 'bullets' | 'paragraph'
 }
 
 export type TemplateId =
@@ -85,3 +89,7 @@ export type TemplateId =
   | 'bold-block'
   | 'timeline'
   | 'luxe'
+  | 'gradient'
+  | 'neon'
+  | 'geometric'
+  | 'aura'

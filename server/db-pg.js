@@ -56,14 +56,16 @@ async function ensureSchema() {
   `
   await conn`CREATE INDEX IF NOT EXISTS idx_resumes_user ON resumes(user_id)`
   await conn`CREATE INDEX IF NOT EXISTS idx_cover_letters_user ON cover_letters(user_id)`
+  await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT`
+  await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'free'`
   schemaDone = true
 }
 
 export async function pgGetUserById(id) {
   if (!conn) return null
   await ensureSchema()
-  const rows = await conn`SELECT id, email, name, created_at, verified FROM users WHERE id = ${id}`
-  return rows[0] || null
+  const rows = await conn`SELECT id, email, name, created_at, verified, subscription_status FROM users WHERE id = ${id}`
+  return rows[0] ? { ...rows[0], subscription_status: rows[0].subscription_status ?? 'free' } : null
 }
 
 export async function pgGetUserByEmail(email) {
@@ -105,6 +107,29 @@ export async function pgUpdateUserOAuth(id, provider, providerId) {
 export async function pgUpdateUserName(id, name) {
   if (!conn) return
   await conn`UPDATE users SET name = ${name} WHERE id = ${id}`
+}
+
+export async function pgGetStripeCustomerId(userId) {
+  if (!conn) return null
+  await ensureSchema()
+  const rows = await conn`SELECT stripe_customer_id FROM users WHERE id = ${userId}`
+  return rows[0]?.stripe_customer_id ?? null
+}
+
+export async function pgSetStripeCustomerId(userId, stripeCustomerId) {
+  if (!conn) return
+  await conn`UPDATE users SET stripe_customer_id = ${stripeCustomerId} WHERE id = ${userId}`
+}
+
+export async function pgSetSubscriptionStatus(userId, status) {
+  if (!conn) return
+  await conn`UPDATE users SET subscription_status = ${status} WHERE id = ${userId}`
+}
+
+export async function pgGetSubscriptionStatus(userId) {
+  if (!conn) return 'free'
+  const rows = await conn`SELECT subscription_status FROM users WHERE id = ${userId}`
+  return rows[0]?.subscription_status ?? 'free'
 }
 
 export async function pgGetResumesByUserId(userId) {

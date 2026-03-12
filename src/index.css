@@ -224,32 +224,35 @@ select:focus-visible {
   color: var(--color-cvmora-ink);
 }
 
-/* Input — Base44-style rounded, 44px min touch target on mobile */
+/* Input — rounded, 44px min touch target on mobile */
 .input-premium {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid #e7e5e4;
-  background: #fff;
-  padding: 0.75rem 1rem;
-  min-height: 44px;
-  font-size: 16px;
+  background: #fafaf9;
+  padding: 0.625rem 0.875rem;
+  min-height: 42px;
+  font-size: 15px;
   font-family: var(--font-sans);
   color: var(--color-cvmora-ink);
   transition: border-color var(--duration-fast) var(--ease-out-expo),
-              box-shadow var(--duration-fast) var(--ease-out-expo);
+              box-shadow var(--duration-fast) var(--ease-out-expo),
+              background-color var(--duration-fast) var(--ease-out-expo);
 }
 
 .input-premium::placeholder {
-  color: var(--color-cvmora-muted-soft);
+  color: #a8a29e;
 }
 
 .input-premium:hover {
   border-color: #d6d3d1;
+  background: #fff;
 }
 
 .input-premium:focus {
   border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+  background: #fff;
   outline: none;
 }
 
@@ -298,10 +301,40 @@ select:focus-visible {
 
 /* Resume preview: measure container — allow templates to shrink so we get true content height; show page 2 only when first is full */
 .resume-measure [class*="-template"] {
+  height: auto !important;
   min-height: 0 !important;
 }
 .resume-measure aside {
   min-height: 0 !important;
+}
+
+/* Resume preview pages: allow templates to grow beyond one page so slicing works */
+.resume-preview-pages .resume-print-inner .resume-template-fill {
+  height: auto !important;
+  min-height: 0 !important;
+}
+.resume-preview-pages .resume-print-inner .resume-template-fill [class*="-template"] {
+  height: auto !important;
+  min-height: 842px !important;
+}
+.resume-preview-pages .resume-print-inner {
+  clip-path: inset(0);
+}
+
+/* Resume preview: let sidebar overlay show through for full-height bars */
+.resume-preview-pages .resume-print-inner .sidebar-right-template,
+.resume-preview-pages .resume-print-inner .pillar-template,
+.resume-preview-pages .resume-print-inner .vertical-line-template,
+.resume-preview-pages .resume-print-inner .corporate-template {
+  background: transparent !important;
+}
+.resume-preview-pages .resume-print-inner .sidebar-right-template aside,
+.resume-preview-pages .resume-print-inner .corporate-template aside {
+  background: transparent !important;
+}
+.resume-preview-pages .resume-print-inner .pillar-template > div:first-child,
+.resume-preview-pages .resume-print-inner .vertical-line-template > div:first-child {
+  background: transparent !important;
 }
 
 /* Resume preview: full-height wrapper so template percentage height resolves */
@@ -382,4 +415,14 @@ select:focus-visible {
 .template-card-paper .resume-print-inner [class*="-template"] {
   height: 100% !important;
   min-height: 100% !important;
+}
+
+/* Template card preview: allow templates to grow past one page so first-page slicing is accurate */
+.template-card-paper .resume-print-inner .resume-template-fill {
+  height: auto !important;
+  min-height: 0 !important;
+}
+.template-card-paper .resume-print-inner .resume-template-fill [class*="-template"] {
+  height: auto !important;
+  min-height: 842px !important;
 }

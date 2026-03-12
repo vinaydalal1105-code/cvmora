@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { TemplateCard } from '../components/TemplateCard'
 import { allTemplates } from '../data/templates'
+import { apiUploadResume } from '../api/client'
+import { buildResumeFromUpload, PENDING_UPLOADED_RESUME_KEY } from '../utils/uploadedResume'
 
 /* Target count for "resumes created today": ~3.5k at midnight → ~28k by end of day, resets daily */
 function getResumeCountForTimeOfDay(): number {
@@ -193,44 +195,78 @@ function useScrollReveal(threshold = 0.15) {
   return { ref, visible }
 }
 
-const HERO_TEMPLATE_IDS = ['professional', 'modern', 'minimal', 'simple-ats', 'balanced', 'elegant'] as const
+const HERO_TEMPLATES = ['professional', 'modern', 'minimal', 'simple-ats'] as const
 
-function HeroResumeCarousel() {
-  const [index, setIndex] = useState(0)
-  const templateId = HERO_TEMPLATE_IDS[index % HERO_TEMPLATE_IDS.length]
-  const template = allTemplates.find((t) => t.id === templateId) ?? allTemplates[0]
-  const next = useCallback(
-    () => setIndex((i) => (i + 1) % HERO_TEMPLATE_IDS.length),
-    []
+function HeroResumeStack() {
+  const [active, setActive] = useState(0)
+  const templates = HERO_TEMPLATES.map(
+    (id) => allTemplates.find((t) => t.id === id) ?? allTemplates[0]
   )
 
+  const autoRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const resetAuto = useCallback(() => {
+    if (autoRef.current) clearInterval(autoRef.current)
+    autoRef.current = setInterval(
+      () => setActive((i) => (i + 1) % templates.length),
+      5000
+    )
+  }, [templates.length])
+
   useEffect(() => {
-    const id = setInterval(next, 4500)
-    return () => clearInterval(id)
-  }, [next])
+    resetAuto()
+    return () => { if (autoRef.current) clearInterval(autoRef.current) }
+  }, [resetAuto])
+
+  const handleSelect = (i: number) => {
+    setActive(i)
+    resetAuto()
+  }
 
   return (
-    <div
-      className="relative w-full max-w-[420px] mx-auto sm:max-w-[480px] overflow-hidden flex items-center justify-center"
-      style={{ minHeight: '520px' }}
-    >
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={template.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.6, ease: [0.33, 0, 0.2, 1] }}
-          className="absolute inset-0 flex items-center justify-center w-full"
-        >
-          <div
-            className="w-full flex justify-center"
-            style={{ transform: 'scale(0.95)', transformOrigin: 'center center' }}
+    <div className="flex flex-col items-center gap-5 w-full">
+      <div className="relative w-full" style={{ aspectRatio: '210/297' }}>
+        {templates.map((t, i) => {
+          const isActive = i === active
+          const offset = i - active
+          return (
+            <motion.div
+              key={t.id}
+              className="absolute inset-0 cursor-pointer"
+              style={{ zIndex: isActive ? 10 : 5 - Math.abs(offset) }}
+              animate={{
+                scale: isActive ? 1 : 0.92 - Math.abs(offset) * 0.03,
+                x: offset * 24,
+                y: Math.abs(offset) * 8,
+                opacity: Math.abs(offset) > 1 ? 0 : isActive ? 1 : 0.6,
+                rotateY: offset * -2,
+              }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              onClick={() => handleSelect(i)}
+            >
+              <div className="w-full h-full rounded-lg overflow-hidden bg-white shadow-[0_4px_24px_rgba(0,0,0,0.1)] border border-[#e7e5e4]">
+                <TemplateCard template={t} variant="hero" />
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+
+      <div className="flex items-center gap-2">
+        {templates.map((t, i) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => handleSelect(i)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
+              i === active
+                ? 'bg-[#1c1917] text-white shadow-sm'
+                : 'bg-white text-[#78716c] border border-[#e7e5e4] hover:border-[#d6d3d1]'
+            }`}
           >
-            <TemplateCard template={template} variant="hero" />
-          </div>
-        </motion.div>
-      </AnimatePresence>
+            {t.name}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
@@ -292,335 +328,366 @@ const testimonials = [
   { quote: 'I can easily use it to generate a simple yet professional CV.', name: 'Carol', rating: 5 },
 ]
 
-/* Base44-style feature sections: step indicator, heading, description, CTA, and right-side card */
 const featureSteps = [
   {
     step: '01',
     total: '04',
-    title: 'Your goal → a recruiter-ready resume, in minutes',
-    desc: 'Other builders make you click through dozens of fields. Tell Cvmora what you’re applying for and get a structured draft with the right sections and wording—no guessing what to include or how to phrase it.',
+    heading: 'Build your resume',
+    title: 'Upload or start from scratch — your resume, structured in minutes',
+    desc: 'Drop in an existing PDF or Word file and Cvmora pulls every section into the right place. Or start fresh with a guided step-by-step builder. Either way you get a live preview that updates as you type.',
     cta: 'Start building',
     to: '/builder',
   },
   {
     step: '02',
     total: '04',
-    title: 'Templates that actually get past ATS',
-    desc: 'Many free templates break in applicant tracking systems, so recruiters never see your full resume. Every Cvmora layout is tested to parse correctly so your content looks right and you stand out.',
+    heading: 'Pick a template',
+    title: 'Every template is tested to pass ATS scanners',
+    desc: 'Choose from Professional, Modern, Simple, and ATS-optimized layouts. Every design is recruiter-tested so your formatting stays intact when parsed by applicant tracking systems.',
     cta: 'Browse templates',
     to: '/templates',
   },
   {
     step: '03',
     total: '04',
-    title: 'Download in one click. No paywall.',
-    desc: 'Try the full builder without signing up. Export to PDF or Word with no watermarks or “upgrade to download” prompts. Create an account only when you want to save versions and switch between them.',
+    heading: 'Download & go',
+    title: 'Export to PDF or Word — clean, print-ready files',
+    desc: 'When your resume is ready, download it as a polished PDF or an editable Word document. No watermarks, no hidden fees. Pay once and your file is ready to send.',
     cta: 'Start building',
     to: '/builder',
   },
   {
     step: '04',
     total: '04',
-    title: 'One builder for every stage of your career',
-    desc: 'First job or next promotion, tech or teaching—use the same Cvmora builder for resumes and cover letters. No switching tools or reformatting when you change direction.',
-    cta: 'Start building',
-    to: '/builder',
+    heading: 'Your career toolkit',
+    title: 'Everything you need in one place — beyond just resumes',
+    desc: 'Build matching cover letters, browse remote jobs, practice interview questions, check salary benchmarks, and read expert career guides. One platform from application to offer.',
+    cta: 'Explore tools',
+    to: '/resources',
   },
 ]
 
-function FeatureSection({
-  step,
-  total,
-  title,
-  desc,
-  cta,
-  to,
-  children,
-}: {
-  step: string
-  total: string
-  title: string
-  desc: string
-  cta: string
-  to: string
-  children: React.ReactNode
-}) {
-  const { ref, visible } = useScrollReveal(0.12)
-  return (
-    <section
-      ref={ref}
-      className={`min-h-[70vh] sm:min-h-[75vh] flex items-center py-12 sm:py-16 px-4 sm:px-6 transition-all duration-700 ease-out ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}
-    >
-      <div className="max-w-[1400px] mx-auto w-full">
-        <div className="max-w-[1100px] mx-auto rounded-[1.25rem] lg:rounded-[1.5rem] bg-white/95 shadow-[0_8px_40px_rgba(0,0,0,0.08),0_2px_12px_rgba(0,0,0,0.04)] border border-[#e5e7eb]/80 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-center p-5 sm:p-6 lg:p-8">
-            <div className="lg:col-span-5 flex flex-col justify-center min-w-0">
-              <p className="text-[#78716c] text-sm sm:text-base font-medium mb-2">
-            {step} <span className="text-[#1c1917]/50">/</span> {total}
-          </p>
-              <h2 className="text-2xl sm:text-3xl lg:text-[2rem] font-bold text-[#1c1917] tracking-tight leading-tight mb-4">
-            {title}
-          </h2>
-              <p className="text-lg sm:text-[1.125rem] text-[#44403c] leading-relaxed mb-6" style={{ lineHeight: 1.6 }}>
-            {desc}
-          </p>
-          <Link
-            to={to}
-                className="inline-flex items-center justify-center px-6 py-3.5 rounded-full bg-[#1c1917] text-white text-base font-medium hover:bg-[#44403c] transition-colors w-fit shadow-sm"
-          >
-            {cta}
-          </Link>
-        </div>
-            <div className="lg:col-span-7 flex justify-center lg:justify-end items-center">
-              {children}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* Wrapper: cards stacked one on top of the other (Base44-style overlap) */
-function StackedCards({ children }: { children: React.ReactNode }) {
-  const cards = Array.isArray(children) ? children : [children]
-  return (
-    <div className="relative w-full max-w-[420px] min-h-[260px] sm:min-h-[280px] mx-auto lg:mx-0">
-      {/* Soft gradient behind stack (Base44-style) */}
-      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-100/40 via-rose-50/30 to-amber-100/40 -z-10" aria-hidden />
-      {cards.map((child, i) => (
-        <div
-          key={i}
-          className="absolute transition-all duration-700 ease-out"
-          style={{
-            zIndex: cards.length - i,
-            left: i * 28,
-            top: i * 24,
-            transform: `translateY(${i * 12}px)`,
-          }}
-        >
-          {child}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-/* Card 1: Resume preview — shows output quality and why it matters */
-function CardResumePreview() {
-  return (
-    <div className="w-full max-w-[400px] rounded-2xl overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
-      <div
-        className="h-2 w-full"
-        style={{
-          background: 'linear-gradient(90deg, #fbbf24 0%, #fbb52c 18%, #f59e0b 35%, #f97316 50%, #f87171 70%, #fb7185 85%, #f43f5e 100%)',
-        }}
-      />
-      <div className="bg-white p-5 sm:p-6">
-        <p className="text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-3">Recruiter-ready output</p>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#fff7ed] to-[#ffedd5] flex items-center justify-center text-[#ea580c] font-bold text-lg border border-orange-200/50">A</div>
-          <div>
-            <p className="font-semibold text-[#1c1917] text-base">Alice Hart</p>
-            <p className="text-sm text-[#78716c]">Math Teacher</p>
-          </div>
-        </div>
-        <p className="text-sm text-[#44403c] leading-relaxed mb-4" style={{ lineHeight: 1.55 }}>
-          Summary, experience, and skills in the right order—no reformatting or missing sections.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <span className="px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200/60">ATS Ready</span>
-          <span className="px-2.5 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200/60">Professional</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* Card 2: Builder output — shows speed and structure, not endless forms */
-function CardBuilderOutput() {
-  const items = [
-    'Added Experience section',
-    'Added Education',
-    'Added Skills',
-    'Added Summary',
-    'Formatted for ATS',
-  ]
-  return (
-    <div className="w-full max-w-[400px] rounded-2xl overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
-      <div
-        className="h-3 w-full"
-        style={{
-          background: 'linear-gradient(90deg, #fcd34d 0%, #fbbf24 20%, #f59e0b 40%, #f97316 60%, #fb923c 75%, #fb7185 90%, #f43f5e 100%)',
-        }}
-      />
-      <div className="bg-gradient-to-b from-white to-rose-50/30 p-5 sm:p-6 border-t border-orange-100/50">
-        <p className="text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-2">Built in seconds, not hours</p>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="w-8 h-8 rounded-lg bg-[#f97316] flex items-center justify-center text-white text-sm font-bold shadow-sm">C</span>
-          <span className="font-semibold text-[#1c1917] text-base">Cvmora</span>
-        </div>
-        <p className="text-sm text-[#44403c] mt-2 mb-4" style={{ lineHeight: 1.55 }}>
-          One goal → full structure. No clicking through 20 screens.
-        </p>
-        <div className="space-y-2">
-          {items.map((label, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm text-[#1c1917]">
-              <span className="w-5 h-5 rounded flex items-center justify-center bg-amber-100 text-amber-700 text-[10px] font-bold">✓</span>
-              <span>{label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* Card 3: Export — no paywall, no watermarks */
-function CardExportOptions() {
-  return (
-    <div className="w-full max-w-[360px] rounded-2xl overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
-      <div
-        className="h-2 w-full"
-        style={{
-          background: 'linear-gradient(90deg, #c4b5fd 0%, #a78bfa 25%, #d946ef 50%, #ec4899 75%, #f472b6 100%)',
-        }}
-      />
-      <div className="bg-white p-5 sm:p-6">
-        <p className="text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-2">No paywall · No watermarks</p>
-        <p className="font-semibold text-[#1c1917] text-base mb-4">Download your resume</p>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200/80">
-            <span className="text-base font-medium text-[#1c1917]">PDF</span>
-            <span className="text-sm text-[#78716c]">Print-ready</span>
-          </div>
-          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-gradient-to-r from-slate-50 to-indigo-50/50 border border-slate-200/80">
-            <span className="text-base font-medium text-[#1c1917]">Word (.docx)</span>
-            <span className="text-sm text-[#78716c]">Editable</span>
-          </div>
-        </div>
-        <p className="text-sm font-medium text-emerald-700 mt-4">One click. No watermarks. No paywall.</p>
-      </div>
-    </div>
-  )
-}
-
-/* Card 4: Template picker — every layout recruiter- and ATS-tested */
-function CardTemplatePicker() {
-  const options = ['Professional', 'Modern', 'Minimal']
-  return (
-    <div className="w-full max-w-[360px] rounded-2xl overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.12)] border border-white/20">
-      <div
-        className="h-2 w-full"
-        style={{
-          background: 'linear-gradient(90deg, #a5b4fc 0%, #818cf8 30%, #c084fc 50%, #f97316 70%, #fbbf24 100%)',
-        }}
-      />
-      <div className="bg-white p-5 sm:p-6">
-        <p className="text-xs font-semibold text-[#78716c] uppercase tracking-wider mb-2">Every layout ATS- & recruiter-tested</p>
-        <p className="font-semibold text-[#1c1917] text-base mb-4">Choose a template</p>
-        <div className="space-y-0 divide-y divide-[#e7e5e4]">
-          {options.map((name, i) => (
-            <div key={name} className="flex items-center justify-between py-4 first:pt-0">
-              <div className="flex items-center gap-3">
-                {i === 0 && <span className="w-5 h-5 rounded-full bg-[#f97316] flex items-center justify-center text-white text-[10px] font-bold">✓</span>}
-                {i !== 0 && <span className="w-5 h-5 rounded-full border-2 border-[#e7e5e4]" />}
-                <span className="text-base font-medium text-[#1c1917]">{name}</span>
-              </div>
-              <span className="text-sm text-emerald-600 font-medium">ATS-friendly</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* Back card: dark Kanban-style (peeks behind section 1) */
-function _CardKanbanPeek() {
-  const cols = [
-    { label: 'Experience', color: 'bg-amber-400' },
-    { label: 'Education', color: 'bg-orange-400' },
-    { label: 'Skills', color: 'bg-sky-400' },
-    { label: 'Summary', color: 'bg-violet-400' },
-  ]
-  return (
-    <div className="w-full max-w-[380px] rounded-2xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-slate-700/50 bg-slate-800">
-      <div className="p-3 border-b border-slate-600/80">
-        <p className="text-xs font-semibold text-white/90">Resume sections</p>
-        <p className="text-[10px] text-slate-400">All sections · ATS-ready</p>
-      </div>
-      <div className="flex gap-1 p-2">
-        {cols.map((c, i) => (
-          <div key={i} className={`flex-1 rounded-lg ${c.color} py-2 px-1.5 text-center`}>
-            <p className="text-[9px] font-bold text-white/95 truncate">{c.label}</p>
-          </div>
-        ))}
-      </div>
-      <div className="p-2 space-y-1.5">
-        {['Contact details', 'Work history', 'Skills list'].map((t, i) => (
-          <div key={i} className="rounded-lg bg-slate-700/80 px-2 py-1.5">
-            <p className="text-[10px] text-white/90">{t}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/* Back card: gradient strip only (peeks behind) */
-function _CardGradientPeek() {
-  return (
-    <div className="w-full max-w-[340px] rounded-2xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] border border-white/30">
-      <div className="h-24 bg-gradient-to-br from-rose-200 via-amber-100 to-violet-200" />
-      <div className="bg-white/95 p-4">
-        <p className="text-xs font-medium text-[#1c1917]">Consider yourself limitless</p>
-        <p className="text-[10px] text-[#78716c] mt-0.5">Build your resume in minutes.</p>
-      </div>
-    </div>
-  )
-}
-
-const suggestionChips = [
-  { label: 'Resume from scratch', to: '/builder' },
-  { label: 'ATS-friendly template', to: '/templates/ats' },
-  { label: 'Cover letter', to: '/cover-letter' },
+const FEATURE_BG_COLORS = [
+  '#faf5ff',
+  '#fef2f2',
+  '#fffbeb',
+  '#f0fdf4',
 ]
 
+function StickyFeatureStack({
+  steps,
+  cards,
+}: {
+  steps: typeof featureSteps
+  cards: React.ReactNode[]
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [bgColor, setBgColor] = useState(FEATURE_BG_COLORS[0])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    const onScroll = () => {
+      const rect = container.getBoundingClientRect()
+      const scrolled = -rect.top
+      const totalScroll = container.scrollHeight - window.innerHeight
+      if (totalScroll <= 0) return
+      const progress = Math.max(0, Math.min(1, scrolled / totalScroll))
+      const idx = Math.min(
+        steps.length - 1,
+        Math.floor(progress * steps.length)
+      )
+      setBgColor(FEATURE_BG_COLORS[idx] ?? FEATURE_BG_COLORS[0])
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [steps.length])
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative transition-colors duration-700 ease-out"
+      style={{ backgroundColor: bgColor }}
+    >
+      {steps.map((s, i) => (
+        <div
+          key={s.step}
+          className="sticky top-0 min-h-screen flex flex-col justify-center px-4 sm:px-6 py-10 sm:py-14"
+          style={{ zIndex: i + 1 }}
+        >
+          <div className="max-w-[1100px] mx-auto w-full">
+            <div className="flex items-baseline gap-3 mb-4 pl-1">
+              <span className="text-[#a8a29e] text-sm font-medium tabular-nums">
+                {s.step} <span className="mx-1 text-[#d6d3d1]">/</span> {s.total}
+              </span>
+              <span className="text-[#78716c] text-sm font-medium">{s.heading}</span>
+            </div>
+            <div className="rounded-[1.5rem] bg-white shadow-[0_4px_32px_rgba(0,0,0,0.08)] border border-[#e5e7eb]/60 overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch min-h-[420px]">
+                <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-12 lg:pr-8">
+                  <h2 className="text-[1.75rem] sm:text-[2rem] lg:text-[2.25rem] font-bold text-[#1c1917] tracking-tight leading-[1.15] mb-5">
+                    {s.title}
+                  </h2>
+                  <p className="text-base sm:text-lg text-[#57534e] leading-relaxed mb-8" style={{ lineHeight: 1.65 }}>
+                    {s.desc}
+                  </p>
+                  <Link
+                    to={s.to}
+                    className="inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-[#1c1917] text-white text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors w-fit"
+                  >
+                    {s.cta}
+                  </Link>
+                </div>
+                <div className="flex items-center justify-center p-6 sm:p-8 lg:p-10 lg:pl-4">
+                  {cards[i]}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+      <div className="h-[15vh]" aria-hidden />
+    </div>
+  )
+}
+
+function CardResumePreview() {
+  const steps = [
+    { icon: '📄', label: 'Upload PDF or Word', done: true },
+    { icon: '✏️', label: 'Edit sections in builder', done: true },
+    { icon: '👁️', label: 'Live preview updates', done: true },
+    { icon: '✅', label: 'Resume ready', done: false },
+  ]
+  return (
+    <div className="w-full max-w-[380px] mx-auto rounded-xl overflow-hidden bg-white border border-[#e7e5e4] shadow-sm">
+      <div className="p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="w-7 h-7 rounded-md bg-[#1c1917] flex items-center justify-center text-white text-xs font-bold">C</span>
+          <span className="font-semibold text-[#1c1917] text-[0.9375rem]">Cvmora Builder</span>
+        </div>
+        <div className="space-y-3">
+          {steps.map((s, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <span className="text-base">{s.icon}</span>
+              <span className={`text-sm ${s.done ? 'text-[#1c1917]' : 'text-[#a8a29e]'}`}>{s.label}</span>
+              {s.done && (
+                <span className="ml-auto w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold flex items-center justify-center border border-emerald-200/60">&#10003;</span>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 pt-4 border-t border-[#f5f5f4] flex items-center gap-2">
+          <span className="text-xs text-[#a8a29e]">Start from scratch or upload</span>
+          <span className="ml-auto text-xs font-medium text-[#f97316]">3 ways to begin</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CardToolkit() {
+  const tools = [
+    { emoji: '✉️', name: 'Cover Letters', desc: 'Match your resume' },
+    { emoji: '💼', name: 'Job Board', desc: 'Remote jobs in one place' },
+    { emoji: '🎤', name: 'Interview Prep', desc: 'Practice questions' },
+    { emoji: '💰', name: 'Salary Analyzer', desc: 'Market rate checks' },
+    { emoji: '📖', name: 'Career Guides', desc: 'Expert tips & advice' },
+  ]
+  return (
+    <div className="w-full max-w-[380px] mx-auto rounded-xl overflow-hidden bg-white border border-[#e7e5e4] shadow-sm">
+      <div className="p-5">
+        <p className="text-[11px] font-semibold text-[#a8a29e] uppercase tracking-wider mb-4">All-in-one platform</p>
+        <div className="space-y-1">
+          {tools.map((t) => (
+            <div key={t.name} className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-lg hover:bg-[#fafaf9] transition-colors">
+              <span className="text-base">{t.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <span className="text-[0.9375rem] font-medium text-[#1c1917] block">{t.name}</span>
+              </div>
+              <span className="text-xs text-[#a8a29e] shrink-0">{t.desc}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CardExportOptions() {
+  return (
+    <div className="w-full max-w-[380px] mx-auto rounded-xl overflow-hidden bg-white border border-[#e7e5e4] shadow-sm">
+      <div className="p-5">
+        <p className="text-[11px] font-semibold text-[#a8a29e] uppercase tracking-wider mb-3">Export your resume</p>
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-[#fafaf9] border border-[#e7e5e4]">
+            <div className="flex items-center gap-2.5">
+              <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18h10V6H7v12zM14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
+              <span className="text-[0.9375rem] font-medium text-[#1c1917]">PDF</span>
+            </div>
+            <span className="text-xs text-[#a8a29e]">Print-ready</span>
+          </div>
+          <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-[#fafaf9] border border-[#e7e5e4]">
+            <div className="flex items-center gap-2.5">
+              <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM13 9V3.5L18.5 9H13z"/></svg>
+              <span className="text-[0.9375rem] font-medium text-[#1c1917]">Word (.docx)</span>
+            </div>
+            <span className="text-xs text-[#a8a29e]">Editable</span>
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t border-[#f5f5f4]">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[#57534e]">No watermarks. No signup required.</span>
+            <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+              Secure
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CardTemplatePicker() {
+  const templates = [
+    { name: 'Professional', category: 'Professional', selected: true },
+    { name: 'Modern', category: 'Modern', selected: false },
+    { name: 'Simple ATS', category: 'ATS', selected: false },
+    { name: 'Classic', category: 'Simple', selected: false },
+  ]
+  return (
+    <div className="w-full max-w-[380px] mx-auto rounded-xl overflow-hidden bg-white border border-[#e7e5e4] shadow-sm">
+      <div className="p-5">
+        <p className="text-[11px] font-semibold text-[#a8a29e] uppercase tracking-wider mb-3">Choose a template</p>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {['All', 'Simple', 'Professional', 'Modern', 'ATS'].map((f, i) => (
+            <span key={f} className={`px-2.5 py-1 rounded-full text-xs font-medium ${i === 0 ? 'bg-[#1c1917] text-white' : 'bg-[#fafaf9] text-[#78716c] border border-[#e7e5e4]'}`}>{f}</span>
+          ))}
+        </div>
+        <div className="space-y-0 divide-y divide-[#f5f5f4]">
+          {templates.map((t) => (
+            <div key={t.name} className="flex items-center justify-between py-3 first:pt-0">
+              <div className="flex items-center gap-3">
+                {t.selected
+                  ? <span className="w-5 h-5 rounded-full bg-[#1c1917] flex items-center justify-center text-white text-[10px] font-bold">&#10003;</span>
+                  : <span className="w-5 h-5 rounded-full border-2 border-[#e7e5e4]" />}
+                <span className="text-[0.9375rem] font-medium text-[#1c1917]">{t.name}</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-medium border border-emerald-200/60">{t.category}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ToolsSection() {
+  const tools = [
+    {
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+        </svg>
+      ),
+      title: 'Resume Builder',
+      desc: 'Live preview, recruiter-approved templates, finish a draft in minutes.',
+      to: '/builder',
+      color: 'text-[#f97316]',
+      bg: 'bg-[#fff7ed]',
+    },
+    {
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+        </svg>
+      ),
+      title: 'Cover Letters',
+      desc: 'Write matching cover letters. Paste the job, tailor your pitch, download.',
+      to: '/cover-letter',
+      color: 'text-violet-600',
+      bg: 'bg-violet-50',
+    },
+    {
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+        </svg>
+      ),
+      title: 'Job Board',
+      desc: 'Browse remote jobs in one place. Search by category and apply directly.',
+      to: '/jobs',
+      color: 'text-sky-600',
+      bg: 'bg-sky-50',
+    },
+    {
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+        </svg>
+      ),
+      title: 'Interview Prep',
+      desc: 'Practice questions that get you hired. By category, with space to draft answers.',
+      to: '/interview',
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+    },
+    {
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+        </svg>
+      ),
+      title: 'Salary Analyzer',
+      desc: 'Check if your offer is at market rate. Negotiate with confidence.',
+      to: '/salary',
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+    },
+    {
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+        </svg>
+      ),
+      title: 'Resources',
+      desc: 'Expert guides on resumes, cover letters, and career advice.',
+      to: '/resources',
+      color: 'text-rose-600',
+      bg: 'bg-rose-50',
+    },
+  ]
+
   return (
     <section
       className="py-20 sm:py-28 px-4 sm:px-6"
       style={{ background: 'linear-gradient(180deg, #ffffff 0%, #fefefe 30%, #ffffff 70%, #ffffff 100%)' }}
     >
-      <div className="max-w-[1400px] mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-bold text-[#1c1917] text-center mb-6 tracking-tight">
-          Every tool you need is here...
+      <div className="max-w-[960px] mx-auto">
+        <h2 className="text-3xl sm:text-4xl font-bold text-[#1c1917] text-center mb-4 tracking-tight">
+          Every tool you need is here
         </h2>
-        <p className="text-[#78716c] text-center text-xl max-w-xl mx-auto mb-14 leading-relaxed" style={{ lineHeight: 1.6 }}>
+        <p className="text-[#78716c] text-center text-lg max-w-md mx-auto mb-12 leading-relaxed">
           From building your resume to landing the offer.
         </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-          {features.map((item) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {tools.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className="surface-card group flex flex-col justify-center p-5 sm:p-6 rounded-2xl bg-white border border-[#e7e5e4] hover:border-[#f97316]/30 min-h-[200px]"
+              className="group flex flex-col p-5 rounded-xl bg-white border border-[#e7e5e4] hover:border-[#d6d3d1] hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200"
             >
-              {item.tag && (
-                <span className="inline-block px-3 py-1 rounded-lg bg-[#fff7ed] text-[#f97316] text-[11px] font-semibold uppercase tracking-wider mb-3">
-                  {item.tag}
-                </span>
-              )}
-              <h3 className="font-semibold text-[#1c1917] text-xl mb-2 group-hover:text-[#f97316] transition-colors duration-200">
+              <div className={`w-10 h-10 rounded-lg ${item.bg} ${item.color} flex items-center justify-center mb-4`}>
+                {item.icon}
+              </div>
+              <h3 className="font-semibold text-[#1c1917] text-[0.9375rem] mb-1.5 group-hover:text-[#f97316] transition-colors duration-200">
                 {item.title}
               </h3>
-              <p className="text-base text-[#44403c] leading-relaxed mb-2" style={{ lineHeight: 1.55 }}>{item.desc}</p>
-              <span className="inline-flex items-center gap-1.5 text-base font-semibold text-[#f97316] group-hover:gap-2.5 transition-all duration-200 shrink-0">
+              <p className="text-sm text-[#78716c] leading-relaxed mb-3 flex-1">{item.desc}</p>
+              <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#f97316] group-hover:gap-2 transition-all duration-200">
                 Get started
-                <span aria-hidden>→</span>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
               </span>
             </Link>
           ))}
@@ -633,6 +700,31 @@ function ToolsSection() {
 export function Landing() {
   const { isAuthenticated } = useAuth()
   const resumeCountDigits = useResumeCountDigits()
+  const navigate = useNavigate()
+  const uploadInputRef = useRef<HTMLInputElement>(null)
+  const [uploadingResume, setUploadingResume] = useState(false)
+  const [uploadResumeError, setUploadResumeError] = useState('')
+
+  const handleLandingUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadResumeError('')
+    setUploadingResume(true)
+    try {
+      const { text, data: parsed } = await apiUploadResume(file)
+      const next = buildResumeFromUpload({ text, parsed })
+      if (next) {
+        sessionStorage.setItem(PENDING_UPLOADED_RESUME_KEY, JSON.stringify(next))
+      }
+      navigate('/builder')
+    } catch (err) {
+      setUploadResumeError(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setUploadingResume(false)
+      e.target.value = ''
+    }
+  }
+
   return (
     <div className="overflow-hidden">
       {/* Hero — smooth transition: warm orange/beige at top → light blue at bottom */}
@@ -642,65 +734,55 @@ export function Landing() {
           background: 'linear-gradient(180deg, #fef7f0 0%, #ffedd5 12%, #ffe4c4 25%, #f5e6dc 40%, #e8f0f4 55%, #dceef5 70%, #d4ebf7 85%, #e0f2fe 100%)',
         }}
       >
-        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-6 lg:gap-12">
-          {/* On mobile: text/call-to-action first, centered; carousel below. Desktop: text left, carousel right */}
-          <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0 w-full order-1 lg:order-1">
-            <h1 className="text-2xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.15] tracking-tight mb-3 sm:mb-6 text-[#1c1917]">
-              This resume builder gets you{' '}
+        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+          <div className="flex-1 text-center lg:text-left max-w-lg mx-auto lg:mx-0 w-full">
+            <h1 className="text-3xl sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.12] tracking-tight mb-5 sm:mb-6 text-[#1c1917]">
+              This resume builder<br className="hidden sm:block" /> gets you{' '}
               <span className="text-[#f97316]">hired faster</span>
             </h1>
-            <p className="text-sm sm:text-2xl text-[#78716c] leading-relaxed mb-6 sm:mb-10 max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.55 }}>
+            <p className="text-base sm:text-xl text-[#57534e] leading-relaxed mb-8 max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.6 }}>
               Only 2% of resumes win. Yours will be one of them.
             </p>
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3 mb-6 sm:mb-10">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3 mb-8">
               <Link
                 to={isAuthenticated ? '/builder' : '/signup'}
-                className="btn-primary w-full sm:w-auto justify-center px-8 py-4 rounded-full bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors font-medium"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-[#1c1917] text-white text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors shadow-sm"
               >
                 Create my resume
               </Link>
-              <Link
-                to="/builder"
-                state={{ showUpload: true }}
-                className="btn-primary w-full sm:w-auto justify-center px-8 py-4 rounded-full border border-[#e7e5e4] text-[#1c1917] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors font-medium"
+              <button
+                type="button"
+                onClick={() => uploadInputRef.current?.click()}
+                disabled={uploadingResume}
+                className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-full border border-[#e7e5e4] text-[#1c1917] bg-white text-[0.9375rem] font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors"
               >
-                Upload my resume
-              </Link>
+                {uploadingResume ? 'Uploading...' : 'Upload my resume'}
+              </button>
+              <input
+                ref={uploadInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                className="hidden"
+                onChange={handleLandingUpload}
+                disabled={uploadingResume}
+              />
             </div>
-            {/* Social proof before template chips on mobile; centered */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 sm:gap-12 mt-6 sm:mt-10 mb-6 sm:mb-0">
-              <span className="flex items-center gap-2 text-xs sm:text-base text-[#44403c] font-medium">
-                <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#a7f3d0] flex items-center justify-center shrink-0" aria-hidden>
-                  <svg width="10" height="8" viewBox="0 0 12 10" fill="none" className="text-[#059669] sm:w-3 sm:h-3">
-                    <path d="M1 5l3.5 3.5L11 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span><strong className="text-[#1c1917] font-semibold">75%</strong> more likely to land the job</span>
+            {uploadResumeError && (
+              <p className="text-sm text-red-600 mb-4">{uploadResumeError}</p>
+            )}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-sm text-[#57534e]">
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                <span><strong className="text-[#1c1917]">75%</strong> more likely to land the job</span>
               </span>
-              <span className="flex items-center gap-2 text-xs sm:text-base text-[#44403c] font-medium">
-                <span className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shrink-0 text-[#f59e0b]" aria-hidden>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="sm:w-3.5 sm:h-3.5">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                </span>
-                <span><strong className="text-[#1c1917] font-semibold">4.8</strong> out of 5 <span className="text-[#78716c]">·</span> <strong className="text-[#1c1917] font-semibold">22,000+</strong> reviews</span>
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                <span><strong className="text-[#1c1917]">4.8</strong> out of 5 · <strong className="text-[#1c1917]">22,000+</strong> reviews</span>
               </span>
-            </div>
-            <p className="text-[11px] sm:text-sm uppercase tracking-wider text-[#78716c] font-semibold mb-2 sm:mb-4">Or try one of these:</p>
-            <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-              {suggestionChips.map((chip) => (
-                <Link
-                  key={chip.label}
-                  to={chip.to}
-                  className="min-h-[44px] flex items-center px-3.5 py-2 rounded-full border border-[#e7e5e4] bg-white text-[#44403c] text-xs sm:text-base font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] active:bg-[#f5f5f4] transition-colors"
-                >
-                  {chip.label}
-                </Link>
-              ))}
             </div>
           </div>
-          <div className="flex-1 flex justify-center lg:justify-end w-full max-w-[420px] sm:max-w-[480px] order-2 lg:order-2">
-            <HeroResumeCarousel />
+          <div className="w-full max-w-[380px] lg:max-w-[420px] shrink-0">
+            <HeroResumeStack />
           </div>
         </div>
       </section>
@@ -793,36 +875,19 @@ export function Landing() {
       </section>
 
       {/* Feature sections: four quote blocks in normal scroll order with gradient background */}
-      <div
-        className="relative"
-        style={{
-          background: 'linear-gradient(180deg, #e0f2fe 0%, #dceff8 8%, #e8f4fa 20%, #f0f7fc 35%, #fef9f5 50%, #fef3e8 65%, #eef6f9 82%, #e0f2fe 100%)',
-        }}
-      >
-        {featureSteps.map((s, i) => (
-          <FeatureSection
-            key={s.step}
-            step={s.step}
-            total={s.total}
-            title={s.title}
-            desc={s.desc}
-            cta={s.cta}
-            to={s.to}
-          >
-            <StackedCards>
-              {i === 0 ? [<CardResumePreview key="a" />]
-                : i === 1 ? [<CardTemplatePicker key="a" />]
-                : i === 2 ? [<CardExportOptions key="a" />]
-                : [<CardBuilderOutput key="a" />]}
-            </StackedCards>
-          </FeatureSection>
-        ))}
-      </div>
+      <StickyFeatureStack
+        steps={featureSteps}
+        cards={[
+          <CardResumePreview key="a" />,
+          <CardTemplatePicker key="b" />,
+          <CardExportOptions key="c" />,
+          <CardToolkit key="d" />,
+        ]}
+      />
 
-      {/* Stats — smooth transition: continues from feature blue into white */}
       <section
         className="relative py-10 sm:py-12 px-4 sm:px-6"
-        style={{ background: 'linear-gradient(180deg, #e0f2fe 0%, #e5f3f9 12%, #eef6fb 25%, #f5f9fc 45%, #fafafa 65%, #fefefe 85%, #ffffff 100%)' }}
+        style={{ background: 'linear-gradient(180deg, #f0fdf4 0%, #f5fdf8 15%, #fafcfa 35%, #fefefe 60%, #ffffff 100%)' }}
       >
         <div className="max-w-[1400px] mx-auto text-center">
           <p className="text-2xl sm:text-3xl font-semibold text-[#1c1917] tracking-tight">
