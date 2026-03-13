@@ -142,6 +142,84 @@ export async function customerPortal(req, res) {
   }
 }
 
+/**
+ * POST /api/stripe/cancel-subscription
+ * Cancels the user's subscription at the end of the current billing period.
+ * Requires authentication.
+ * Returns: { success, periodEnd, cancelAtPeriodEnd }
+ */
+export async function cancelSubscription(req, res) {
+  if (!stripe) {
+    return res.status(503).json({ error: 'Payments not configured' })
+  }
+
+  const auth = req.headers.authorization
+  const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null
+  const userId = token ? verifyToken(token) : null
+  if (!userId) {
+    return res.status(401).json({ error: 'Authentication required' })
+  }
+
+  const customerId = await db.getStripeCustomerId(userId)
+  if (!customerId) {
+    return res.status(400).json({ error: 'No billing account found.' })
+  }
+
+  try {
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'active',
+      limit: 1,
+    })
+
+    const activeSub = subscriptions.data[0]
+    if (!activeSub) {
+      // Check for trialing
+      const trialingSubs = await stripe.subscriptions.list({
+        customer: customerId,
+        status: 'trialing',
+        limit: 1,
+      })
+      if (!trialingSubs.data[0]) {
+        return res.status(400).json({ error: 'No active subscription found.' })
+      }
+      // Cancel trialing subscription at period end
+      const updated = await stripe.subscriptions.update(trialingSubs.data[0].id, {
+        cancel_at_period_end: true,
+      })
+      await db.updateSubscriptionDetails(userId, {
+        status: 'active',
+        periodEnd: updated.current_period_end,
+        cancelAtPeriodEnd: true,
+      })
+      return res.json({
+        success: true,
+        periodEnd: updated.current_period_end,
+        cancelAtPeriodEnd: true,
+      })
+    }
+
+    const updated = await stripe.subscriptions.update(activeSub.id, {
+      cancel_at_period_end: true,
+    })
+
+    await db.updateSubscriptionDetails(userId, {
+      status: 'active',
+      periodEnd: updated.current_period_end,
+      cancelAtPeriodEnd: true,
+    })
+
+    res.json({
+      success: true,
+      periodEnd: updated.current_period_end,
+      cancelAtPeriodEnd: true,
+    })
+  } catch (err) {
+    console.error('[stripe] cancelSubscription', err)
+    res.status(500).json({ error: err.message || 'Failed to cancel subscription' })
+  }
+}
+
 /** POST /api/stripe/webhook — Stripe webhook (must receive raw body) */
 export async function stripeWebhook(req, res) {
   if (!stripe) {

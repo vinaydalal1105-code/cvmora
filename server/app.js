@@ -41,7 +41,7 @@ import { resumesRouter } from './routes/resumes.js'
 import { coverLettersRouter } from './routes/coverLetters.js'
 import { uploadRouter } from './routes/upload.js'
 import { jobsRouter } from './routes/jobs.js'
-import { createCheckoutSession, verifySession, customerPortal, stripeWebhook } from './routes/stripe.js'
+import { createCheckoutSession, verifySession, customerPortal, cancelSubscription, stripeWebhook } from './routes/stripe.js'
 import { getUserIdByEmail } from './db.js'
 
 const app = express()
@@ -160,6 +160,7 @@ app.use('/api/auth', oauthRouter)
 app.post('/api/stripe/create-checkout-session', createCheckoutSession)
 app.get('/api/stripe/verify-session', verifySession)
 app.post('/api/stripe/customer-portal', customerPortal)
+app.post('/api/stripe/cancel-subscription', cancelSubscription)
 app.use('/api/resumes', resumesRouter)
 app.use('/api/cover-letters', coverLettersRouter)
 app.use('/api/upload', uploadRouter)
