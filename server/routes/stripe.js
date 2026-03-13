@@ -168,7 +168,17 @@ export async function stripeWebhook(req, res) {
         const session = event.data.object
         const userId = session.metadata?.cvmora_user_id
         if (userId) {
-          await db.setSubscriptionStatus(Number(userId), 'active')
+          const subscriptionId = session.subscription
+          if (subscriptionId) {
+            const sub = await stripe.subscriptions.retrieve(subscriptionId)
+            await db.updateSubscriptionDetails(Number(userId), {
+              status: sub.status === 'active' || sub.status === 'trialing' ? 'active' : 'free',
+              periodEnd: sub.current_period_end,
+              cancelAtPeriodEnd: sub.cancel_at_period_end
+            })
+          } else {
+            await db.setSubscriptionStatus(Number(userId), 'active')
+          }
         }
         break
       }
@@ -176,8 +186,11 @@ export async function stripeWebhook(req, res) {
         const sub = event.data.object
         const userId = sub.metadata?.cvmora_user_id
         if (userId) {
-          const status = sub.status === 'active' || sub.status === 'trialing' ? 'active' : 'free'
-          await db.setSubscriptionStatus(Number(userId), status)
+          await db.updateSubscriptionDetails(Number(userId), {
+            status: sub.status === 'active' || sub.status === 'trialing' ? 'active' : 'free',
+            periodEnd: sub.current_period_end,
+            cancelAtPeriodEnd: sub.cancel_at_period_end
+          })
         }
         break
       }
@@ -185,7 +198,11 @@ export async function stripeWebhook(req, res) {
         const sub = event.data.object
         const userId = sub.metadata?.cvmora_user_id
         if (userId) {
-          await db.setSubscriptionStatus(Number(userId), 'free')
+          await db.updateSubscriptionDetails(Number(userId), {
+            status: 'free',
+            periodEnd: null,
+            cancelAtPeriodEnd: false
+          })
         }
         break
       }

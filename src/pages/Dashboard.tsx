@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../api/client'
 import { ResumeThumbnail } from '../components/ResumeThumbnail'
@@ -118,9 +118,11 @@ function ResumeCard({ resume, onDeleteClick, isPro }: { resume: ResumeMeta; onDe
 }
 
 export function Dashboard() {
-  const { user, isAuthenticated, updateProfile } = useAuth()
+  const { user, isAuthenticated, updateProfile, deleteAccount, logout } = useAuth()
   const isPro = user?.subscription_status === 'active'
   const [editingName, setEditingName] = useState(false)
+  const [manageLoading, setManageLoading] = useState(false)
+  const navigate = useNavigate()
 
   const handleEditName = async () => {
     const newName = window.prompt('Display name', user?.name ?? '')
@@ -132,6 +134,28 @@ export function Dashboard() {
       await updateProfile({ name: trimmed })
     } finally {
       setEditingName(false)
+    }
+  }
+
+  const handleManage = async () => {
+    setManageLoading(true)
+    try {
+      const res = await api<{ url: string }>('/stripe/customer-portal', { method: 'POST' })
+      if (res?.url) window.location.href = res.url
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Could not open billing portal.')
+    } finally {
+      setManageLoading(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Are you absolutely sure? This will delete all your resumes, cover letters, and cancel any active subscription. This cannot be undone.')) return
+    try {
+      await deleteAccount()
+      navigate('/')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete account.')
     }
   }
   const [resumes, setResumes] = useState<ResumeMeta[]>([])
@@ -308,7 +332,52 @@ export function Dashboard() {
           {editingName ? '…' : 'Edit name'}
         </button>
       </div>
-      <p className="text-[0.9375rem] text-cvmora-muted mb-10">{user?.email}</p>
+      <p className="text-[0.9375rem] text-cvmora-muted mb-6">{user?.email}</p>
+
+      {/* Membership Bar */}
+      <div className="bg-white border border-[#e7e5e4] rounded-2xl p-4 sm:p-5 shadow-sm overflow-hidden relative mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isPro ? 'bg-[#BFED8D] text-[#1c1917]' : 'bg-[#f4f4f5] text-[#78716c]'}`}>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-[12px] font-bold text-[#a8a29e] uppercase tracking-wider">Current Plan</p>
+              <h2 className="text-lg font-bold text-[#1c1917]">
+                {isPro ? 'CVMora Pro Membership' : 'Free Basic Plan'}
+              </h2>
+              {isPro && user?.subscription_period_end && (
+                <p className="text-[13px] text-[#78716c] mt-0.5">
+                  {user.cancel_at_period_end 
+                    ? `Access until ${new Date(user.subscription_period_end * 1000).toLocaleDateString()}`
+                    : `Next payment: ${new Date(user.subscription_period_end * 1000).toLocaleDateString()}`
+                  }
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {!isPro ? (
+              <Link
+                to="/pricing"
+                className="px-4 py-2 rounded-lg bg-[#BFED8D] text-[#1c1917] text-sm font-bold border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
+              >
+                Upgrade to Pro
+              </Link>
+            ) : (
+              <button
+                onClick={handleManage}
+                disabled={manageLoading}
+                className="px-4 py-2 rounded-lg border border-[#e7e5e4] text-[#44403c] text-sm font-semibold hover:bg-[#fafaf9] transition-colors disabled:opacity-50"
+              >
+                {manageLoading ? 'Opening...' : 'Manage Membership'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {error && (
         <div className="p-4 rounded-xl bg-red-50 text-red-700 text-[0.9375rem] font-medium border border-red-100 mb-8">
@@ -410,6 +479,36 @@ export function Dashboard() {
           </ul>
         )}
       </section>
+
+      <section className="mt-12 mb-20">
+        <h2 className="text-xl font-bold text-[#1c1917] mb-6">Account Settings</h2>
+        <div className="bg-white border border-[#e7e5e4] rounded-2xl overflow-hidden">
+          <div className="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+              <h3 className="text-base font-bold text-[#1c1917]">Delete Account</h3>
+              <p className="text-sm text-[#78716c] mt-1">
+                Permanently remove all your resumes, cover letters, and account information. 
+                Any active subscription will be cancelled immediately.
+              </p>
+            </div>
+            <button
+              onClick={handleDeleteAccount}
+              className="px-5 py-2.5 rounded-full text-red-600 border border-red-200 bg-red-50 text-[14px] font-bold hover:bg-red-100 transition-colors"
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div className="text-center pb-12">
+        <button
+          onClick={logout}
+          className="text-[#78716c] text-sm hover:text-[#1c1917] hover:underline transition-colors"
+        >
+          Sign out from all devices
+        </button>
+      </div>
     </div>
   )
 }

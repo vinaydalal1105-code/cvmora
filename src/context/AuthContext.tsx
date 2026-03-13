@@ -7,6 +7,8 @@ interface User {
   name: string
   created_at?: string
   subscription_status?: string
+  subscription_period_end?: number
+  cancel_at_period_end?: boolean
 }
 
 interface AuthContextValue {
@@ -19,6 +21,7 @@ interface AuthContextValue {
   updateProfile: (updates: { name?: string }) => Promise<void>
   refreshUser: () => Promise<void>
   logout: () => void
+  deleteAccount: () => Promise<void>
   isAuthenticated: boolean
 }
 
@@ -104,6 +107,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(token, u)
   }, [token, persist])
 
+  const deleteAccount = useCallback(async () => {
+    if (!token) return
+    await api<{ success: boolean }>('/auth/me', { method: 'DELETE' })
+    persist(null, null)
+  }, [token, persist])
+
   useEffect(() => {
     setLoading(false)
   }, [])
@@ -118,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     updateProfile,
     refreshUser,
     logout,
+    deleteAccount,
     isAuthenticated: !!token && !!user,
   }
 

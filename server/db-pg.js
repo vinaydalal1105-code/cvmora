@@ -58,6 +58,8 @@ async function ensureSchema() {
   await conn`CREATE INDEX IF NOT EXISTS idx_cover_letters_user ON cover_letters(user_id)`
   await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT`
   await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'free'`
+  await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_period_end BIGINT`
+  await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS cancel_at_period_end BOOLEAN DEFAULT FALSE`
   await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS one_time_credits INTEGER DEFAULT 0`
   schemaDone = true
 }
@@ -65,8 +67,14 @@ async function ensureSchema() {
 export async function pgGetUserById(id) {
   if (!conn) return null
   await ensureSchema()
-  const rows = await conn`SELECT id, email, name, created_at, verified, subscription_status, one_time_credits FROM users WHERE id = ${id}`
-  return rows[0] ? { ...rows[0], subscription_status: rows[0].subscription_status ?? 'free', one_time_credits: rows[0].one_time_credits ?? 0 } : null
+  const rows = await conn`SELECT id, email, name, created_at, verified, subscription_status, subscription_period_end, cancel_at_period_end, one_time_credits FROM users WHERE id = ${id}`
+  return rows[0] ? { 
+    ...rows[0], 
+    subscription_status: rows[0].subscription_status ?? 'free', 
+    subscription_period_end: rows[0].subscription_period_end ? Number(rows[0].subscription_period_end) : null,
+    cancel_at_period_end: Boolean(rows[0].cancel_at_period_end),
+    one_time_credits: rows[0].one_time_credits ?? 0 
+  } : null
 }
 
 export async function pgGetUserByEmail(email) {
@@ -125,6 +133,17 @@ export async function pgSetStripeCustomerId(userId, stripeCustomerId) {
 export async function pgSetSubscriptionStatus(userId, status) {
   if (!conn) return
   await conn`UPDATE users SET subscription_status = ${status} WHERE id = ${userId}`
+}
+
+export async function pgUpdateSubscriptionDetails(userId, { status, periodEnd, cancelAtPeriodEnd }) {
+  if (!conn) return
+  await conn`
+    UPDATE users 
+    SET subscription_status = ${status}, 
+        subscription_period_end = ${periodEnd ? BigInt(periodEnd) : null}, 
+        cancel_at_period_end = ${Boolean(cancelAtPeriodEnd)} 
+    WHERE id = ${userId}
+  `
 }
 
 export async function pgGetSubscriptionStatus(userId) {
@@ -231,6 +250,17 @@ export async function pgUpdateCoverLetter(id, userId, fields) {
 export async function pgDeleteCoverLetter(id, userId) {
   if (!conn) return 0
   const rows = await conn`DELETE FROM cover_letters WHERE id = ${id} AND user_id = ${userId} RETURNING id`
+  return rows.length
+}
+
+export async function pgDeleteUser(userId) {
+  if (!conn) return 0
+  // Neon doesn't support transactions in the serverless driver in a simple way for serial calls,
+  // but we can just run them sequentially or use a multi-statement if needed.
+  // Sequential is safer for simple cascading.
+  await conn`DELETE FROM resumes WHERE user_id = ${userId}`
+  await conn`DELETE FROM cover_letters WHERE user_id = ${userId}`
+  const rows = await conn`DELETE FROM users WHERE id = ${userId} RETURNING id`
   return rows.length
 }
 

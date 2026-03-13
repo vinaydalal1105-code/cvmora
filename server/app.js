@@ -34,7 +34,7 @@ if (process.env.VERCEL !== '1') {
 
 import express from 'express'
 import cors from 'cors'
-import { register, login, verifyToken, getUserById, verifyEmailToken, setUserVerified, createPasswordResetToken, verifyPasswordResetToken, updatePassword, updateUserProfile } from './auth.js'
+import { register, login, verifyToken, getUserById, verifyEmailToken, setUserVerified, createPasswordResetToken, verifyPasswordResetToken, updatePassword, updateUserProfile, deleteUserAccount } from './auth.js'
 import { sendVerificationEmail, sendPasswordResetEmail } from './mail.js'
 import { oauthRouter } from './routes/oauth.js'
 import { resumesRouter } from './routes/resumes.js'
@@ -143,6 +143,17 @@ app.patch('/api/auth/me', async (req, res) => {
   const user = await getUserById(userId)
   if (!user) return res.status(401).json({ error: 'User not found' })
   res.json(user)
+})
+
+app.delete('/api/auth/me', async (req, res) => {
+  const auth = req.headers.authorization
+  const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null
+  if (!token) return res.status(401).json({ error: 'Not authenticated' })
+  const userId = verifyToken(token)
+  if (!userId) return res.status(401).json({ error: 'Invalid or expired token' })
+  
+  await deleteUserAccount(userId)
+  res.json({ success: true })
 })
 
 app.use('/api/auth', oauthRouter)

@@ -78,6 +78,12 @@ function getSqlite() {
       if (!info.some((c) => c.name === 'subscription_status')) {
         sqliteDb.exec('ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT \'free\'')
       }
+      if (!info.some((c) => c.name === 'subscription_period_end')) {
+        sqliteDb.exec('ALTER TABLE users ADD COLUMN subscription_period_end INTEGER')
+      }
+      if (!info.some((c) => c.name === 'cancel_at_period_end')) {
+        sqliteDb.exec('ALTER TABLE users ADD COLUMN cancel_at_period_end INTEGER DEFAULT 0')
+      }
       if (!info.some((c) => c.name === 'one_time_credits')) {
         sqliteDb.exec('ALTER TABLE users ADD COLUMN one_time_credits INTEGER DEFAULT 0')
       }
@@ -89,9 +95,15 @@ function getSqlite() {
 // --- Users
 export async function getUserById(id) {
   if (usePg) return pg.pgGetUserById(id)
-  const row = getSqlite().prepare('SELECT id, email, name, created_at, verified, subscription_status, one_time_credits FROM users WHERE id = ?').get(id)
+  const row = getSqlite().prepare('SELECT id, email, name, created_at, verified, subscription_status, subscription_period_end, cancel_at_period_end, one_time_credits FROM users WHERE id = ?').get(id)
   if (!row) return null
-  return { ...row, subscription_status: row.subscription_status || 'free', one_time_credits: row.one_time_credits || 0 }
+  return { 
+    ...row, 
+    subscription_status: row.subscription_status || 'free', 
+    subscription_period_end: row.subscription_period_end,
+    cancel_at_period_end: Boolean(row.cancel_at_period_end),
+    one_time_credits: row.one_time_credits || 0 
+  }
 }
 
 export async function getUserByEmailForLogin(email) {
@@ -155,6 +167,17 @@ export async function setSubscriptionStatus(userId, status) {
   getSqlite().prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run(status, userId)
 }
 
+export async function updateSubscriptionDetails(userId, { status, periodEnd, cancelAtPeriodEnd }) {
+  if (usePg) return pg.pgUpdateSubscriptionDetails(userId, { status, periodEnd, cancelAtPeriodEnd })
+  getSqlite().prepare(`
+    UPDATE users 
+    SET subscription_status = ?, 
+        subscription_period_end = ?, 
+        cancel_at_period_end = ? 
+    WHERE id = ?
+  `).run(status, periodEnd, cancelAtPeriodEnd ? 1 : 0, userId)
+}
+
 export async function getSubscriptionStatus(userId) {
   if (usePg) return pg.pgGetSubscriptionStatus(userId)
   const row = getSqlite().prepare('SELECT subscription_status FROM users WHERE id = ?').get(userId)
@@ -186,6 +209,19 @@ export function hasOAuthColumns() {
   if (usePg) return true
   const info = getSqlite().prepare('PRAGMA table_info(users)').all()
   return info.some((c) => c.name === 'provider')
+}
+
+// --- Multi-delete / Account Removal
+export async function deleteUser(userId) {
+  if (usePg) return pg.pgDeleteUser(userId)
+  const sqlite = getSqlite()
+  const tx = sqlite.transaction(() => {
+    sqlite.prepare('DELETE FROM resumes WHERE user_id = ?').run(userId)
+    sqlite.prepare('DELETE FROM cover_letters WHERE user_id = ?').run(userId)
+    const r = sqlite.prepare('DELETE FROM users WHERE id = ?').run(userId)
+    return r.changes
+  })
+  return tx()
 }
 
 // --- Resumes (for routes)

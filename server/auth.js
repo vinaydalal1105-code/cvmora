@@ -138,3 +138,7 @@ export async function findOrCreateOAuthUser(provider, providerId, email, name) {
   user = await db.getUserById(id)
   return { user, token: createToken(user.id), isNewUser: true }
 }
+
+export async function deleteUserAccount(userId) {
+  return db.deleteUser(userId)
+}
