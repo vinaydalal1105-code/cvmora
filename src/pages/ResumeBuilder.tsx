@@ -245,19 +245,6 @@ function ResumeBuilderInner() {
     saveResume(true)
   }
 
-  const hasContent =
-    (data.contact?.fullName || '').trim() ||
-    (data.contact?.email || '').trim() ||
-    (data.summary || '').trim() ||
-    data.experience?.some((e) => (e.jobTitle || e.company || e.description || '').trim()) ||
-    data.education?.some((e) => (e.degree || e.school || e.description || '').trim()) ||
-    (data.skills?.length ?? 0) > 0
-  useEffect(() => {
-    if (!isAuthenticated || !hasContent || saving) return
-    const t = setTimeout(() => saveResume(false), 2500)
-    return () => clearTimeout(t)
-  }, [data, template, isAuthenticated, saving, id])
-
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
