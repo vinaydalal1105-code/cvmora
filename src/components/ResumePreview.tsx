@@ -137,11 +137,13 @@ export const ResumePreview = forwardRef<ResumePreviewHandle, { showDownloadButto
   const { data, template, accentColor } = useResume()
   const printRef = useRef<HTMLDivElement>(null)
   const measureRef = useRef<HTMLDivElement>(null)
+  const previewContainerRef = useRef<HTMLDivElement>(null)
   const effectiveAccent = accentColor ?? DEFAULT_ACCENTS[template]
   const [downloadingDocx, setDownloadingDocx] = useState(false)
   const [pageCount, setPageCount] = useState(1)
   const [contentHeight, setContentHeight] = useState(A4_RENDER_HEIGHT)
   const [pageOffsets, setPageOffsets] = useState<number[]>([0])
+  const [containerWidth, setContainerWidth] = useState(0)
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -187,6 +189,25 @@ export const ResumePreview = forwardRef<ResumePreviewHandle, { showDownloadButto
   const isEduPara = data.educationFormat === 'paragraph'
   const paraClasses = [isExpPara ? 'exp-para' : '', isEduPara ? 'edu-para' : ''].filter(Boolean).join(' ')
   const hasPara = isExpPara || isEduPara
+
+  useEffect(() => {
+    const el = previewContainerRef.current
+    if (!el) return
+    const update = () => setContainerWidth(el.clientWidth)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const mobilePadding = 32
+  const availableWidth = Math.max(0, containerWidth - mobilePadding)
+  const mobileScale = containerWidth > 0 ? Math.min(1, availableWidth / A4_PREVIEW_WIDTH) : 1
+  const isMobilePreview = mobileScale < 1
+  const scaledWidth = A4_PREVIEW_WIDTH * mobileScale
+  const scaledPageHeight = A4_PREVIEW_HEIGHT * mobileScale
+  const gapBetweenPages = 48
+  const totalScaledHeight = pageCount * scaledPageHeight + (pageCount - 1) * gapBetweenPages * mobileScale
 
   useEffect(() => {
     const el = measureRef.current
@@ -360,7 +381,10 @@ export const ResumePreview = forwardRef<ResumePreviewHandle, { showDownloadButto
           </div>
         )}
       </div>
-      <div className="flex-1 min-h-0 overflow-auto bg-[#f0f0f0] px-3 pt-8 pb-10 flex flex-col items-center relative">
+      <div
+        ref={previewContainerRef}
+        className="flex-1 min-h-0 overflow-auto bg-[#f0f0f0] px-4 sm:px-3 pt-6 sm:pt-8 pb-10 flex flex-col items-center relative"
+      >
         {hasPara && (
           <style>{`
             .exp-para .exp-desc, .edu-para .edu-desc { list-style: none !important; padding-left: 0 !important; margin-left: 0 !important; }
@@ -380,68 +404,137 @@ export const ResumePreview = forwardRef<ResumePreviewHandle, { showDownloadButto
             <TemplateComponent data={data} accentColor={effectiveAccent} />
           </div>
         </div>
-        {/* Multi-page preview with proper page breaks */}
-        <div className="resume-preview-pages flex flex-col pt-3 pb-4" style={{ width: A4_PREVIEW_WIDTH, maxWidth: '100%' }}>
-          {Array.from({ length: pageCount }, (_, i) => {
-            const offset = pageOffsets[i] ?? i * A4_RENDER_HEIGHT
-            const nextOffset = pageOffsets[i + 1]
-            const end = Math.min(contentHeight, nextOffset ?? (offset + A4_RENDER_HEIGHT))
-            const sliceHeight = Math.max(1, Math.min(A4_RENDER_HEIGHT, end - offset))
-            return (
-            <div key={i}>
-              {i > 0 && (
-                <div className="w-full flex-shrink-0 bg-transparent" style={{ minHeight: 48 }} aria-hidden />
-              )}
-              <div
-                className="resume-print-root shadow-xl bg-white flex-shrink-0 overflow-hidden rounded-lg relative"
-                style={{
-                  width: A4_PREVIEW_WIDTH,
-                  height: A4_PREVIEW_HEIGHT,
-                  minWidth: A4_PREVIEW_WIDTH,
-                  maxWidth: '100%',
-                  boxSizing: 'border-box',
-                }}
-              >
-                {sidebarOverlay && (
-                  <div
-                    aria-hidden
-                    className="absolute inset-y-0"
-                    style={{
-                      backgroundColor: sidebarOverlay.color,
-                      width: `${sidebarOverlay.widthPct}%`,
-                      minWidth: sidebarOverlay.minPx ? `${sidebarOverlay.minPx}px` : undefined,
-                      left: sidebarOverlay.side === 'left' ? 0 : undefined,
-                      right: sidebarOverlay.side === 'right' ? 0 : undefined,
-                    }}
-                  />
-                )}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    transform: `scale(${PREVIEW_SCALE})`,
-                    transformOrigin: 'top left',
-                    width: A4_RENDER_WIDTH,
-                  }}
-                >
-                  {i > 0 && <div style={{ height: 32 }} />}
-                  <div style={{ height: i > 0 ? sliceHeight - 32 : sliceHeight, overflow: 'hidden' }}>
-                    <div
-                      className={`resume-template-fill ${paraClasses}`}
-                      style={{
-                        width: '100%',
-                        minHeight: pageCount > 1 ? pageCount * A4_RENDER_HEIGHT : undefined,
-                        transform: offset === 0 ? 'none' : `translate3d(0, ${-offset}px, 0)`,
-                        willChange: offset === 0 ? undefined : 'transform',
-                      }}
-                    >
-                      <TemplateComponent data={data} accentColor={effectiveAccent} />
+        {/* Multi-page preview with proper page breaks; on mobile scale to fit width */}
+        <div
+          className="resume-preview-pages flex flex-col pt-3 pb-4"
+          style={{
+            width: isMobilePreview ? scaledWidth : A4_PREVIEW_WIDTH,
+            maxWidth: '100%',
+            ...(isMobilePreview ? { minHeight: totalScaledHeight, position: 'relative' } : {}),
+          }}
+        >
+          {isMobilePreview ? (
+            <div
+              className="absolute left-0 top-0 overflow-hidden rounded-lg"
+              style={{
+                width: A4_PREVIEW_WIDTH,
+                height: pageCount * A4_PREVIEW_HEIGHT + (pageCount - 1) * gapBetweenPages,
+                transform: `scale(${mobileScale})`,
+                transformOrigin: 'top left',
+              }}
+            >
+              <div className="flex flex-col">
+                {Array.from({ length: pageCount }, (_, i) => {
+                  const offset = pageOffsets[i] ?? i * A4_RENDER_HEIGHT
+                  const nextOffset = pageOffsets[i + 1]
+                  const end = Math.min(contentHeight, nextOffset ?? (offset + A4_RENDER_HEIGHT))
+                  const sliceHeight = Math.max(1, Math.min(A4_RENDER_HEIGHT, end - offset))
+                  return (
+                    <div key={i} className="flex flex-col">
+                      {i > 0 && <div className="w-full flex-shrink-0 bg-transparent" style={{ minHeight: 48 }} aria-hidden />}
+                      <div
+                        className="resume-print-root shadow-xl bg-white flex-shrink-0 overflow-hidden rounded-lg relative"
+                        style={{ width: A4_PREVIEW_WIDTH, height: A4_PREVIEW_HEIGHT, boxSizing: 'border-box' }}
+                      >
+                        {sidebarOverlay && (
+                          <div
+                            aria-hidden
+                            className="absolute inset-y-0"
+                            style={{
+                              backgroundColor: sidebarOverlay.color,
+                              width: `${sidebarOverlay.widthPct}%`,
+                              minWidth: sidebarOverlay.minPx ? `${sidebarOverlay.minPx}px` : undefined,
+                              left: sidebarOverlay.side === 'left' ? 0 : undefined,
+                              right: sidebarOverlay.side === 'right' ? 0 : undefined,
+                            }}
+                          />
+                        )}
+                        <div className="absolute inset-0" style={{ transform: `scale(${PREVIEW_SCALE})`, transformOrigin: 'top left', width: A4_RENDER_WIDTH }}>
+                          {i > 0 && <div style={{ height: 32 }} />}
+                          <div style={{ height: i > 0 ? sliceHeight - 32 : sliceHeight, overflow: 'hidden' }}>
+                            <div
+                              className={`resume-template-fill ${paraClasses}`}
+                              style={{
+                                width: '100%',
+                                minHeight: pageCount > 1 ? pageCount * A4_RENDER_HEIGHT : undefined,
+                                transform: offset === 0 ? 'none' : `translate3d(0, ${-offset}px, 0)`,
+                                willChange: offset === 0 ? undefined : 'transform',
+                              }}
+                            >
+                              <TemplateComponent data={data} accentColor={effectiveAccent} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  )
+                })}
               </div>
             </div>
-            )
-          })}
+          ) : (
+            <>
+              {Array.from({ length: pageCount }, (_, i) => {
+                const offset = pageOffsets[i] ?? i * A4_RENDER_HEIGHT
+                const nextOffset = pageOffsets[i + 1]
+                const end = Math.min(contentHeight, nextOffset ?? (offset + A4_RENDER_HEIGHT))
+                const sliceHeight = Math.max(1, Math.min(A4_RENDER_HEIGHT, end - offset))
+                return (
+                  <div key={i}>
+                    {i > 0 && (
+                      <div className="w-full flex-shrink-0 bg-transparent" style={{ minHeight: 48 }} aria-hidden />
+                    )}
+                    <div
+                      className="resume-print-root shadow-xl bg-white flex-shrink-0 overflow-hidden rounded-lg relative"
+                      style={{
+                        width: A4_PREVIEW_WIDTH,
+                        height: A4_PREVIEW_HEIGHT,
+                        minWidth: A4_PREVIEW_WIDTH,
+                        maxWidth: '100%',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      {sidebarOverlay && (
+                        <div
+                          aria-hidden
+                          className="absolute inset-y-0"
+                          style={{
+                            backgroundColor: sidebarOverlay.color,
+                            width: `${sidebarOverlay.widthPct}%`,
+                            minWidth: sidebarOverlay.minPx ? `${sidebarOverlay.minPx}px` : undefined,
+                            left: sidebarOverlay.side === 'left' ? 0 : undefined,
+                            right: sidebarOverlay.side === 'right' ? 0 : undefined,
+                          }}
+                        />
+                      )}
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          transform: `scale(${PREVIEW_SCALE})`,
+                          transformOrigin: 'top left',
+                          width: A4_RENDER_WIDTH,
+                        }}
+                      >
+                        {i > 0 && <div style={{ height: 32 }} />}
+                        <div style={{ height: i > 0 ? sliceHeight - 32 : sliceHeight, overflow: 'hidden' }}>
+                          <div
+                            className={`resume-template-fill ${paraClasses}`}
+                            style={{
+                              width: '100%',
+                              minHeight: pageCount > 1 ? pageCount * A4_RENDER_HEIGHT : undefined,
+                              transform: offset === 0 ? 'none' : `translate3d(0, ${-offset}px, 0)`,
+                              willChange: offset === 0 ? undefined : 'transform',
+                            }}
+                          >
+                            <TemplateComponent data={data} accentColor={effectiveAccent} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </>
+          )}
         </div>
         {/* Print container: one div per page for multi-page PDF */}
         <div ref={printRef} className="hidden print:block" aria-hidden>

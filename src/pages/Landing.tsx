@@ -413,11 +413,11 @@ function StickyFeatureStack({
       {steps.map((s, i) => (
         <div
           key={s.step}
-          className="lg:sticky lg:top-0 lg:min-h-screen flex flex-col justify-center px-5 sm:px-6 py-4 sm:py-10 lg:py-14"
+          className="lg:sticky lg:top-0 lg:min-h-screen flex flex-col justify-center px-5 sm:px-6 py-8 sm:py-10 lg:py-14"
           style={{ zIndex: i + 1 }}
         >
           <div className="max-w-[1100px] mx-auto w-full">
-            <div className="flex items-baseline gap-3 mb-3 sm:mb-4 pl-1">
+            <div className="flex items-baseline gap-3 mb-5 sm:mb-6 pl-1">
               <span className="text-[#a8a29e] text-xs sm:text-sm font-medium tabular-nums">
                 {s.step} <span className="mx-1 text-[#d6d3d1]">/</span> {s.total}
               </span>
@@ -425,16 +425,16 @@ function StickyFeatureStack({
             </div>
             <div className="rounded-2xl sm:rounded-[1.5rem] bg-white shadow-[0_4px_32px_rgba(0,0,0,0.08)] border border-[#e5e7eb]/60 overflow-hidden">
               <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch min-h-0 lg:min-h-[420px]">
-                <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12 lg:pr-8">
-                  <h2 className="text-[1.2rem] sm:text-[2rem] lg:text-[2.25rem] font-bold text-[#1c1917] tracking-tight leading-[1.3] sm:leading-[1.15] mb-4 sm:mb-5">
+                <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-14 lg:pr-10">
+                  <h2 className="text-[1.2rem] sm:text-[2rem] lg:text-[2.25rem] font-bold text-[#1c1917] tracking-tight leading-[1.35] sm:leading-[1.2] mb-5 sm:mb-6">
                     {s.title}
                   </h2>
-                  <p className="text-[13px] sm:text-lg text-[#57534e] leading-relaxed mb-6 sm:mb-8" style={{ lineHeight: 1.65 }}>
+                  <p className="text-[13px] sm:text-lg text-[#57534e] leading-relaxed mb-8 sm:mb-10" style={{ lineHeight: 1.75 }}>
                     {s.desc}
                   </p>
                   <Link
                     to={s.to}
-                    className="inline-flex items-center justify-center px-6 sm:px-7 py-3.5 sm:py-3.5 rounded-full bg-[#1c1917] text-white text-[14px] sm:text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors w-full sm:w-fit"
+                    className="inline-flex items-center justify-center px-6 sm:px-7 py-3.5 sm:py-3.5 rounded-full bg-[#1c1917] text-white text-[14px] sm:text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors w-full sm:w-fit mt-1"
                   >
                     {s.cta}
                   </Link>
