@@ -242,7 +242,7 @@ export function Pricing() {
               disabled={loading}
               className="w-full px-5 py-3 rounded-full bg-[#f97316] text-white text-[15px] font-semibold hover:bg-[#ea580c] active:scale-[0.98] disabled:opacity-50 transition-all shadow-sm"
             >
-              {loading ? 'Redirecting...' : 'Upgrade to Pro'}
+              {loading ? 'Redirecting...' : 'Start 3-Day Free Trial'}
             </button>
           )}
 

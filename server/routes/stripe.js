@@ -63,6 +63,7 @@ export async function createCheckoutSession(req, res) {
         billing_cycle: billingCycle,
       },
       subscription_data: {
+        ...(billingCycle === 'monthly' ? { trial_period_days: 3 } : {}),
         metadata: {
           ...(userId ? { cvmora_user_id: String(userId) } : {}),
         },

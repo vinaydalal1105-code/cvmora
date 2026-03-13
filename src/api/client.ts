@@ -93,8 +93,14 @@ export async function apiUploadResume(
 
   if (!res.ok) {
     const status = `${res.status} ${res.statusText}`.trim()
-    const rawHint = raw && raw.length <= 160 ? raw : ''
-    throw new Error(data.error || rawHint || `Upload failed (${status || 'unknown error'})`)
+    const rawHint = raw && raw.length <= 200 && !raw.trimStart().startsWith('<') ? raw.trim() : ''
+    throw new Error(
+      data.error || rawHint || (res.status === 413
+        ? 'File too large. Use a file under 10MB.'
+        : res.status >= 500
+          ? 'Upload service error. Try again or use a smaller PDF/Word file.'
+          : `Upload failed (${status || 'unknown error'}). Use PDF or Word (.doc, .docx).`)
+    )
   }
   return {
     text: data.text ?? '',

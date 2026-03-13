@@ -58,27 +58,28 @@ async function ensureSchema() {
   await conn`CREATE INDEX IF NOT EXISTS idx_cover_letters_user ON cover_letters(user_id)`
   await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT`
   await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'free'`
+  await conn`ALTER TABLE users ADD COLUMN IF NOT EXISTS one_time_credits INTEGER DEFAULT 0`
   schemaDone = true
 }
 
 export async function pgGetUserById(id) {
   if (!conn) return null
   await ensureSchema()
-  const rows = await conn`SELECT id, email, name, created_at, verified, subscription_status FROM users WHERE id = ${id}`
-  return rows[0] ? { ...rows[0], subscription_status: rows[0].subscription_status ?? 'free' } : null
+  const rows = await conn`SELECT id, email, name, created_at, verified, subscription_status, one_time_credits FROM users WHERE id = ${id}`
+  return rows[0] ? { ...rows[0], subscription_status: rows[0].subscription_status ?? 'free', one_time_credits: rows[0].one_time_credits ?? 0 } : null
 }
 
 export async function pgGetUserByEmail(email) {
   if (!conn) return null
   await ensureSchema()
-  const rows = await conn`SELECT id, email, name, password_hash, verified FROM users WHERE email = ${email}`
+  const rows = await conn`SELECT id, email, name, password_hash, verified, one_time_credits FROM users WHERE email = ${email}`
   return rows[0] || null
 }
 
 export async function pgGetUserByProvider(provider, providerId) {
   if (!conn) return null
   await ensureSchema()
-  const rows = await conn`SELECT id, email, name, created_at FROM users WHERE provider = ${provider} AND provider_id = ${providerId}`
+  const rows = await conn`SELECT id, email, name, created_at, one_time_credits FROM users WHERE provider = ${provider} AND provider_id = ${providerId}`
   return rows[0] || null
 }
 
@@ -130,6 +131,27 @@ export async function pgGetSubscriptionStatus(userId) {
   if (!conn) return 'free'
   const rows = await conn`SELECT subscription_status FROM users WHERE id = ${userId}`
   return rows[0]?.subscription_status ?? 'free'
+}
+
+export async function pgGetOneTimeCredits(userId) {
+  if (!conn) return 0
+  await ensureSchema()
+  const rows = await conn`SELECT one_time_credits FROM users WHERE id = ${userId}`
+  return rows[0]?.one_time_credits ?? 0
+}
+
+export async function pgIncrementOneTimeCredits(userId, amount) {
+  if (!conn) return 0
+  await ensureSchema()
+  const rows = await conn`UPDATE users SET one_time_credits = COALESCE(one_time_credits, 0) + ${amount} WHERE id = ${userId} RETURNING one_time_credits`
+  return rows[0]?.one_time_credits ?? 0
+}
+
+export async function pgDecrementOneTimeCredits(userId) {
+  if (!conn) return false
+  await ensureSchema()
+  const rows = await conn`UPDATE users SET one_time_credits = GREATEST(COALESCE(one_time_credits, 0) - 1, 0) WHERE id = ${userId} AND COALESCE(one_time_credits, 0) > 0 RETURNING one_time_credits`
+  return rows.length > 0
 }
 
 export async function pgGetResumesByUserId(userId) {

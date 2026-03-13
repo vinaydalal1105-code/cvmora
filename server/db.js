@@ -78,6 +78,9 @@ function getSqlite() {
       if (!info.some((c) => c.name === 'subscription_status')) {
         sqliteDb.exec('ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT \'free\'')
       }
+      if (!info.some((c) => c.name === 'one_time_credits')) {
+        sqliteDb.exec('ALTER TABLE users ADD COLUMN one_time_credits INTEGER DEFAULT 0')
+      }
     } catch (_) {}
   }
   return sqliteDb
@@ -86,14 +89,14 @@ function getSqlite() {
 // --- Users
 export async function getUserById(id) {
   if (usePg) return pg.pgGetUserById(id)
-  const row = getSqlite().prepare('SELECT id, email, name, created_at, verified, subscription_status FROM users WHERE id = ?').get(id)
+  const row = getSqlite().prepare('SELECT id, email, name, created_at, verified, subscription_status, one_time_credits FROM users WHERE id = ?').get(id)
   if (!row) return null
-  return { ...row, subscription_status: row.subscription_status || 'free' }
+  return { ...row, subscription_status: row.subscription_status || 'free', one_time_credits: row.one_time_credits || 0 }
 }
 
 export async function getUserByEmailForLogin(email) {
   if (usePg) return pg.pgGetUserByEmail(email)
-  return getSqlite().prepare('SELECT id, email, name, password_hash, verified FROM users WHERE email = ?').get(email)
+  return getSqlite().prepare('SELECT id, email, name, password_hash, verified, one_time_credits FROM users WHERE email = ?').get(email)
 }
 
 export async function getUserIdByEmail(email) {
@@ -107,7 +110,7 @@ export async function getUserIdByEmail(email) {
 
 export async function getUserByProvider(provider, providerId) {
   if (usePg) return pg.pgGetUserByProvider(provider, providerId)
-  return getSqlite().prepare('SELECT id, email, name, created_at FROM users WHERE provider = ? AND provider_id = ?').get(provider, providerId)
+  return getSqlite().prepare('SELECT id, email, name, created_at, one_time_credits FROM users WHERE provider = ? AND provider_id = ?').get(provider, providerId)
 }
 
 export async function insertUser({ email, password_hash, name, verified, provider, provider_id }) {
@@ -156,6 +159,27 @@ export async function getSubscriptionStatus(userId) {
   if (usePg) return pg.pgGetSubscriptionStatus(userId)
   const row = getSqlite().prepare('SELECT subscription_status FROM users WHERE id = ?').get(userId)
   return (row?.subscription_status || 'free')
+}
+
+export async function getOneTimeCredits(userId) {
+  if (usePg) return pg.pgGetOneTimeCredits(userId)
+  const row = getSqlite().prepare('SELECT one_time_credits FROM users WHERE id = ?').get(userId)
+  return row?.one_time_credits ?? 0
+}
+
+export async function incrementOneTimeCredits(userId, amount) {
+  if (usePg) return pg.pgIncrementOneTimeCredits(userId, amount)
+  const sqlite = getSqlite()
+  sqlite.prepare('UPDATE users SET one_time_credits = coalesce(one_time_credits, 0) + ? WHERE id = ?').run(amount, userId)
+  const row = sqlite.prepare('SELECT one_time_credits FROM users WHERE id = ?').get(userId)
+  return row?.one_time_credits ?? 0
+}
+
+export async function decrementOneTimeCredits(userId) {
+  if (usePg) return pg.pgDecrementOneTimeCredits(userId)
+  const sqlite = getSqlite()
+  const r = sqlite.prepare('UPDATE users SET one_time_credits = coalesce(one_time_credits, 0) - 1 WHERE id = ? AND coalesce(one_time_credits, 0) > 0').run(userId)
+  return r.changes > 0
 }
 
 export function hasOAuthColumns() {
