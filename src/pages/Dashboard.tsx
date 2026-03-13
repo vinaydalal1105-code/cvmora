@@ -24,24 +24,13 @@ interface CoverLetterMeta {
   updated_at: string
 }
 
-function ResumeCard({ resume, onDelete, isPro }: { resume: ResumeMeta; onDelete?: (id: number) => void; isPro: boolean }) {
+function ResumeCard({ resume, onDeleteClick, isPro }: { resume: ResumeMeta; onDeleteClick?: (resume: ResumeMeta) => void; isPro: boolean }) {
   const [downloadingWord, setDownloadingWord] = useState(false)
-  const [deleting, setDeleting] = useState(false)
 
-  const handleDelete = async (e: React.MouseEvent) => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!onDelete || deleting) return
-    if (!window.confirm('Delete this resume? This cannot be undone.')) return
-    setDeleting(true)
-    try {
-      await api(`/resumes/${resume.id}`, { method: 'DELETE' })
-      onDelete(resume.id)
-    } catch (err) {
-      console.error('Delete failed:', err)
-    } finally {
-      setDeleting(false)
-    }
+    onDeleteClick?.(resume)
   }
 
   const handleDownloadWord = async (e: React.MouseEvent) => {
@@ -113,14 +102,13 @@ function ResumeCard({ resume, onDelete, isPro }: { resume: ResumeMeta; onDelete?
           >
             Edit
           </Link>
-          {onDelete && (
+          {onDeleteClick && (
             <button
               type="button"
-              onClick={handleDelete}
-              disabled={deleting}
-              className="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.8125rem] font-medium text-red-600 hover:bg-red-50 hover:underline disabled:opacity-50"
+              onClick={handleDeleteClick}
+              className="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.8125rem] font-medium text-red-600 hover:bg-red-50 hover:underline"
             >
-              {deleting ? '…' : 'Delete'}
+              Delete
             </button>
           )}
         </div>
@@ -151,6 +139,9 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [deletingAll, setDeletingAll] = useState(false)
+  const [resumeToDelete, setResumeToDelete] = useState<ResumeMeta | null>(null)
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -173,11 +164,15 @@ export function Dashboard() {
       .finally(() => setLoading(false))
   }, [isAuthenticated])
 
-  const handleDeleteAllResumes = async () => {
+  const handleRequestDeleteAll = () => {
     if (deletingAll || resumes.length === 0) return
-    if (!window.confirm(`Permanently delete all ${resumes.length} resumes? This cannot be undone.`)) return
+    setShowDeleteAllConfirm(true)
+  }
+
+  const handleConfirmDeleteAll = async () => {
     setDeletingAll(true)
     setError('')
+    setShowDeleteAllConfirm(false)
     try {
       await api<{ deleted: number }>('/resumes/delete-all', { method: 'POST' })
       setResumes([])
@@ -186,6 +181,22 @@ export function Dashboard() {
       setError('Couldn’t delete all resumes. Try again.')
     } finally {
       setDeletingAll(false)
+    }
+  }
+
+  const handleConfirmDeleteResume = async () => {
+    if (!resumeToDelete) return
+    const id = resumeToDelete.id
+    setDeletingId(id)
+    setResumeToDelete(null)
+    try {
+      await api(`/resumes/${id}`, { method: 'DELETE' })
+      setResumes((prev) => prev.filter((x) => x.id !== id))
+    } catch (err) {
+      console.error('Delete failed:', err)
+      setError('Couldn’t delete resume. Try again.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -206,6 +217,84 @@ export function Dashboard() {
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      {/* Confirm delete one resume */}
+      {resumeToDelete && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50"
+          onClick={() => setResumeToDelete(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-delete-title"
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white shadow-xl border border-[#e7e5e4] p-6 sm:p-8 animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="confirm-delete-title" className="text-lg font-semibold text-[#1c1917] mb-2">
+              Delete this resume?
+            </h2>
+            <p className="text-[0.9375rem] text-[#57534e] mb-6">
+              “{resumeToDelete.title}” will be permanently removed. This cannot be undone.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setResumeToDelete(null)}
+                className="px-4 py-2.5 rounded-xl text-[15px] font-medium text-[#57534e] hover:bg-[#f5f5f4] border border-[#e7e5e4] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteResume}
+                className="px-4 py-2.5 rounded-xl text-[15px] font-medium text-white bg-red-600 hover:bg-red-700 border border-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm delete all resumes */}
+      {showDeleteAllConfirm && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50"
+          onClick={() => setShowDeleteAllConfirm(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-delete-all-title"
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white shadow-xl border border-[#e7e5e4] p-6 sm:p-8 animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="confirm-delete-all-title" className="text-lg font-semibold text-[#1c1917] mb-2">
+              Delete all resumes?
+            </h2>
+            <p className="text-[0.9375rem] text-[#57534e] mb-6">
+              Permanently delete all {resumes.length} resume{resumes.length !== 1 ? 's' : ''}? This cannot be undone.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeleteAllConfirm(false)}
+                className="px-4 py-2.5 rounded-xl text-[15px] font-medium text-[#57534e] hover:bg-[#f5f5f4] border border-[#e7e5e4] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteAll}
+                className="px-4 py-2.5 rounded-xl text-[15px] font-medium text-white bg-red-600 hover:bg-red-700 border border-red-700 transition-colors"
+              >
+                Delete all
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-baseline gap-2 mb-1">
         <h1 className="text-2xl sm:text-3xl font-bold text-cvmora-ink tracking-tight">
           Welcome{user?.name ? `, ${user.name}` : ''}
@@ -234,7 +323,7 @@ export function Dashboard() {
             {resumes.length > 0 && (
               <button
                 type="button"
-                onClick={handleDeleteAllResumes}
+                onClick={handleRequestDeleteAll}
                 disabled={deletingAll}
                 className="text-[0.8125rem] font-medium text-red-600 hover:text-red-700 hover:underline disabled:opacity-50"
               >
@@ -267,7 +356,7 @@ export function Dashboard() {
               <li key={r.id}>
                 <ResumeCard
                   resume={r}
-                  onDelete={(id) => setResumes((prev) => prev.filter((x) => x.id !== id))}
+                  onDeleteClick={() => setResumeToDelete(r)}
                   isPro={isPro}
                 />
               </li>
