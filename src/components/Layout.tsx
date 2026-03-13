@@ -282,18 +282,36 @@ export function Layout() {
               ))}
             </nav>
 
-            <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {isAuthenticated ? (
                 <>
                   <Link
                     to="/pricing"
-                    className="hidden sm:flex text-[14px] sm:text-[15px] font-medium text-[#f97316] hover:text-[#ea580c] transition-colors py-2 px-1.5 sm:px-2 min-h-[44px] items-center rounded-full lg:min-h-0"
+                    className="hidden sm:flex text-[14px] sm:text-[15px] font-medium text-[#f97316] hover:text-[#ea580c] transition-colors py-2.5 px-2 sm:px-3 min-h-[44px] items-center lg:min-h-0 rounded-full hover:bg-[#fff7ed]/60"
                   >
                     Pricing
                   </Link>
-                  <Link to="/dashboard" className="hidden sm:flex text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] items-center lg:min-h-0">Dashboard</Link>
-                  <span className="text-xs text-[#78716c] hidden lg:inline max-w-[120px] truncate" title={(user?.name || user?.email) ?? ''}>{user?.name || user?.email}</span>
-                  <button type="button" onClick={handleLogout} className="hidden sm:flex text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] items-center lg:min-h-0">Sign out</button>
+                  <Link
+                    to="/dashboard"
+                    className="hidden sm:flex text-[14px] sm:text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 sm:px-3 min-h-[44px] items-center lg:min-h-0 rounded-full hover:bg-[#f5f5f4]"
+                  >
+                    Dashboard
+                  </Link>
+                  <div className="hidden lg:flex items-center gap-3 pl-2 sm:pl-3 border-l border-[#e7e5e4] ml-1">
+                    <span
+                      className="text-[13px] text-[#78716c] max-w-[140px] truncate"
+                      title={(user?.name || user?.email) ?? ''}
+                    >
+                      {user?.name || user?.email}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="hidden sm:flex text-[14px] sm:text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 sm:px-3 min-h-[44px] items-center lg:min-h-0 rounded-full hover:bg-[#f5f5f4]"
+                  >
+                    Sign out
+                  </button>
                 </>
               ) : (
                 <>
