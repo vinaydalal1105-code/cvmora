@@ -729,21 +729,21 @@ export function Landing() {
     <div className="overflow-hidden">
       {/* Hero — smooth transition: warm orange/beige at top → light blue at bottom */}
       <section
-        className="relative pt-10 sm:pt-20 pb-14 sm:pb-32 px-5 sm:px-6 min-h-0 sm:min-h-[85vh] sm:min-h-[85dvh] flex items-center"
+        className="relative pt-14 sm:pt-20 pb-20 sm:pb-32 px-5 sm:px-6 min-h-0 sm:min-h-[85vh] sm:min-h-[85dvh] flex items-center"
         style={{
           background: 'linear-gradient(180deg, #fef7f0 0%, #ffedd5 12%, #ffe4c4 25%, #f5e6dc 40%, #e8f0f4 55%, #dceef5 70%, #d4ebf7 85%, #e0f2fe 100%)',
         }}
       >
-        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-12 sm:gap-10 lg:gap-16">
           <div className="flex-1 text-center lg:text-left max-w-lg mx-auto lg:mx-0 w-full">
-            <h1 className="text-[1.625rem] sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.2] sm:leading-[1.12] tracking-tight mb-5 sm:mb-6 text-[#1c1917]">
+            <h1 className="text-[1.625rem] sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.25] sm:leading-[1.12] tracking-tight mb-6 sm:mb-8 text-[#1c1917]">
               This resume builder gets you{' '}
               <span className="text-[#f97316]">hired faster</span>
             </h1>
-            <p className="text-[15px] sm:text-xl text-[#57534e] leading-relaxed mb-8 sm:mb-8 max-w-sm sm:max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.7 }}>
+            <p className="text-[15px] sm:text-xl text-[#57534e] leading-relaxed mb-10 sm:mb-10 max-w-sm sm:max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.75 }}>
               Only 2% of resumes win. Yours will be one of them.
             </p>
-            <div className="flex flex-col gap-3 mb-8 sm:mb-8 max-w-xs sm:max-w-none mx-auto lg:mx-0 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+            <div className="flex flex-col gap-4 sm:gap-3 mb-12 sm:mb-10 max-w-xs sm:max-w-none mx-auto lg:mx-0 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
                 to={isAuthenticated ? '/builder' : '/signup'}
                 className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-4 sm:py-3.5 rounded-full bg-[#1c1917] text-white text-[15px] sm:text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors shadow-sm"
@@ -770,7 +770,7 @@ export function Landing() {
             {uploadResumeError && (
               <p className="text-sm text-red-600 mb-4">{uploadResumeError}</p>
             )}
-            <div className="flex items-center justify-center lg:justify-start gap-6 text-[13px] sm:text-sm text-[#57534e]">
+            <div className="flex items-center justify-center lg:justify-start gap-6 text-[13px] sm:text-sm text-[#57534e] mt-2">
               <span className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                 <span><strong className="text-[#1c1917]">75%</strong> more likely</span>
