@@ -392,15 +392,18 @@ function ResumeBuilderInner() {
           </div>
         )}
 
-        <div className="flex-1 flex flex-col md:flex-row min-h-0 min-w-0 overflow-hidden">
+        <div
+          className="flex-1 flex flex-col md:flex-row min-h-0 min-w-0 overflow-y-auto overflow-x-hidden md:overflow-hidden"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           {activeTab === 'edit' ? (
             <>
-              <aside className="w-full md:w-[380px] lg:w-[400px] flex-shrink-0 min-h-0 md:border-r border-[#e7e5e4] bg-white flex flex-col overflow-y-auto">
-                <div className="flex-1 pb-28">
+              <aside className="w-full md:w-[380px] lg:w-[400px] flex-none md:flex-shrink-0 min-h-0 md:border-r border-[#e7e5e4] bg-white flex flex-col overflow-y-auto md:overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="flex-1 min-h-0 pb-32">
                   <BuilderStepContent stepIndex={builderStep} />
                 </div>
               </aside>
-              <section className="flex-1 min-w-0 min-h-[40vh] md:min-h-0 flex flex-col bg-[#f0f0f0] border-t md:border-t-0 border-[#e7e5e4]">
+              <section className="flex-none min-h-[50vh] md:flex-1 md:min-h-0 min-w-0 flex flex-col bg-[#f0f0f0] border-t md:border-t-0 border-[#e7e5e4]">
                 <ResumePreview ref={previewRef} showDownloadButtons={false} />
               </section>
             </>

@@ -63,7 +63,7 @@ export function resumeScore(data: {
 
 function FormatToggle({ value, onChange }: { value: 'bullets' | 'paragraph'; onChange: (v: 'bullets' | 'paragraph') => void }) {
   return (
-    <div className="flex items-center gap-1 bg-[#f5f5f4] rounded-lg p-0.5 mb-4">
+    <div className="flex items-center gap-1 bg-[#f5f5f4] rounded-lg p-0.5 mb-5 sm:mb-4">
       <button
         type="button"
         onClick={() => onChange('bullets')}
@@ -102,10 +102,10 @@ function PersonalDetailsStep() {
   }
 
   return (
-    <div className="px-5 py-5">
-      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Personal Details</h1>
-      <p className="text-[13px] text-[#78716c] mb-5 leading-relaxed">
-        Users who added phone number and email received 64% more positive feedback from recruiters.
+    <div className="px-5 sm:px-5 py-6 sm:py-5">
+      <h1 className="text-xl sm:text-lg font-bold text-[#1c1917] tracking-tight mb-2">Personal Details</h1>
+      <p className="text-[13px] text-[#78716c] mb-6 leading-relaxed max-w-md">
+        Add phone and email for 64% more positive recruiter feedback.
       </p>
 
       <Input
@@ -116,7 +116,7 @@ function PersonalDetailsStep() {
       />
 
       {showPhotoOption && (
-        <div className="mb-4">
+        <div className="mb-5">
           <label className="block text-[13px] font-medium text-[#44403c] mb-2">Profile photo</label>
           <input
             ref={photoInputRef}
@@ -156,7 +156,7 @@ function PersonalDetailsStep() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
         <Input
           label="First Name"
           value={c.firstName ?? ''}
@@ -170,7 +170,7 @@ function PersonalDetailsStep() {
           placeholder="Last name"
         />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
         <Input
           label="Email"
           value={c.email}
@@ -191,7 +191,7 @@ function PersonalDetailsStep() {
         onChange={(v) => updateContact({ address: v })}
         placeholder="Street address"
       />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
         <Input
           label="City, State"
           value={(c.city ?? '') + (c.state ? ', ' + (c.state ?? '') : '')}
@@ -253,18 +253,18 @@ function ExperienceStepContent() {
   const fmt = data.experienceFormat ?? 'bullets'
 
   return (
-    <div className="px-5 py-5">
-      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Employment History</h1>
-      <p className="text-[13px] text-[#78716c] mb-5 leading-relaxed">
-        List your most recent roles first. Include job title, company, dates and key achievements.
+    <div className="px-5 sm:px-5 py-6 sm:py-5">
+      <h1 className="text-xl sm:text-lg font-bold text-[#1c1917] tracking-tight mb-2">Employment History</h1>
+      <p className="text-[13px] text-[#78716c] mb-6 leading-relaxed max-w-md">
+        Most recent first. Add title, company, dates and key wins.
       </p>
       <FormatToggle value={fmt} onChange={setExperienceFormat} />
       {experience.map((exp) => (
         <div
           key={exp.id}
-          className="mb-4 p-4 rounded-xl border border-[#e7e5e4] bg-white"
+          className="mb-6 p-5 sm:p-4 rounded-xl border border-[#e7e5e4] bg-white"
         >
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-4">
             <span className="text-xs font-semibold text-[#f97316]">Job</span>
             {experience.length > 1 && (
               <button
@@ -279,7 +279,7 @@ function ExperienceStepContent() {
           <Input label="Job title" value={exp.jobTitle} onChange={(v) => updateExperience(exp.id, { jobTitle: v })} />
           <Input label="Company" value={exp.company} onChange={(v) => updateExperience(exp.id, { company: v })} />
           <Input label="Location" value={exp.location} onChange={(v) => updateExperience(exp.id, { location: v })} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
             <Input
               label="Start"
               value={exp.startDate}
@@ -293,7 +293,7 @@ function ExperienceStepContent() {
               placeholder="Present"
             />
           </div>
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-4">
             <input
               type="checkbox"
               id={`current-${exp.id}`}
@@ -331,18 +331,18 @@ function EducationStepContent() {
   const fmt = data.educationFormat ?? 'bullets'
 
   return (
-    <div className="px-5 py-5">
-      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Education</h1>
-      <p className="text-[13px] text-[#78716c] mb-5 leading-relaxed">
-        Add your degrees and certifications. Most recent first.
+    <div className="px-5 sm:px-5 py-6 sm:py-5">
+      <h1 className="text-xl sm:text-lg font-bold text-[#1c1917] tracking-tight mb-2">Education</h1>
+      <p className="text-[13px] text-[#78716c] mb-6 leading-relaxed max-w-md">
+        Degrees and certifications. Most recent first.
       </p>
       <FormatToggle value={fmt} onChange={setEducationFormat} />
       {education.map((edu) => (
         <div
           key={edu.id}
-          className="mb-4 p-4 rounded-xl border border-[#e7e5e4] bg-white"
+          className="mb-6 p-5 sm:p-4 rounded-xl border border-[#e7e5e4] bg-white"
         >
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-4">
             <span className="text-xs font-semibold text-[#f97316]">School</span>
             {education.length > 1 && (
               <button
@@ -357,7 +357,7 @@ function EducationStepContent() {
           <Input label="Degree" value={edu.degree} onChange={(v) => updateEducation(edu.id, { degree: v })} />
           <Input label="School" value={edu.school} onChange={(v) => updateEducation(edu.id, { school: v })} />
           <Input label="Location" value={edu.location} onChange={(v) => updateEducation(edu.id, { location: v })} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
             <Input
               label="Start"
               value={edu.startDate}
@@ -432,12 +432,12 @@ function SkillsStepContent() {
   }
 
   return (
-    <div className="px-5 py-5">
-      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Skills</h1>
-      <p className="text-[13px] text-[#78716c] mb-4 leading-relaxed">
-        Choose skills that show you fit the position. Match key skills from the job listing.
+    <div className="px-5 sm:px-5 py-6 sm:py-5">
+      <h1 className="text-xl sm:text-lg font-bold text-[#1c1917] tracking-tight mb-2">Skills</h1>
+      <p className="text-[13px] text-[#78716c] mb-6 leading-relaxed max-w-md">
+        Match key skills from the job listing.
       </p>
-      <div className="space-y-2.5 mb-4">
+      <div className="space-y-3 mb-5">
         {skills.map((skill, index) => {
           const suggestions = getSkillSuggestions(skill)
           const showList = focusedIndex === index && suggestions.length > 0
@@ -528,10 +528,10 @@ function SummaryStepContent() {
   const { data, updateSummary, setDescriptionFormat } = useResume()
   const fmt = data.descriptionFormat ?? 'bullets'
   return (
-    <div className="px-5 py-5">
-      <h1 className="text-lg font-bold text-[#1c1917] tracking-tight mb-1">Professional Summary</h1>
-      <p className="text-[13px] text-[#78716c] mb-5 leading-relaxed">
-        A few sentences about your experience and goals. Recruiters often read this first.
+    <div className="px-5 sm:px-5 py-6 sm:py-5">
+      <h1 className="text-xl sm:text-lg font-bold text-[#1c1917] tracking-tight mb-2">Professional Summary</h1>
+      <p className="text-[13px] text-[#78716c] mb-6 leading-relaxed max-w-md">
+        Recruiters read this first. Experience and goals in a few lines.
       </p>
       <FormatToggle value={fmt} onChange={setDescriptionFormat} />
       <TextArea
@@ -583,7 +583,7 @@ export function BuilderStepFooter({
   const handleMainAction = isLast && onFinish ? onFinish : onNext
 
   return (
-    <footer className="flex-none flex items-center justify-between gap-3 px-4 py-3 border-t border-[#e7e5e4] bg-white">
+    <footer className="flex-none flex items-center justify-between gap-3 px-4 sm:px-4 py-3.5 sm:py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] border-t border-[#e7e5e4] bg-white">
       <div className="flex items-center gap-2">
         {stepIndex > 0 ? (
           <button

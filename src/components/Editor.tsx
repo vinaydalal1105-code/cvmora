@@ -35,14 +35,14 @@ export function Input({
   type?: string
 }) {
   return (
-    <div className="mb-3">
-      <label className="block text-[13px] font-medium text-[#44403c] mb-1.5">{label}</label>
+    <div className="mb-4 sm:mb-3">
+      <label className="block text-[13px] sm:text-[14px] font-medium text-[#44403c] mb-2 sm:mb-1.5">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="input-premium text-[15px] py-2.5"
+        className="input-premium text-[15px] py-3 sm:py-2.5 rounded-xl"
       />
     </div>
   )
@@ -62,14 +62,14 @@ export function TextArea({
   rows?: number
 }) {
   return (
-    <div className="mb-3">
-      <label className="block text-[13px] font-medium text-[#44403c] mb-1.5">{label}</label>
+    <div className="mb-4 sm:mb-3">
+      <label className="block text-[13px] sm:text-[14px] font-medium text-[#44403c] mb-2 sm:mb-1.5">{label}</label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="input-premium resize-y text-[15px] py-2.5"
+        className="input-premium resize-y min-h-[7rem] sm:min-h-[6rem] text-[15px] py-3 sm:py-2.5 rounded-xl"
       />
     </div>
   )

@@ -333,8 +333,8 @@ const featureSteps = [
     step: '01',
     total: '04',
     heading: 'Build your resume',
-    title: 'Upload or start from scratch — your resume, structured in minutes',
-    desc: 'Drop in an existing PDF or Word file and Cvmora pulls every section into the right place. Or start fresh with a guided step-by-step builder. Either way you get a live preview that updates as you type.',
+    title: 'Upload or start from scratch',
+    desc: 'Drop a PDF or Word file and we structure it. Or build step-by-step with a live preview.',
     cta: 'Start building',
     to: '/builder',
   },
@@ -342,8 +342,8 @@ const featureSteps = [
     step: '02',
     total: '04',
     heading: 'Pick a template',
-    title: 'Every template is tested to pass ATS scanners',
-    desc: 'Choose from Professional, Modern, Simple, and ATS-optimized layouts. Every design is recruiter-tested so your formatting stays intact when parsed by applicant tracking systems.',
+    title: 'ATS-ready templates',
+    desc: 'Professional, Modern, and Simple layouts. Recruiter-tested so formatting stays intact.',
     cta: 'Browse templates',
     to: '/templates',
   },
@@ -351,8 +351,8 @@ const featureSteps = [
     step: '03',
     total: '04',
     heading: 'Download & go',
-    title: 'Export to PDF or Word — clean, print-ready files',
-    desc: 'When your resume is ready, download it as a polished PDF or an editable Word document. No watermarks, no hidden fees. Pay once and your file is ready to send.',
+    title: 'PDF or Word — print-ready',
+    desc: 'Download when ready. No watermarks. One platform from draft to send.',
     cta: 'Start building',
     to: '/builder',
   },
@@ -360,8 +360,8 @@ const featureSteps = [
     step: '04',
     total: '04',
     heading: 'Your career toolkit',
-    title: 'Everything you need in one place — beyond just resumes',
-    desc: 'Build matching cover letters, browse remote jobs, practice interview questions, check salary benchmarks, and read expert career guides. One platform from application to offer.',
+    title: 'More than resumes',
+    desc: 'Cover letters, job board, interview prep, salary tools, and guides.',
     cta: 'Explore tools',
     to: '/resources',
   },
@@ -425,16 +425,16 @@ function StickyFeatureStack({
             </div>
             <div className="rounded-2xl sm:rounded-[1.5rem] bg-white shadow-[0_4px_32px_rgba(0,0,0,0.08)] border border-[#e5e7eb]/60 overflow-hidden">
               <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch min-h-0 lg:min-h-[420px]">
-                <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-12 lg:pr-8">
-                  <h2 className="text-[1.25rem] sm:text-[2rem] lg:text-[2.25rem] font-bold text-[#1c1917] tracking-tight leading-[1.25] sm:leading-[1.15] mb-3 sm:mb-5">
+                <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12 lg:pr-8">
+                  <h2 className="text-[1.2rem] sm:text-[2rem] lg:text-[2.25rem] font-bold text-[#1c1917] tracking-tight leading-[1.3] sm:leading-[1.15] mb-4 sm:mb-5">
                     {s.title}
                   </h2>
-                  <p className="text-[13px] sm:text-lg text-[#57534e] leading-relaxed mb-5 sm:mb-8" style={{ lineHeight: 1.7 }}>
+                  <p className="text-[13px] sm:text-lg text-[#57534e] leading-relaxed mb-6 sm:mb-8" style={{ lineHeight: 1.65 }}>
                     {s.desc}
                   </p>
                   <Link
                     to={s.to}
-                    className="inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 rounded-full bg-[#1c1917] text-white text-[14px] sm:text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors w-full sm:w-fit"
+                    className="inline-flex items-center justify-center px-6 sm:px-7 py-3.5 sm:py-3.5 rounded-full bg-[#1c1917] text-white text-[14px] sm:text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors w-full sm:w-fit"
                   >
                     {s.cta}
                   </Link>

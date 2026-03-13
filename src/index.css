@@ -256,6 +256,18 @@ select:focus-visible {
   outline: none;
 }
 
+/* Textarea: ensure internal scroll on mobile, min height */
+textarea.input-premium {
+  min-height: 6rem;
+  resize: vertical;
+}
+@media (max-width: 768px) {
+  textarea.input-premium {
+    min-height: 7rem;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Button primary — Base44 green CTA, 44px min touch target */
 .btn-primary {
   display: inline-flex;
