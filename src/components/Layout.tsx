@@ -264,10 +264,9 @@ export function Layout() {
         onMouseLeave={() => setOpenDropdown(null)}
       >
         <header className="w-full max-w-[1400px] mx-auto rounded-full bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-[#e5e7eb]/80 overflow-visible">
-          <div className="flex items-center justify-between gap-2 sm:gap-4 pl-3 pr-4 sm:px-8 py-2 sm:py-2.5 min-h-[44px] sm:min-h-0">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-4 pl-2.5 pr-2 sm:px-8 py-1.5 sm:py-2.5 min-h-[48px] sm:min-h-0">
             <Logo />
 
-            {/* Desktop nav: hidden on small screens */}
             <nav className="hidden lg:flex items-center gap-0 flex-1 justify-center max-w-2xl mx-3">
               {mainNav.map((item) => (
                 <NavLink
@@ -283,34 +282,33 @@ export function Layout() {
               ))}
             </nav>
 
-            {/* Mobile menu button — 44px touch target */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen((o) => !o)}
-              className="lg:hidden flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full text-[#1c1917] hover:bg-[#f5f5f4] active:bg-[#e7e5e4]"
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            >
-              {mobileMenuOpen ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-              )}
-            </button>
-
             <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
               {isAuthenticated ? (
                 <>
-                  <Link to="/dashboard" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center lg:min-h-0">Dashboard</Link>
+                  <Link to="/dashboard" className="hidden sm:flex text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] items-center lg:min-h-0">Dashboard</Link>
                   <span className="text-xs text-[#78716c] hidden lg:inline max-w-[120px] truncate" title={(user?.name || user?.email) ?? ''}>{user?.name || user?.email}</span>
-                  <button type="button" onClick={handleLogout} className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center lg:min-h-0">Sign out</button>
+                  <button type="button" onClick={handleLogout} className="hidden sm:flex text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] items-center lg:min-h-0">Sign out</button>
                 </>
               ) : (
                 <>
-                  <Link to="/pricing" className="text-[15px] font-medium text-[#f97316] hover:text-[#ea580c] transition-colors py-2.5 px-2 min-h-[44px] flex items-center rounded-full lg:min-h-0 hidden sm:flex">Pricing</Link>
-                  <Link to="/login" className="text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 min-h-[44px] flex items-center rounded-full lg:min-h-0">Sign in</Link>
-                  <Link to="/builder" className="px-3 py-2.5 min-h-[44px] flex items-center rounded-full bg-[#BFED8D] text-[#1c1917] text-[14px] sm:text-[15px] font-medium border border-[#a8e070] shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors whitespace-nowrap shrink-0">Start building</Link>
+                  <Link to="/pricing" className="text-[14px] sm:text-[15px] font-medium text-[#f97316] hover:text-[#ea580c] transition-colors py-2 px-1.5 sm:px-2 min-h-[44px] flex items-center rounded-full lg:min-h-0 hidden sm:flex">Pricing</Link>
+                  <Link to="/login" className="text-[14px] sm:text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2 px-1.5 sm:px-2 min-h-[44px] flex items-center rounded-full lg:min-h-0 hidden sm:flex">Sign in</Link>
+                  <Link to="/builder" className="px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[44px] flex items-center rounded-full bg-[#BFED8D] text-[#1c1917] text-[13px] sm:text-[15px] font-medium border border-[#a8e070] shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:bg-[#b0e87d] transition-colors whitespace-nowrap shrink-0">Start building</Link>
                 </>
               )}
+
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen((o) => !o)}
+                className="lg:hidden flex items-center justify-center w-10 h-10 min-w-[40px] min-h-[40px] rounded-full text-[#1c1917] hover:bg-[#f5f5f4] active:bg-[#e7e5e4]"
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {mobileMenuOpen ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                )}
+              </button>
             </div>
           </div>
         </header>
@@ -362,6 +360,32 @@ export function Layout() {
                     )}
                   </div>
                 ))}
+
+                <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="block px-5 py-3.5 text-[15px] font-semibold text-[#f97316] hover:bg-[#fff7ed]">
+                  Pricing
+                </Link>
+
+                <div className="border-t border-[#e5e7eb] mt-1 pt-1">
+                  {isAuthenticated ? (
+                    <>
+                      <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-5 py-3.5 text-[15px] font-medium text-[#1c1917] hover:bg-[#f5f5f4]">
+                        Dashboard
+                      </Link>
+                      <button type="button" onClick={() => { handleLogout(); setMobileMenuOpen(false) }} className="w-full text-left px-5 py-3.5 text-[15px] font-medium text-[#1c1917] hover:bg-[#f5f5f4]">
+                        Sign out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block px-5 py-3.5 text-[15px] font-medium text-[#1c1917] hover:bg-[#f5f5f4]">
+                        Sign in
+                      </Link>
+                      <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block mx-4 mb-3 mt-1 text-center px-5 py-3 rounded-full bg-[#BFED8D] text-[#1c1917] text-[15px] font-semibold border border-[#a8e070]">
+                        Create account
+                      </Link>
+                    </>
+                  )}
+                </div>
               </nav>
             </motion.div>
           )}

@@ -87,13 +87,13 @@ export function Pricing() {
   const totalLabel = billing === 'yearly' ? `$${YEARLY_PRICE}/year` : `$${MONTHLY_PRICE}/month`
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-20">
       {toast && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-lg text-[14px] font-medium ${
+          className={`fixed top-20 sm:top-24 left-1/2 -translate-x-1/2 z-50 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-lg text-[13px] sm:text-[14px] font-medium max-w-[90vw] text-center ${
             toast.type === 'success'
               ? 'bg-green-50 text-green-800 border border-green-200'
               : 'bg-amber-50 text-amber-800 border border-amber-200'
@@ -108,7 +108,7 @@ export function Pricing() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1c1917] tracking-tight"
+          className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-[#1c1917] tracking-tight"
         >
           Simple, transparent pricing
         </motion.h1>
@@ -161,7 +161,7 @@ export function Pricing() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="rounded-2xl border border-[#e7e5e4] bg-white p-8 flex flex-col"
+          className="rounded-2xl border border-[#e7e5e4] bg-white p-6 sm:p-8 flex flex-col"
         >
           <div className="mb-6">
             <h2 className="text-lg font-bold text-[#1c1917]">Free</h2>
@@ -197,7 +197,7 @@ export function Pricing() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.25 }}
-          className="rounded-2xl border-2 border-[#f97316] bg-white p-8 flex flex-col relative overflow-hidden"
+          className="rounded-2xl border-2 border-[#f97316] bg-white p-6 sm:p-8 flex flex-col relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 bg-[#f97316] text-white text-[11px] font-bold px-4 py-1 rounded-bl-xl">
             MOST POPULAR

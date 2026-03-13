@@ -413,33 +413,33 @@ function StickyFeatureStack({
       {steps.map((s, i) => (
         <div
           key={s.step}
-          className="sticky top-0 min-h-screen flex flex-col justify-center px-4 sm:px-6 py-10 sm:py-14"
+          className="lg:sticky lg:top-0 lg:min-h-screen flex flex-col justify-center px-4 sm:px-6 py-6 sm:py-10 lg:py-14"
           style={{ zIndex: i + 1 }}
         >
           <div className="max-w-[1100px] mx-auto w-full">
-            <div className="flex items-baseline gap-3 mb-4 pl-1">
+            <div className="flex items-baseline gap-3 mb-3 sm:mb-4 pl-1">
               <span className="text-[#a8a29e] text-sm font-medium tabular-nums">
                 {s.step} <span className="mx-1 text-[#d6d3d1]">/</span> {s.total}
               </span>
               <span className="text-[#78716c] text-sm font-medium">{s.heading}</span>
             </div>
-            <div className="rounded-[1.5rem] bg-white shadow-[0_4px_32px_rgba(0,0,0,0.08)] border border-[#e5e7eb]/60 overflow-hidden">
-              <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch min-h-[420px]">
-                <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-12 lg:pr-8">
-                  <h2 className="text-[1.75rem] sm:text-[2rem] lg:text-[2.25rem] font-bold text-[#1c1917] tracking-tight leading-[1.15] mb-5">
+            <div className="rounded-2xl sm:rounded-[1.5rem] bg-white shadow-[0_4px_32px_rgba(0,0,0,0.08)] border border-[#e5e7eb]/60 overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch min-h-0 lg:min-h-[420px]">
+                <div className="flex flex-col justify-center p-5 sm:p-10 lg:p-12 lg:pr-8">
+                  <h2 className="text-[1.375rem] sm:text-[2rem] lg:text-[2.25rem] font-bold text-[#1c1917] tracking-tight leading-[1.2] sm:leading-[1.15] mb-3 sm:mb-5">
                     {s.title}
                   </h2>
-                  <p className="text-base sm:text-lg text-[#57534e] leading-relaxed mb-8" style={{ lineHeight: 1.65 }}>
+                  <p className="text-[14px] sm:text-lg text-[#57534e] leading-relaxed mb-5 sm:mb-8" style={{ lineHeight: 1.65 }}>
                     {s.desc}
                   </p>
                   <Link
                     to={s.to}
-                    className="inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-[#1c1917] text-white text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors w-fit"
+                    className="inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 rounded-full bg-[#1c1917] text-white text-[14px] sm:text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors w-full sm:w-fit"
                   >
                     {s.cta}
                   </Link>
                 </div>
-                <div className="flex items-center justify-center p-6 sm:p-8 lg:p-10 lg:pl-4">
+                <div className="flex items-center justify-center p-4 sm:p-8 lg:p-10 lg:pl-4">
                   {cards[i]}
                 </div>
               </div>
@@ -729,21 +729,21 @@ export function Landing() {
     <div className="overflow-hidden">
       {/* Hero — smooth transition: warm orange/beige at top → light blue at bottom */}
       <section
-        className="relative pt-12 sm:pt-20 pb-20 sm:pb-32 px-4 sm:px-6 min-h-[85vh] min-h-[85dvh] flex items-center"
+        className="relative pt-8 sm:pt-20 pb-12 sm:pb-32 px-4 sm:px-6 min-h-0 sm:min-h-[85vh] sm:min-h-[85dvh] flex items-center"
         style={{
           background: 'linear-gradient(180deg, #fef7f0 0%, #ffedd5 12%, #ffe4c4 25%, #f5e6dc 40%, #e8f0f4 55%, #dceef5 70%, #d4ebf7 85%, #e0f2fe 100%)',
         }}
       >
-        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-6 sm:gap-8 lg:gap-16">
           <div className="flex-1 text-center lg:text-left max-w-lg mx-auto lg:mx-0 w-full">
-            <h1 className="text-3xl sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.12] tracking-tight mb-5 sm:mb-6 text-[#1c1917]">
-              This resume builder<br className="hidden sm:block" /> gets you{' '}
+            <h1 className="text-[1.75rem] sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.15] tracking-tight mb-4 sm:mb-6 text-[#1c1917]">
+              This resume builder gets you{' '}
               <span className="text-[#f97316]">hired faster</span>
             </h1>
-            <p className="text-base sm:text-xl text-[#57534e] leading-relaxed mb-8 max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.6 }}>
+            <p className="text-[15px] sm:text-xl text-[#57534e] leading-relaxed mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.6 }}>
               Only 2% of resumes win. Yours will be one of them.
             </p>
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3 mb-8">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3 mb-6 sm:mb-8">
               <Link
                 to={isAuthenticated ? '/builder' : '/signup'}
                 className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-[#1c1917] text-white text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors shadow-sm"
@@ -770,7 +770,7 @@ export function Landing() {
             {uploadResumeError && (
               <p className="text-sm text-red-600 mb-4">{uploadResumeError}</p>
             )}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-sm text-[#57534e]">
+            <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-6 text-[13px] sm:text-sm text-[#57534e]">
               <span className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                 <span><strong className="text-[#1c1917]">75%</strong> more likely to land the job</span>
@@ -781,7 +781,7 @@ export function Landing() {
               </span>
             </div>
           </div>
-          <div className="w-full max-w-[380px] lg:max-w-[420px] shrink-0">
+          <div className="w-full max-w-[280px] sm:max-w-[380px] lg:max-w-[420px] shrink-0">
             <HeroResumeStack />
           </div>
         </div>
@@ -795,7 +795,7 @@ export function Landing() {
         }}
       >
         <div className="max-w-[1100px] mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-12 sm:mb-14">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-8 sm:mb-14">
             <ResumesCreatedIcon />
             <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
               <span className="text-[#1c1917] font-bold tracking-tight" style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)' }}>
