@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../api/client'
@@ -58,7 +58,13 @@ export function Pricing() {
     return () => clearTimeout(t)
   }, [toast])
 
+  const navigate = useNavigate()
+
   const handleUpgrade = async () => {
+    if (!isAuthenticated) {
+      navigate('/signup')
+      return
+    }
     setLoading(true)
     try {
       const res = await api<{ url: string }>('/stripe/create-checkout-session', {
