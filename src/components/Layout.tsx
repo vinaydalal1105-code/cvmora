@@ -182,9 +182,11 @@ export function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [openDropdown, setOpenDropdown] = useState<DropdownId | null>(null)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [navVisible, setNavVisible] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const lastScrollYRef = useRef(0)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const isBuilder = location.pathname.startsWith('/builder')
   const isCoverLetterBuilder =
     location.pathname.startsWith('/cover-letter') &&
@@ -198,7 +200,17 @@ export function Layout() {
   useEffect(() => {
     setMobileMenuOpen(false)
     setOpenDropdown(null)
+    setUserMenuOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    if (!userMenuOpen) return
+    const close = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setUserMenuOpen(false)
+    }
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [userMenuOpen])
 
   useEffect(() => {
     let ticking = false
@@ -282,36 +294,49 @@ export function Layout() {
               ))}
             </nav>
 
-            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
               {isAuthenticated ? (
                 <>
                   <Link
                     to="/pricing"
-                    className="hidden sm:flex text-[14px] sm:text-[15px] font-medium text-[#f97316] hover:text-[#ea580c] transition-colors py-2.5 px-2 sm:px-3 min-h-[44px] items-center lg:min-h-0 rounded-full hover:bg-[#fff7ed]/60"
+                    className="hidden sm:flex text-[14px] sm:text-[15px] font-medium text-[#f97316] hover:text-[#ea580c] transition-colors py-2 px-1.5 sm:px-2 min-h-[44px] items-center rounded-full lg:min-h-0"
                   >
                     Pricing
                   </Link>
-                  <Link
-                    to="/dashboard"
-                    className="hidden sm:flex text-[14px] sm:text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 sm:px-3 min-h-[44px] items-center lg:min-h-0 rounded-full hover:bg-[#f5f5f4]"
-                  >
-                    Dashboard
-                  </Link>
-                  <div className="hidden lg:flex items-center gap-3 pl-2 sm:pl-3 border-l border-[#e7e5e4] ml-1">
-                    <span
-                      className="text-[13px] text-[#78716c] max-w-[140px] truncate"
-                      title={(user?.name || user?.email) ?? ''}
+                  <div className="relative hidden sm:block" ref={userMenuRef}>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setUserMenuOpen((o) => !o) }}
+                      className="flex items-center gap-1.5 py-2 px-2.5 rounded-full text-[15px] font-medium text-[#1c1917] hover:bg-[#f5f5f4] hover:text-[#f97316] transition-colors min-h-[44px]"
+                      aria-expanded={userMenuOpen}
+                      aria-haspopup="true"
                     >
-                      {user?.name || user?.email}
-                    </span>
+                      <span className="max-w-[120px] truncate" title={(user?.name || user?.email) ?? ''}>
+                        {user?.name || user?.email}
+                      </span>
+                      <svg className={`w-4 h-4 text-[#78716c] transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M2.5 4.5 L6 8 L9.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    {userMenuOpen && (
+                      <div className="absolute right-0 top-full mt-1 py-1.5 min-w-[160px] rounded-xl bg-white shadow-lg border border-[#e7e5e4] z-50">
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="block w-full text-left px-4 py-2.5 text-[15px] font-medium text-[#1c1917] hover:bg-[#f5f5f4] hover:text-[#f97316] transition-colors first:rounded-t-xl last:rounded-b-xl"
+                        >
+                          Dashboard
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => { setUserMenuOpen(false); handleLogout() }}
+                          className="block w-full text-left px-4 py-2.5 text-[15px] font-medium text-[#1c1917] hover:bg-[#f5f5f4] hover:text-[#dc2626] transition-colors first:rounded-t-xl last:rounded-b-xl"
+                        >
+                          Sign out
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="hidden sm:flex text-[14px] sm:text-[15px] font-medium text-[#1c1917] hover:text-[#f97316] transition-colors py-2.5 px-2 sm:px-3 min-h-[44px] items-center lg:min-h-0 rounded-full hover:bg-[#f5f5f4]"
-                  >
-                    Sign out
-                  </button>
                 </>
               ) : (
                 <>
