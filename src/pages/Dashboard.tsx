@@ -24,7 +24,7 @@ interface CoverLetterMeta {
   updated_at: string
 }
 
-function ResumeCard({ resume, onDelete }: { resume: ResumeMeta; onDelete?: (id: number) => void }) {
+function ResumeCard({ resume, onDelete, isPro }: { resume: ResumeMeta; onDelete?: (id: number) => void; isPro: boolean }) {
   const [downloadingWord, setDownloadingWord] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -80,21 +80,33 @@ function ResumeCard({ resume, onDelete }: { resume: ResumeMeta; onDelete?: (id: 
           Updated {new Date(resume.updated_at).toLocaleDateString()}
         </p>
         <div className="flex flex-wrap items-center gap-2 mt-3">
-          <Link
-            to={`/builder/${resume.id}?download=pdf`}
-            onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.8125rem] font-medium bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
-          >
-            Download PDF
-          </Link>
-          <button
-            type="button"
-            onClick={handleDownloadWord}
-            disabled={downloadingWord}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.8125rem] font-medium border border-[var(--color-border)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 disabled:opacity-50 transition-colors"
-          >
-            {downloadingWord ? '…' : 'Download Word'}
-          </button>
+          {isPro ? (
+            <>
+              <Link
+                to={`/builder/${resume.id}?download=pdf`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.8125rem] font-medium bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] hover:bg-[#b0e87d] transition-colors"
+              >
+                Download PDF
+              </Link>
+              <button
+                type="button"
+                onClick={handleDownloadWord}
+                disabled={downloadingWord}
+                className="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.8125rem] font-medium border border-[var(--color-border)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 disabled:opacity-50 transition-colors"
+              >
+                {downloadingWord ? '…' : 'Download Word'}
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/pricing"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.8125rem] font-medium bg-[#f97316] text-white border border-[#ea580c] hover:bg-[#ea580c] transition-colors"
+            >
+              Upgrade to Pro to download
+            </Link>
+          )}
           <Link
             to={`/builder/${resume.id}`}
             className="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.8125rem] font-medium text-[var(--color-primary)] hover:underline"
@@ -119,6 +131,7 @@ function ResumeCard({ resume, onDelete }: { resume: ResumeMeta; onDelete?: (id: 
 
 export function Dashboard() {
   const { user, isAuthenticated, updateProfile } = useAuth()
+  const isPro = user?.subscription_status === 'active'
   const [editingName, setEditingName] = useState(false)
 
   const handleEditName = async () => {
@@ -255,6 +268,7 @@ export function Dashboard() {
                 <ResumeCard
                   resume={r}
                   onDelete={(id) => setResumes((prev) => prev.filter((x) => x.id !== id))}
+                  isPro={isPro}
                 />
               </li>
             ))}

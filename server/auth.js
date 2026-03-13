@@ -88,8 +88,9 @@ export async function login(email, password) {
   if (!user.verified) {
     return { error: 'Please verify your email first. Check your inbox for the verification link.' }
   }
-  const { password_hash, ...safe } = user
-  return { user: safe, token: createToken(user.id) }
+  const full = await db.getUserById(user.id)
+  if (!full) return { error: 'Invalid email or password' }
+  return { user: full, token: createToken(user.id) }
 }
 
 export async function getUserById(id) {
