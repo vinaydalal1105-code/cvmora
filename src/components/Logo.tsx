@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 const orange = '#F08221'
 const charcoal = '#2D323E'
 const checkGreen = '#74D160'
-const dogEar = '#B85C38'
 
 type LogoProps = {
   iconOnly?: boolean
@@ -11,9 +10,9 @@ type LogoProps = {
 }
 
 /**
- * Logo mark: orange circle, stacked documents (charcoal + white), green checkmarks, dog-ear.
+ * Logo mark: clean document with check — resume approved. Works at any size.
  */
-function LogoMark() {
+export function LogoMark() {
   return (
     <svg
       width="36"
@@ -24,42 +23,18 @@ function LogoMark() {
       aria-hidden
       className="overflow-visible"
     >
-      {/* Orange circle */}
-      <circle cx="18" cy="18" r="17.5" fill={orange} />
-      {/* Back document (charcoal, stacked) */}
+      {/* Document shape — rounded rectangle */}
       <path
-        d="M10 14h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V16a2 2 0 0 1 2-2z"
-        fill={charcoal}
-        transform="rotate(-2 18 18)"
+        d="M8 6a2 2 0 0 1 2-2h10l6 6v16a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V6z"
+        fill={orange}
       />
-      {/* Front document (white) with rounded corners; top-right cut for dog-ear */}
+      {/* Folded corner accent */}
+      <path d="M24 4v6h-6l6-6z" fill="rgba(0,0,0,0.12)" />
+      {/* Checkmark */}
       <path
-        d="M11.5 11.5a1.5 1.5 0 0 1 1.5-1.5h11l5 5v13a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-16a1.5 1.5 0 0 1 1.5-1.5z"
-        fill="white"
-      />
-      {/* Dog-ear (folded corner) */}
-      <path d="M23 11l5 0 0 5z" fill={dogEar} />
-      {/* Three green checkmarks */}
-      <path
-        d="M14 17.5l2.5 2.5 5-5"
-        stroke={checkGreen}
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <path
-        d="M14 23l2.5 2.5 5-5"
-        stroke={checkGreen}
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <path
-        d="M14 28.5l2.5 2.5 5-5"
-        stroke={checkGreen}
-        strokeWidth="1.4"
+        d="M14 18.5l4 4 8-9"
+        stroke="white"
+        strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"

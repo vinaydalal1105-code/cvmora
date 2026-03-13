@@ -12,6 +12,7 @@ import {
   BuilderStepContent,
   BuilderStepFooter,
 } from '../components/BuilderSteps'
+import { LogoMark } from '../components/Logo'
 import type { ResumeData } from '../types/resume'
 import { filledExamples } from '../data/filledExamples'
 import { displayName } from '../utils/resume'
@@ -291,7 +292,7 @@ function ResumeBuilderInner() {
       <header className="flex-none flex items-center justify-between gap-3 px-4 py-2 border-b border-[#e7e5e4] bg-white shrink-0 min-h-[52px]">
         <div className="flex items-center gap-3 min-w-0">
           <a href="/" className="flex items-center gap-2 shrink-0 text-[#1c1917] no-underline">
-            <span className="w-7 h-7 rounded-lg bg-[#f97316] flex items-center justify-center text-white font-semibold text-xs">C</span>
+            <span className="inline-flex [&_svg]:w-7 [&_svg]:h-7"><LogoMark /></span>
             <span className="text-sm font-semibold tracking-tight hidden sm:inline">Cvmora</span>
           </a>
 
