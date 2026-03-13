@@ -413,23 +413,23 @@ function StickyFeatureStack({
       {steps.map((s, i) => (
         <div
           key={s.step}
-          className="lg:sticky lg:top-0 lg:min-h-screen flex flex-col justify-center px-4 sm:px-6 py-6 sm:py-10 lg:py-14"
+          className="lg:sticky lg:top-0 lg:min-h-screen flex flex-col justify-center px-5 sm:px-6 py-4 sm:py-10 lg:py-14"
           style={{ zIndex: i + 1 }}
         >
           <div className="max-w-[1100px] mx-auto w-full">
             <div className="flex items-baseline gap-3 mb-3 sm:mb-4 pl-1">
-              <span className="text-[#a8a29e] text-sm font-medium tabular-nums">
+              <span className="text-[#a8a29e] text-xs sm:text-sm font-medium tabular-nums">
                 {s.step} <span className="mx-1 text-[#d6d3d1]">/</span> {s.total}
               </span>
-              <span className="text-[#78716c] text-sm font-medium">{s.heading}</span>
+              <span className="text-[#78716c] text-xs sm:text-sm font-medium">{s.heading}</span>
             </div>
             <div className="rounded-2xl sm:rounded-[1.5rem] bg-white shadow-[0_4px_32px_rgba(0,0,0,0.08)] border border-[#e5e7eb]/60 overflow-hidden">
               <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch min-h-0 lg:min-h-[420px]">
-                <div className="flex flex-col justify-center p-5 sm:p-10 lg:p-12 lg:pr-8">
-                  <h2 className="text-[1.375rem] sm:text-[2rem] lg:text-[2.25rem] font-bold text-[#1c1917] tracking-tight leading-[1.2] sm:leading-[1.15] mb-3 sm:mb-5">
+                <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-12 lg:pr-8">
+                  <h2 className="text-[1.25rem] sm:text-[2rem] lg:text-[2.25rem] font-bold text-[#1c1917] tracking-tight leading-[1.25] sm:leading-[1.15] mb-3 sm:mb-5">
                     {s.title}
                   </h2>
-                  <p className="text-[14px] sm:text-lg text-[#57534e] leading-relaxed mb-5 sm:mb-8" style={{ lineHeight: 1.65 }}>
+                  <p className="text-[13px] sm:text-lg text-[#57534e] leading-relaxed mb-5 sm:mb-8" style={{ lineHeight: 1.7 }}>
                     {s.desc}
                   </p>
                   <Link
@@ -439,7 +439,7 @@ function StickyFeatureStack({
                     {s.cta}
                   </Link>
                 </div>
-                <div className="flex items-center justify-center p-4 sm:p-8 lg:p-10 lg:pl-4">
+                <div className="hidden sm:flex items-center justify-center p-8 lg:p-10 lg:pl-4">
                   {cards[i]}
                 </div>
               </div>
@@ -661,33 +661,33 @@ function ToolsSection() {
 
   return (
     <section
-      className="py-20 sm:py-28 px-4 sm:px-6"
+      className="py-12 sm:py-28 px-5 sm:px-6"
       style={{ background: 'linear-gradient(180deg, #ffffff 0%, #fefefe 30%, #ffffff 70%, #ffffff 100%)' }}
     >
       <div className="max-w-[960px] mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-bold text-[#1c1917] text-center mb-4 tracking-tight">
-          Every tool you need is here
+        <h2 className="text-xl sm:text-4xl font-bold text-[#1c1917] text-center mb-2 sm:mb-4 tracking-tight">
+          Every tool you need
         </h2>
-        <p className="text-[#78716c] text-center text-lg max-w-md mx-auto mb-12 leading-relaxed">
+        <p className="text-[#78716c] text-center text-sm sm:text-lg max-w-md mx-auto mb-8 sm:mb-12 leading-relaxed">
           From building your resume to landing the offer.
         </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {tools.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className="group flex flex-col p-5 rounded-xl bg-white border border-[#e7e5e4] hover:border-[#d6d3d1] hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200"
+              className="group flex flex-col p-4 sm:p-5 rounded-xl bg-white border border-[#e7e5e4] hover:border-[#d6d3d1] hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200"
             >
-              <div className={`w-10 h-10 rounded-lg ${item.bg} ${item.color} flex items-center justify-center mb-4`}>
+              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg ${item.bg} ${item.color} flex items-center justify-center mb-2.5 sm:mb-4 [&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6`}>
                 {item.icon}
               </div>
-              <h3 className="font-semibold text-[#1c1917] text-[0.9375rem] mb-1.5 group-hover:text-[#f97316] transition-colors duration-200">
+              <h3 className="font-semibold text-[#1c1917] text-[13px] sm:text-[0.9375rem] mb-1 sm:mb-1.5 group-hover:text-[#f97316] transition-colors duration-200">
                 {item.title}
               </h3>
-              <p className="text-sm text-[#78716c] leading-relaxed mb-3 flex-1">{item.desc}</p>
-              <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#f97316] group-hover:gap-2 transition-all duration-200">
-                Get started
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+              <p className="text-[11px] sm:text-sm text-[#78716c] leading-relaxed mb-2 sm:mb-3 flex-1 hidden sm:block">{item.desc}</p>
+              <span className="inline-flex items-center gap-1 text-[11px] sm:text-sm font-semibold text-[#f97316] group-hover:gap-2 transition-all duration-200">
+                Go
+                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
               </span>
             </Link>
           ))}
@@ -729,24 +729,24 @@ export function Landing() {
     <div className="overflow-hidden">
       {/* Hero — smooth transition: warm orange/beige at top → light blue at bottom */}
       <section
-        className="relative pt-8 sm:pt-20 pb-12 sm:pb-32 px-4 sm:px-6 min-h-0 sm:min-h-[85vh] sm:min-h-[85dvh] flex items-center"
+        className="relative pt-10 sm:pt-20 pb-14 sm:pb-32 px-5 sm:px-6 min-h-0 sm:min-h-[85vh] sm:min-h-[85dvh] flex items-center"
         style={{
           background: 'linear-gradient(180deg, #fef7f0 0%, #ffedd5 12%, #ffe4c4 25%, #f5e6dc 40%, #e8f0f4 55%, #dceef5 70%, #d4ebf7 85%, #e0f2fe 100%)',
         }}
       >
-        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-6 sm:gap-8 lg:gap-16">
+        <div className="max-w-[1100px] mx-auto relative w-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
           <div className="flex-1 text-center lg:text-left max-w-lg mx-auto lg:mx-0 w-full">
-            <h1 className="text-[1.75rem] sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.15] tracking-tight mb-4 sm:mb-6 text-[#1c1917]">
+            <h1 className="text-[1.625rem] sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.2] sm:leading-[1.12] tracking-tight mb-5 sm:mb-6 text-[#1c1917]">
               This resume builder gets you{' '}
               <span className="text-[#f97316]">hired faster</span>
             </h1>
-            <p className="text-[15px] sm:text-xl text-[#57534e] leading-relaxed mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.6 }}>
+            <p className="text-[15px] sm:text-xl text-[#57534e] leading-relaxed mb-8 sm:mb-8 max-w-sm sm:max-w-md mx-auto lg:mx-0" style={{ lineHeight: 1.7 }}>
               Only 2% of resumes win. Yours will be one of them.
             </p>
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3 mb-6 sm:mb-8">
+            <div className="flex flex-col gap-3 mb-8 sm:mb-8 max-w-xs sm:max-w-none mx-auto lg:mx-0 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
                 to={isAuthenticated ? '/builder' : '/signup'}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-[#1c1917] text-white text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors shadow-sm"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-4 sm:py-3.5 rounded-full bg-[#1c1917] text-white text-[15px] sm:text-[0.9375rem] font-medium hover:bg-[#292524] transition-colors shadow-sm"
               >
                 Create my resume
               </Link>
@@ -754,7 +754,7 @@ export function Landing() {
                 type="button"
                 onClick={() => uploadInputRef.current?.click()}
                 disabled={uploadingResume}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-full border border-[#e7e5e4] text-[#1c1917] bg-white text-[0.9375rem] font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-4 sm:py-3.5 rounded-full border border-[#e7e5e4] text-[#1c1917] bg-white text-[15px] sm:text-[0.9375rem] font-medium hover:border-[#d6d3d1] hover:bg-[#fafafa] transition-colors"
               >
                 {uploadingResume ? 'Uploading...' : 'Upload my resume'}
               </button>
@@ -770,18 +770,18 @@ export function Landing() {
             {uploadResumeError && (
               <p className="text-sm text-red-600 mb-4">{uploadResumeError}</p>
             )}
-            <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-6 text-[13px] sm:text-sm text-[#57534e]">
+            <div className="flex items-center justify-center lg:justify-start gap-6 text-[13px] sm:text-sm text-[#57534e]">
               <span className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
-                <span><strong className="text-[#1c1917]">75%</strong> more likely to land the job</span>
+                <span><strong className="text-[#1c1917]">75%</strong> more likely</span>
               </span>
               <span className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
-                <span><strong className="text-[#1c1917]">4.8</strong> out of 5 · <strong className="text-[#1c1917]">22,000+</strong> reviews</span>
+                <span><strong className="text-[#1c1917]">4.8</strong> · 22K+ reviews</span>
               </span>
             </div>
           </div>
-          <div className="w-full max-w-[280px] sm:max-w-[380px] lg:max-w-[420px] shrink-0">
+          <div className="w-full max-w-[260px] sm:max-w-[380px] lg:max-w-[420px] shrink-0">
             <HeroResumeStack />
           </div>
         </div>
@@ -789,66 +789,48 @@ export function Landing() {
 
       {/* Resume.io-style: stats + benefit cards — [icon] [big number] [resumes created today] */}
       <section
-        className="relative py-12 sm:py-16 px-4 sm:px-6"
+        className="relative py-10 sm:py-16 px-5 sm:px-6"
         style={{
           background: 'linear-gradient(180deg, #e0f2fe 0%, #dceff8 15%, #e8f4fa 40%, #f0f7fc 70%, #e0f2fe 100%)',
         }}
       >
         <div className="max-w-[1100px] mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-8 sm:mb-14">
-            <ResumesCreatedIcon />
-            <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-              <span className="text-[#1c1917] font-bold tracking-tight" style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)' }}>
+          <div className="flex flex-col items-center justify-center gap-1 mb-10 sm:mb-14">
+            <div className="flex items-center gap-3">
+              <ResumesCreatedIcon />
+              <span className="text-[#1c1917] font-bold tracking-tight" style={{ fontSize: 'clamp(2rem, 6vw, 4rem)' }}>
                 <OdometerDisplay digitValues={resumeCountDigits} className="text-[#1c1917]" />
               </span>
-              <span className="text-lg sm:text-xl text-[#44403c] font-normal">
-                resumes created today
-              </span>
-            </p>
+            </div>
+            <span className="text-base sm:text-xl text-[#44403c] font-normal">
+              resumes created today
+            </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {[
-              {
-                icon: '✨',
-                title: 'A draft in 10 mins',
-                desc: 'The builder is 10× faster than doing it on your own. One goal → full structure.',
-              },
-              {
-                icon: 'A+',
-                title: 'Zero mistakes',
-                desc: "Don't stress over typos. You'll sound great and look professional.",
-              },
-              {
-                icon: '◎',
-                title: 'ATS templates',
-                desc: 'Your resume stays 100% compliant. Recruiters will see you.',
-              },
-              {
-                icon: '$',
-                title: 'Get paid more',
-                desc: 'We can help you negotiate a higher starting salary with confidence.',
-              },
+              { icon: '✨', title: '10 min draft', desc: '10× faster than doing it alone.' },
+              { icon: 'A+', title: 'Zero mistakes', desc: 'Sound great, look professional.' },
+              { icon: '◎', title: 'ATS ready', desc: 'Recruiters will see your resume.' },
+              { icon: '$', title: 'Get paid more', desc: 'Negotiate a higher salary.' },
             ].map((card, i) => (
               <div
                 key={i}
-                className="rounded-2xl bg-white/95 border border-[#e5e7eb]/80 p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:border-[#f97316]/20 transition-all duration-300"
+                className="rounded-xl sm:rounded-2xl bg-white/95 border border-[#e5e7eb]/80 p-4 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
               >
-                <span className="inline-flex w-10 h-10 items-center justify-center rounded-xl bg-[#fff7ed] text-[#ea580c] font-bold text-lg mb-3">
+                <span className="inline-flex w-9 h-9 sm:w-10 sm:h-10 items-center justify-center rounded-lg sm:rounded-xl bg-[#fff7ed] text-[#ea580c] font-bold text-base sm:text-lg mb-2 sm:mb-3">
                   {card.icon}
                 </span>
-                <h3 className="font-semibold text-[#1c1917] text-lg mb-2">{card.title}</h3>
-                <p className="text-base text-[#44403c] leading-relaxed" style={{ lineHeight: 1.55 }}>{card.desc}</p>
+                <h3 className="font-semibold text-[#1c1917] text-[14px] sm:text-lg mb-1 sm:mb-2">{card.title}</h3>
+                <p className="text-[12px] sm:text-base text-[#44403c] leading-relaxed">{card.desc}</p>
               </div>
             ))}
           </div>
-          <div className="mt-14 sm:mt-16 pt-10 sm:pt-12 border-t border-[#e5e7eb]/60">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-6 sm:gap-10">
-              <p className="text-[#44403c] text-base font-medium leading-snug shrink-0 text-center sm:text-left">
-                Our candidates
-                <br />
-                have been hired at:
+          <div className="mt-10 sm:mt-16 pt-8 sm:pt-12 border-t border-[#e5e7eb]/60">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 sm:gap-10">
+              <p className="text-[#44403c] text-sm sm:text-base font-medium leading-snug shrink-0 text-center sm:text-left">
+                Our candidates have been hired at:
               </p>
-              <div className="grid grid-cols-4 sm:grid-cols-7 gap-8 items-center justify-items-center max-w-[640px] sm:max-w-none mx-auto sm:mx-0">
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-6 sm:gap-8 items-center justify-items-center max-w-[300px] sm:max-w-none mx-auto sm:mx-0">
                 {[
                   { name: 'Booking.com', logo: '/logos/booking.svg' },
                   { name: 'Apple', logo: '/logos/apple.svg' },
@@ -858,12 +840,12 @@ export function Landing() {
                   { name: 'Accenture', logo: '/logos/accenture.svg' },
                   { name: 'KPMG', logo: '/logos/kpmg.svg' },
                 ].map(({ name, logo }) => (
-                  <div key={name} className="h-8 w-full flex items-center justify-center">
+                  <div key={name} className="h-6 sm:h-8 w-full flex items-center justify-center">
                     <img
                       src={logo}
                       alt={name}
                       title={name}
-                      className="max-h-7 w-full max-w-[100px] object-contain object-center opacity-80 grayscale hover:grayscale-0 hover:opacity-100 transition-all mx-auto"
+                      className="max-h-5 sm:max-h-7 w-full max-w-[80px] sm:max-w-[100px] object-contain object-center opacity-80 grayscale hover:grayscale-0 hover:opacity-100 transition-all mx-auto"
                       loading="lazy"
                     />
                   </div>
@@ -886,15 +868,15 @@ export function Landing() {
       />
 
       <section
-        className="relative py-10 sm:py-12 px-4 sm:px-6"
+        className="relative py-8 sm:py-12 px-5 sm:px-6"
         style={{ background: 'linear-gradient(180deg, #f0fdf4 0%, #f5fdf8 15%, #fafcfa 35%, #fefefe 60%, #ffffff 100%)' }}
       >
         <div className="max-w-[1400px] mx-auto text-center">
-          <p className="text-2xl sm:text-3xl font-semibold text-[#1c1917] tracking-tight">
+          <p className="text-xl sm:text-3xl font-semibold text-[#1c1917] tracking-tight">
             <span className="text-[#f97316]">Resumes created today</span>
             <span className="block sm:inline sm:ml-2 mt-1 sm:mt-0 text-[#44403c]">with Cvmora</span>
           </p>
-          <p className="text-base text-cvmora-muted mt-2 font-medium">Start now and get hired faster.</p>
+          <p className="text-sm sm:text-base text-cvmora-muted mt-1 sm:mt-2 font-medium">Start now and get hired faster.</p>
         </div>
       </section>
 
@@ -903,31 +885,31 @@ export function Landing() {
 
       {/* Testimonials — smooth transition from white into peach, then back to white */}
       <section
-        className="py-20 sm:py-28 px-4 sm:px-6"
+        className="py-12 sm:py-28 px-5 sm:px-6"
         style={{
           background: 'linear-gradient(180deg, #ffffff 0%, #fffdfb 8%, #fffbf7 18%, #fff9f3 28%, #fff7ed 35%, #fff7ed 65%, #fff9f3 75%, #fffbf7 88%, #fffdfb 95%, #ffffff 100%)',
         }}
       >
         <div className="max-w-[1400px] mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#1c1917] text-center mb-3 tracking-tight">
+          <h2 className="text-xl sm:text-3xl font-bold text-[#1c1917] text-center mb-2 sm:mb-3 tracking-tight">
             92% of users recommend us
           </h2>
-          <p className="text-[#78716c] text-center text-base font-medium mb-12">4.8 out of 5 · based on reviews</p>
-          <div className="grid sm:grid-cols-3 gap-6 sm:gap-8">
+          <p className="text-[#78716c] text-center text-sm sm:text-base font-medium mb-8 sm:mb-12">4.8 out of 5 · based on reviews</p>
+          <div className="grid sm:grid-cols-3 gap-4 sm:gap-8">
             {testimonials.map((t, i) => (
               <div
                 key={i}
-                className="surface-card p-6 sm:p-7 rounded-2xl bg-white border-[#e7e5e4]"
+                className="surface-card p-5 sm:p-7 rounded-xl sm:rounded-2xl bg-white border-[#e7e5e4]"
               >
-                <div className="flex gap-0.5 mb-4 text-amber-500 text-[1.125rem]">
+                <div className="flex gap-0.5 mb-2 sm:mb-4 text-amber-500 text-[0.9375rem] sm:text-[1.125rem]">
                   {Array.from({ length: t.rating }).map((_, j) => (
                     <span key={j} aria-hidden>★</span>
                   ))}
                 </div>
-                <p className="text-base text-[#44403c] leading-relaxed mb-5 font-medium" style={{ lineHeight: 1.6 }}>
+                <p className="text-[13px] sm:text-base text-[#44403c] leading-relaxed mb-3 sm:mb-5 font-medium" style={{ lineHeight: 1.6 }}>
                   &ldquo;{t.quote}&rdquo;
                 </p>
-                <p className="text-sm font-medium text-[#78716c]">{t.name}</p>
+                <p className="text-xs sm:text-sm font-medium text-[#78716c]">{t.name}</p>
               </div>
             ))}
           </div>
@@ -936,21 +918,21 @@ export function Landing() {
 
       {/* Final CTA — smooth from peach/cream into white */}
       <section
-        className="py-20 sm:py-28 px-4 sm:px-6"
+        className="py-14 sm:py-28 px-5 sm:px-6"
         style={{
           background: 'linear-gradient(180deg, #fffbf7 0%, #fffaf5 12%, #fff8f2 25%, #fff6f0 40%, #fff4ee 55%, #fff8f8 75%, #ffffff 100%)',
         }}
       >
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#1c1917] mb-6 tracking-tight">
+          <h2 className="text-xl sm:text-3xl font-bold text-[#1c1917] mb-4 sm:mb-6 tracking-tight">
             Ready to stand out?
           </h2>
-          <p className="text-[#44403c] text-xl leading-relaxed mb-10" style={{ lineHeight: 1.6 }}>
-            Join Cvmora and create your resume in minutes. Save multiple versions and download anytime.
+          <p className="text-[#44403c] text-[15px] sm:text-xl leading-relaxed mb-8 sm:mb-10" style={{ lineHeight: 1.6 }}>
+            Create your resume in minutes. Download anytime.
           </p>
           <Link
             to={isAuthenticated ? '/builder' : '/signup'}
-            className="btn-primary inline-flex items-center gap-2 px-10 py-4 rounded-full bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shadow-sm font-medium"
+            className="btn-primary inline-flex items-center gap-2 px-8 sm:px-10 py-3.5 sm:py-4 rounded-full bg-[#BFED8D] text-[#1c1917] border border-[#a8e070] hover:bg-[#b0e87d] transition-colors shadow-sm font-medium text-[15px] sm:text-base"
           >
             Get started free
             <span aria-hidden>→</span>
