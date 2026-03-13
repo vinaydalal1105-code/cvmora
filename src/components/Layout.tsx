@@ -12,7 +12,7 @@ const mainNav: { to: string; label: string; dropdown?: DropdownId }[] = [
   { to: '/templates', label: 'Resume Templates', dropdown: 'templates' },
   { to: '/examples', label: 'Resume Examples', dropdown: 'examples' },
   { to: '/cover-letter', label: 'Cover Letter', dropdown: 'cover-letter' },
-  { to: '/pricing', label: 'Pricing' },
+  { to: '/faq', label: 'FAQ' },
   { to: '/resources', label: 'Resources', dropdown: 'resources' },
 ]
 
